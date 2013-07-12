@@ -2,7 +2,7 @@
 
 workspace = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/workspace/'
 jobdir    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/jobs/'
-plotsdir  = workspace+'/plots/V1/'
+plotsdir  = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/plots/'
 cardbase  = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/'
 
 

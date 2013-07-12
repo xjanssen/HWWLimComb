@@ -18,18 +18,19 @@ parser.add_option("-T", "--targets",    dest="targets",     help="What to do ( P
 parser.add_option("-u", "--unblind",    dest="unblind",     help="Unblind results",                default=False, action="store_true")
 parser.add_option("-b", "--batch"  ,    dest="runBatch",    help="Run in batch",                   default=False, action="store_true")
 parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode for batch jobs" , default=[], type='string' , action='callback' , callback=combTools.list_maker('batchSplit',','))
+parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default="V1" ,  type='string' )
 
 
 (options, args) = parser.parse_args()
 
-Version='V1'
+print '==== Data Cards Version : ',options.Version
 
 combList      = combTools.CombList_Filter(combinations,options.combs).get()
 energyList    = combTools.EnergyList_Filter(options.energy).get()
 PhysModelList = combTools.PhysModelList_Filter(physmodels,options.models).get()
 TargetList    = combTools.TargetList_Filter(targets,options.targets).get()
 
-if options.runBatch: jobs = batchTools.batchJobs("results",combList,energyList,PhysModelList,TargetList,options.batchSplit,options.masses,options.unblind,Version)
+if options.runBatch: jobs = batchTools.batchJobs("results",combList,energyList,PhysModelList,TargetList,options.batchSplit,options.masses,options.unblind,options.Version)
 
 #Run Combine
 for iComb in combList:
@@ -37,11 +38,11 @@ for iComb in combList:
     for iModel in PhysModelList:
       print '---------------------------> Model = '+iModel 
       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
-      massList  = combTools.MassList_Filter(cardtypes,channels[Version],combinations,physmodels[iModel]['cardtype'],options.masses,iComb,energyList).get()
+      massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.masses,iComb,energyList).get()
       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
-        TargetDir=workspace+'/'+Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+        TargetDir=workspace+'/'+options.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
       else:
-        TargetDir=workspace+'/'+Version+'/'+cardDir+'/'+iComb
+        TargetDir=workspace+'/'+options.Version+'/'+cardDir+'/'+iComb
       print 'Target Dir : '+TargetDir
       print 'Masses List: '+str(massList)
       for iMass in massList:
@@ -66,7 +67,7 @@ for iComb in combList:
               # Toys ?
               ToysList = []
               if 'Toys' in targets[iTarget]: 
-                ToysList = combTools.getToys(iComb,iTarget,iMass,workspace,Version,cardtypes,physmodels,targets)
+                ToysList = combTools.getToys(iComb,iTarget,iMass,workspace,options.Version,cardtypes,physmodels,targets)
                 NJobs=len(ToysList)
               
               for iJob in xrange(1,NJobs+1):

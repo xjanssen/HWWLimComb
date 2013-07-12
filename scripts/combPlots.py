@@ -24,7 +24,8 @@ CMSText=["CMS Preliminary","CMS"]
 LumText=["#sqrt{s} = 7 TeV, L #leq 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L #leq 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L #leq 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L #leq 19.5 fb^{-1}"]
 
 class combPlot :
-   def __init__(self,blind=True,postFix='',logX=False,logY=False):
+   def __init__(self,Version,blind=True,postFix='',logX=False,logY=False):
+       self.Version = Version
        self.blind   = blind
        self.postFix = postFix
        self.logX    = logX
@@ -35,7 +36,8 @@ class combPlot :
        self.c1      = TCanvas("c1","c1",800,800)
        self.Legend  = TLegend()
        self.isSquareCanvas=False
-       os.system('mkdir -p '+plotsdir)
+       self.plotsdir= plotsdir+'/'+self.Version
+       os.system('mkdir -p '+self.plotsdir)
 
    def resetPlot(self):
        self.Obj2Plot= {} 
@@ -114,9 +116,9 @@ class combPlot :
    def Save(self,Name):
        if len(self.postFix) > 0 and self.postFix[0] != '_' : pF = '_'+self.postFix
        else                     : pF = self.postFix
-       self.c1.SaveAs(plotsdir+'/'+Name+pF+'.pdf')
-       os.system('convert '+plotsdir+'/'+Name+pF+'.pdf '+plotsdir+'/'+Name+pF+'.png') 
-       os.system('convert '+plotsdir+'/'+Name+pF+'.pdf '+plotsdir+'/'+Name+pF+'.gif') 
+       self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.pdf')
+       os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.png') 
+       os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.gif') 
 
    def treeAccess(self,tree):
         tree.SetBranchStatus('*',0)
@@ -131,12 +133,12 @@ class combPlot :
 
         return _lm, _mh
 
-   def readResults(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],iTarget='BestFit',Version='V1'):
+   def readResults(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],iTarget='BestFit'):
 
        # Get info from comfig
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
        energyList= combTools.EnergyList_Filter(iEnergy).get()
-       massList  = combTools.MassList_Filter(cardtypes,channels[Version],combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
+       massList  = combTools.MassList_Filter(cardtypes,channels[self.Version],combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
        if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
          TargetDir=workspace+'/'+Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
        else:

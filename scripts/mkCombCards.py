@@ -250,18 +250,16 @@ parser.add_option("-z", "--zip",        dest="zip",         help="compress outpu
 parser.add_option("-P", "--purpose",    dest="purpose",     help="purpose of the datacard (couplings, searches, mass, ...)", default="searches", metavar="PATTERN")
 parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default="0", metavar="SQRT(S)")
 parser.add_option("-m", "--masses",     dest="masses",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('masses',',',int))
-#parser.add_option("-b", "--batch"  ,    dest="runBatch",    help="Run in batch",                   default=False, action="store_true")
-#parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode for batch jobs" , default=[], type='string' , action='callback' , callback=combTools.list_maker('batchSplit',','))
+parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default="V1" ,  type='string' )
 
-Version='V1'
 
 (options, args) = parser.parse_args()
+
+print '==== Data Cards Version : ',options.Version
 combList   = combTools.CombList_Filter(combinations,options.combs).get()
 cardDir    = combTools.CardDir_Filter(cardtypes,options.purpose).get()
 energyList = combTools.EnergyList_Filter(options.energy).get()
 
-
-#if options.runBatch: jobs = batchTools.batchJobs("workspace",combList,energyList,purpose,['None'],options.batchSplit,options.masses,True)
 
 # Build combinations
 for iComb in combList:
@@ -279,12 +277,12 @@ for iComb in combList:
        isValidPurpose=True
    # Process if valid
    if isValidEnergy and isValidPurpose :
-     massList   = combTools.MassList_Filter(cardtypes,channels[Version],combinations,options.purpose,options.masses,iComb,energyList).get()
+     massList   = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,options.purpose,options.masses,iComb,energyList).get()
      print '---------------------- Building cards for combination: '+iComb
      if 'targetdir' in cardtypes[options.purpose]:
-       TargetDir=workspace+'/'+Version+'/'+cardtypes[options.purpose]['targetdir']+'/'+iComb
+       TargetDir=workspace+'/'+options.Version+'/'+cardtypes[options.purpose]['targetdir']+'/'+iComb
      else:
-       TargetDir=workspace+'/'+Version+'/'+cardDir+'/'+iComb
+       TargetDir=workspace+'/'+options.Version+'/'+cardDir+'/'+iComb
      print 'Target Dir : '+TargetDir
      print 'Masses List: '+str(massList)
      for iMass in massList:
@@ -292,13 +290,13 @@ for iComb in combList:
        #toMove = [] 
        for iChannel in  combinations[iComb]['channels']:
          for iEnergy in energyList :
-           if (iEnergy in channels[Version][iChannel]) :
-             if (iMass >= channels[Version][iChannel][iEnergy]['mrange'][0]) and (iMass <= channels[Version][iChannel][iEnergy]['mrange'][1]) : 
-               if 'hcp2012' in channels[Version][iChannel][iEnergy]['dir'] :
-                 card=cardbase+channels[Version][iChannel][iEnergy]['dir']+'/'+channels[Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
+           if (iEnergy in channels[options.Version][iChannel]) :
+             if (iMass >= channels[options.Version][iChannel][iEnergy]['mrange'][0]) and (iMass <= channels[options.Version][iChannel][iEnergy]['mrange'][1]) : 
+               if 'hcp2012' in channels[options.Version][iChannel][iEnergy]['dir'] :
+                 card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
                else:
-                 card=cardbase+channels[Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
-               tag= "%s%s_%dTeV_%s" % (channels[Version][iChannel][iEnergy]['branch'],channels[Version][iChannel][iEnergy]['decay'],channels[Version][iChannel][iEnergy]['energy'],channels[Version][iChannel][iEnergy]['tag'])
+                 card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
+               tag= "%s%s_%dTeV_%s" % (channels[options.Version][iChannel][iEnergy]['branch'],channels[options.Version][iChannel][iEnergy]['decay'],channels[options.Version][iChannel][iEnergy]['energy'],channels[options.Version][iChannel][iEnergy]['tag'])
                # Here we can manipulate cards
                print '  ' , tag, ' --> ', card
                if 'preProc' in cardtypes[options.purpose] :

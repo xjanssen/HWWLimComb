@@ -31,10 +31,11 @@ parser.add_option("-i", "--inject",     dest="inject",      help="Inject mH=125"
 parser.add_option("-f", "--postfix",    dest="postFix",     help="Figure post-fix",        default='', metavar="PATTERN")
 parser.add_option("-x", "--logx"   ,    dest="logx",        help="logX",                   default=False, action="store_true")
 parser.add_option("-y", "--logy"   ,    dest="logy",        help="logY",                   default=False, action="store_true")
+parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default="V1" ,  type='string' )
 
 (options, args) = parser.parse_args()
 
-Version='V1'
+print '==== Data Cards Version : ',options.Version
 
 combList      = combTools.CombList_Filter(combinations,options.combs).get()
 energyList    = combTools.EnergyList_Filter(options.energy).get()
@@ -52,12 +53,12 @@ for iPlot in options.plots:
        print '---------------------------> Model = '+iModel 
        for iComb in combList:
           print '------------------------------> Comb = '+iComb
-          massList  = combTools.MassList_Filter(cardtypes,channels[Version],combinations,physmodels[iModel]['cardtype'],[],iComb,energyList).get()
+          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],[],iComb,energyList).get()
           if (len(options.mrange) >= 2 ) : 
             mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
             postFix += '_mH'+str(options.mrange[0])+'-'+str(options.mrange[1])
           else                           : mLF = massList
-          plot=combPlots.combPlot(options.unblind,postFix,options.logx,options.logy)
+          plot=combPlots.combPlot(options.unblind,options.Version,postFix,options.logx,options.logy)
           if iPlot == 'Limit'   : plot.plotOneLimit(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'Sign'    : plot.plotSignVsMh(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'BestFit' : plot.plotMuVsMh(iComb,options.energy,iModel,mLF)
@@ -73,14 +74,14 @@ for iPlot in options.plots:
          mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
          postFix += '_mH'+str(options.mrange[0])+'-'+str(options.mrange[1])
        else                           : mLF = massList
-       plot=combPlots.combPlot(options.unblind,postFix,options.logx,options.logy)
+       plot=combPlots.combPlot(options.unblind,options.Version,postFix,options.logx,options.logy)
        if iPlot == 'ExpLim'  : plot.plotExpLimits(combList,options.energy,iModel,mLF)
        if iPlot == 'ExpSign' : plot.plotExpSignVsMh(combList,options.energy,iModel,mLF)
  
    elif iPlot in ['MuCC']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
-       plot=combPlots.combPlot(options.unblind,postFix)
+       plot=combPlots.combPlot(options.unblind,options.Version,postFix)
        plot.plotMuChannel() 
 
 
