@@ -17,7 +17,7 @@ from copy import deepcopy
 def WJetFix(cardIn,cardForWJ):
     if not iChannel in preProc['WJetFix']['ChannelList'] :
       return cardIn
-    cardWJ =cardForWJ.replace(cardDir,'smhiggs').replace(str(iMass),(preProc['WJetFix']['massWJ']).replace('$MASS',str(iMass)))
+    cardWJ =cardForWJ.replace(cardDir,'couplings').replace(str(iMass),(preProc['WJetFix']['massWJ']).replace('$MASS',str(iMass))).replace('_hsm','')
     cardOut=cardIn.replace(os.path.splitext(cardIn)[1],'_WJetFix'+os.path.splitext(cardIn)[1] )  
     print 'WJetFix IN  :', cardIn 
     print 'WJetFix WJet:', cardWJ
@@ -297,6 +297,8 @@ for iComb in combList:
                else:
                  card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
                tag= "%s%s_%dTeV_%s" % (channels[options.Version][iChannel][iEnergy]['branch'],channels[options.Version][iChannel][iEnergy]['decay'],channels[options.Version][iChannel][iEnergy]['energy'],channels[options.Version][iChannel][iEnergy]['tag'])
+               # Fix ZH card name for _hsm !!!
+               if cardtypes[options.purpose]['dir'] == 'searches' and 'zh3l2j' in iChannel : card=card.replace('zh3l2j_','zh3l2j_hsm_')
                # Here we can manipulate cards
                print '  ' , tag, ' --> ', card
                if 'preProc' in cardtypes[options.purpose] :
