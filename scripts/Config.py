@@ -7,16 +7,16 @@ cardbase  = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/'
 
 
 cardtypes = {
-  'couplings' : { 'dir' : 'couplings' , 'masses' : [125,125.8] } ,
-  'smhiggs'   : { 'dir' : 'smhiggs'   , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
-  'searches'  : { 'dir' : 'searches'   , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
+  'couplings' : { 'dir' : 'couplings' , 'masses' : [125,125.7] } ,
+  'smhiggs'   : { 'dir' : 'couplings' , 'targetdir' : 'smhiggs' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
+  'searches'  : { 'dir' : 'searches'  ,                           'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
+  'wjetfix'   : { 'dir' : 'searches'  , 'targetdir' : 'wjetfix' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['WJetFix'] } , 
+  'sminject'  : { 'dir' : 'searches'  , 'targetdir' : 'sminject', 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['SMInject'] } ,
+  'smtoys'    : { 'dir' : 'searches'  , 'targetdir' : 'smtoys'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['SMToys'] } ,
+# 'custom'    : { 'dir' : 'couplings' , 'masses' : [125] } , 
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 500, 600] } ,
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250 , 300 ] } ,
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200 ] } ,
-  'custom'    : { 'dir' : 'couplings' , 'masses' : [125] } , 
-  'wjetfix'   : { 'dir' : 'searches'  , 'targetdir' : 'wjetfix' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 500, 600] , 'preProc' : ['WJetFix'] } , 
-  'sminject'  : { 'dir' : 'searches'  , 'targetdir' : 'sminject', 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 500, 600] , 'preProc' : ['SMInject'] } ,
-  'smtoys'    : { 'dir' : 'searches'  , 'targetdir' : 'smtoys'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 500, 600] , 'preProc' : ['SMToys'] } ,
 }
 
 preProc = {
@@ -33,7 +33,130 @@ preProc = {
 
 channels = { 
 
-# ============ V1: Cards for HWW Paper ==========================
+# ============ V2: Cards for HWW Paper (datacrds from comb svn) ==========================
+
+'V2' : {
+  # ============ H -> WW 0/1-jet cut-based ================== 
+  'hww0jof_cut' :   { 
+                    '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_7TeV.txt'} ,
+                    '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_8TeV.txt'} ,  
+                    } ,
+  'hww1jof_cut' :   {
+                    '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_cut_7TeV.txt'} ,
+                    '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_cut_8TeV.txt'} ,
+                    } ,
+  'hww0jsf_cut' :   {
+                    '7TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_0j_cut_7TeV.txt'} ,
+                    '8TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_0j_cut_8TeV.txt'} ,
+                    } ,
+  'hww1jsf_cut' :   {
+                    '7TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_1j_cut_7TeV.txt'} ,
+                    '8TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_1j_cut_8TeV.txt'} ,
+                    } ,
+  # ============ H -> WW 0/1-jet 2D shapes =================
+  'hww0jof_shape' : {
+                    '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_shape_7TeV.txt' , 'files' : ['hwwof_0j.input_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_shape_8TeV.txt' , 'files' : ['hwwof_0j.input_8TeV.root'] } ,
+                    } ,
+  'hww1jof_shape'  : {
+                    '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_shape_7TeV.txt' , 'files' : ['hwwof_1j.input_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_shape_8TeV.txt' , 'files' : ['hwwof_1j.input_8TeV.root'] } ,
+                    } , 
+  
+  # ============ H -> WW VBF Cut Based =====================
+  'hww2jof_cut' :   {
+                    '7TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'cut'  , 'mrange' : [110,600] , 'dir' : 'summer2013'   ,  'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_2j_cut_7TeV.txt'},
+                    '8TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'cut'  , 'mrange' : [110,600] , 'dir' : 'summer2013'   ,  'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_2j_cut_8TeV.txt'},
+                    } ,
+  'hww2jsf_cut' :   {
+                    '7TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'cut'  , 'mrange' : [110,600] , 'dir' : 'summer2013'   ,  'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_2j_cut_7TeV.txt'},
+                    '8TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'cut'  , 'mrange' : [110,600] , 'dir' : 'summer2013'   ,  'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_2j_cut_8TeV.txt'},
+                    } ,
+
+  # ============ H -> WW VBF Shape Based =====================
+  'hww2jof_shape' : {
+                    '7TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'shape'  , 'mrange' : [110,600] , 'dir' : 'summer2013'   ,  'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_2j_shape_7TeV.txt' , 'files' : ['shapes/hww-4.92fb.mH$MASS.of_2j_shape.root'] },
+                    '8TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'shape'  , 'mrange' : [110,600] , 'dir' : 'summer2013'   ,  'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_2j_shape_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_2j_shape.root'] },
+                    } ,
+
+  # ============ VH -> WW 3l cut-based ==================
+  'vh3l_sssf_cut' :  {
+                    '7TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'cut'   , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_cut_7TeV.txt' } ,  
+                    '8TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'cut'   , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_cut_8TeV.txt' } ,
+                    } ,
+  'vh3l_ossf_cut' :  {
+                    '7TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'cut'   , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_cut_7TeV.txt' } ,  
+                    '8TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'cut'   , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_cut_8TeV.txt' } ,
+                    } ,
+
+  # ============ VH -> WW 3l shape-based ==================
+  'vh3l_sssf_shape' :  {
+                    '7TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_shape_7TeV.txt' , 'files' : ['vh3l1_input_7TeV.root'] } ,  
+                    '8TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_shape_8TeV.txt' , 'files' : ['vh3l1_input_8TeV.root'] } 
+                    } ,
+  'vh3l_ossf_shape' : {
+                    '7TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_shape_7TeV.txt' , 'files' : ['vh3l2_input_7TeV.root'] } ,  
+                    '8TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_shape_8TeV.txt' , 'files' : ['vh3l2_input_8TeV.root'] } 
+                    } ,
+ 
+  # ============ VH -> WW 2j cut-based ==================
+  'hwwvh2jsf_cut' : {
+                    '7TeV' : { 'tag' : 'sf' , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh2j' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [120,190]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'hwwsf_vh2j_cut_7TeV.txt' , 'files' : ['shapes/hww-4.92fb.mH$MASS.sf_vh2j_shape.root']  },
+                    '8TeV' : { 'tag' : 'sf' , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh2j' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'hwwsf_vh2j_cut_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.sf_vh2j_shape.root'] }
+                    } ,
+  'hwwvh2jof_cut' : {
+                    '7TeV' : { 'tag' : 'of' , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh2j' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [120,190]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'hwwof_vh2j_cut_7TeV.txt' , 'files' : ['shapes/hww-4.92fb.mH$MASS.of_vh2j_shape.root'] },
+                    '8TeV' : { 'tag' : 'of' , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh2j' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'hwwof_vh2j_cut_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_vh2j_shape.root'] }
+                    } ,
+
+  # ============ VH -> WW 2j shape-based ================== ( 7TeV -> cut-based )
+  'hwwvh2jof_shape' : {
+                    '7TeV' : { 'tag' : 'of' , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh2j' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [120,190]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'hwwof_vh2j_cut_7TeV.txt'   , 'files' : ['shapes/hww-4.92fb.mH$MASS.of_vh2j_shape.root'] },
+                    '8TeV' : { 'tag' : 'of' , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh2j' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'hwwof_vh2j_shape_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_vh2j_shape_mll.root'] }
+                    } ,
+
+  # ============ ZH -> WW 3l 2j cut-based ================
+  'zh3l2j_eee_cut'  : {
+                    '7TeV' : { 'tag' : 'eee', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_eee_7TeV.txt' } ,
+                    '8TeV' : { 'tag' : 'eee', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_eee_8TeV.txt' } ,
+                    } ,
+  'zh3l2j_eem_cut'  : {
+                    '7TeV' : { 'tag' : 'eem', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_eem_7TeV.txt' } ,
+                    '8TeV' : { 'tag' : 'eem', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_eem_8TeV.txt' } ,
+                    } ,
+  'zh3l2j_emm_cut'  : {
+                    '7TeV' : { 'tag' : 'emm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_emm_7TeV.txt' } ,
+                    '8TeV' : { 'tag' : 'emm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_emm_8TeV.txt' } ,
+                    } ,
+  'zh3l2j_mmm_cut'  : {
+                    '7TeV' : { 'tag' : 'mmm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_mmm_7TeV.txt' } ,
+                    '8TeV' : { 'tag' : 'mmm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_cut_mmm_8TeV.txt' } ,
+                    } ,
+
+
+  # ============ ZH -> WW 3l 2j cut-based ================
+  'zh3l2j_eee_shape': {
+                    '7TeV' : { 'tag' : 'eee', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_eee_7TeV.txt' , 'files' : ['zh3l2j_input_shape_eee_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'eee', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_eee_8TeV.txt' , 'files' : ['zh3l2j_input_shape_eee_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_eem_shape': {
+                    '7TeV' : { 'tag' : 'eem', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_eem_7TeV.txt' , 'files' : ['zh3l2j_input_shape_eem_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'eem', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_eem_8TeV.txt' , 'files' : ['zh3l2j_input_shape_eem_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_emm_shape': {
+                    '7TeV' : { 'tag' : 'emm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_emm_7TeV.txt' , 'files' : ['zh3l2j_input_shape_emm_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'emm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_emm_8TeV.txt' , 'files' : ['zh3l2j_input_shape_emm_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_mmm_shape': {
+                    '7TeV' : { 'tag' : 'mmm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_mmm_7TeV.txt' , 'files' : ['zh3l2j_input_shape_mmm_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'mmm', 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'zh3l2j' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200]  , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS' , 'card' : 'zh3l2j_shape_mmm_8TeV.txt' , 'files' : ['zh3l2j_input_shape_mmm_8TeV.root'] } ,
+                    } ,
+
+},
+
+
+
+# ============ V1: Cards for HWW Paper (local datacards) ==========================
 
 'V1' : {
   # ============ H -> WW 0/1-jet cut-based ================== 
@@ -160,38 +283,38 @@ channels = {
 
   # ============ H -> WW 0/1-jet cut-based ================== 
   #'hww0jof_cut' :   { 
-  #                  '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_7TeV.txt'} ,
-  #                  '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_8TeV.txt'}   
+  #                  '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_7TeV.txt'} ,
+  #                  '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_8TeV.txt'}   
   #                  } ,
   #'hww1jof_cut' :   {
-  #                  '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_cut_7TeV.txt'} ,
-  #                  '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_cut_8TeV.txt'}
+  #                  '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_cut_7TeV.txt'} ,
+  #                  '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_cut_8TeV.txt'}
   #                  } ,
   'hww0jsf_cut' :   {
-                    '7TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_0j_cut_7TeV.txt'} ,
-                    '8TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_0j_cut_8TeV.txt' }
+                    '7TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_0j_cut_7TeV.txt'} ,
+                    '8TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_0j_cut_8TeV.txt' }
                     } ,
   'hww1jsf_cut' :   {
-                    '7TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_1j_cut_7TeV.txt'} ,
-                    '8TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_1j_cut_8TeV.txt'}
+                    '7TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_1j_cut_7TeV.txt'} ,
+                    '8TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwsf_1j_cut_8TeV.txt'}
                     } ,
   # ============ H -> WW 0/1-jet 2D shapes =================
   'hww0jof_shape' : {
-                    '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_shape_7TeV.txt' , 'files' : ['hwwof_0j.input_7TeV.root'] } ,
-                    '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_shape_8TeV.txt' , 'files' : ['hwwof_0j.input_8TeV.root'] }
+                    '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_shape_7TeV.txt' , 'files' : ['hwwof_0j.input_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_shape_8TeV.txt' , 'files' : ['hwwof_0j.input_8TeV.root'] }
                     } ,
   'hww1jof_shape'  : {
-                    '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_shape_7TeV.txt' , 'files' : ['hwwof_1j.input_7TeV.root'] } ,
-                    '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_shape_8TeV.txt' , 'files' : ['hwwof_1j.input_8TeV.root'] }
+                    '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_shape_7TeV.txt' , 'files' : ['hwwof_1j.input_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_shape_8TeV.txt' , 'files' : ['hwwof_1j.input_8TeV.root'] }
                     } , 
   # ============ H -> WW 0/1-jet Mr Fit =================
   # 'hww0jof_mrfit'  : {
-  #                  '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_mrfit_7TeV.txt'} ,
-  #                  '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_mrfit_8TeV.txt'}
+  #                  '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_mrfit_7TeV.txt'} ,
+  #                  '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_mrfit_8TeV.txt'}
   #                } ,
   # 'hww1jof_mrfit'  : {
-  #                  '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_mrfit_7TeV.txt'} ,
-  #                  '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_mrfit_8TeV.txt'}
+  #                  '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_mrfit_7TeV.txt'} ,
+  #                  '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'mrfit' , 'mrange' : [110,600]  , 'dir' : 'summer2013_V0' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_1j_mrfit_8TeV.txt'}
   #                } ,
   # ============ H -> WW VBF cut-based (OLD HCP RESULT) ==================
   'hww2j_hcp' :     {
@@ -207,12 +330,12 @@ channels = {
 
   # ============ VH -> WW 3l shape-based ==================
   'vh3l_sssf_shape' :  {
-                    '7TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_shape_7TeV.txt' , 'files' : ['vh3l1_input_7TeV.root'] } ,  
-                    '8TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_shape_8TeV.txt' , 'files' : ['vh3l1_input_8TeV.root'] } 
+                    '7TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013_V0' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_shape_7TeV.txt' , 'files' : ['vh3l1_input_7TeV.root'] } ,  
+                    '8TeV' : { 'tag' : 'sssf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013_V0' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l1_shape_8TeV.txt' , 'files' : ['vh3l1_input_8TeV.root'] } 
                     } ,
   'vh3l_ossf_shape' :  {
-                    '7TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_shape_7TeV.txt' , 'files' : ['vh3l2_input_7TeV.root'] } ,  
-                    '8TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_shape_8TeV.txt' , 'files' : ['vh3l2_input_8TeV.root'] } 
+                    '7TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013_V0' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_shape_7TeV.txt' , 'files' : ['vh3l2_input_7TeV.root'] } ,  
+                    '8TeV' : { 'tag' : 'ossf'  , 'prod' : 'VH' , 'branch' : 'hww' , 'decay' : 'vh3l' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,200] , 'dir' : 'summer2013_V0' , 'subdir' : 'vhww/$MASS', 'card' : 'vh3l2_shape_8TeV.txt' , 'files' : ['vh3l2_input_8TeV.root'] } 
                     } ,
  
   # ============ VH -> WW 2j cut-based ==================
