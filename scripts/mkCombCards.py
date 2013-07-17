@@ -9,7 +9,7 @@ import combTools
 import batchTools
 
 from Config import *
-from manipDataCard_v2 import card as cardTools
+from manipDataCard import card as cardTools
 from copy import deepcopy 
 
 

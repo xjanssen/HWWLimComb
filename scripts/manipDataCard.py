@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys,os,inspect
 from optparse import OptionParser
+from copy import deepcopy as dc
 
 class card():
 	'''Class card() is intended to contain a datacard, structured in a couple of dictionaries for simplified editing.'''
@@ -167,16 +168,14 @@ class card():
 		self.linenumbers[('header2',n)] = self.linenumbers[('header2',str(int(n)-1))] + 0.01
 
 ##################################################
-        def remShape(self,label,root='ALL'):
-                if not (not label == '' and not root == ''):
-                        sys.exit('Arguments don\'t suffice, check these: label: '+str(label)+', root: '+str(root))
-                for key in self.content['header2'].keys():
-                        fields = self.content['header2'][key]
-                        if (fields[1] == label and fields[2] == root) or (fields[1] == label and root == 'ALL'):
-                                del self.content['header2'][key]
-                                #print 'removed:', fields
-
-
+	def remShape(self,label,root='ALL'):
+		if not (not label == '' and not root == ''):
+			sys.exit('Arguments don\'t suffice, check these: label: '+str(label)+', root: '+str(root))
+		for key in self.content['header2'].keys():
+			fields = self.content['header2'][key]
+			if (fields[1] == label and fields[2] == root) or (fields[1] == label and root == 'ALL'):
+				del self.content['header2'][key]
+				print 'removed:', fields
 
 ##################################################
 	def addCol(self,bin,process,processId,rate,observation):
@@ -190,13 +189,81 @@ class card():
 		self.content['block2']['processId'].append(str(processId))
 		self.content['block2']['rate'].append(str(rate))
 		#systs
-		for systtype in ['lnN','lnU','gmN','shape']:
-			if (systtype in self.content['systs']):
+		for systtype in self.content['systs']:
+			if systtype in ['lnN','lnU','gmN','shape'] or systtype[0:5] == 'shape':
 				for entry in self.content['systs'][systtype].itervalues():
 					entry.append('-')
 		#header1
 		self.content['header1']['imax'] = str(len(set(self.content['block1']['bin'])))
 
+#FUNCTION: delCol################################
+	def remCol(self,**kwargs):
+		'''Method remCol.'''
+		sets = [['bin','process'],['bin','processId'],['bin'],['process'],['processId']]
+		iset = -999
+		for i,s in enumerate(sets):
+			if (set(s)).issubset(kwargs.keys()):
+				iset = i
+				break
+		if iset == -999:
+			sys.exit('Not enough information. Check arguments: '+str(kwargs))
+		if iset == 2:
+			if not kwargs['bin'] in self.content['block2']['bin']:
+				sys.exit('No such bin in card, can\'t remove. Check arguments: '+str(kwargs))
+			allprocesses = dc(self.content['block2']['process'])
+			for process in allprocesses:
+				if self.content['block2']['bin'][self.content['block2']['process'].index(process)] == kwargs['bin']:
+					self.remCol(bin=kwargs['bin'],process=process)
+		elif iset == 3:
+			if not kwargs['process'] in self.content['block2']['process']:
+				sys.exit('No such process in card, can\'t remove. Check arguments: '+str(kwargs))
+			allprocesses = dc(self.content['block2']['process'])
+			for process in allprocesses:
+				if process == kwargs['process']:
+					self.remCol(bin=self.content['block2']['bin'][self.content['block2']['process'].index(process)],process=process)
+		elif iset == 4:
+			if not kwargs['processId'] in self.content['block2']['processId']:
+				sys.exit('No such processId in card, can\'t remove. Check arguments: '+str(kwargs))
+			allprocesses = dc(self.content['block2']['processId'])
+			for processid in allprocesses:
+				if processid == kwargs['processId']:
+					self.remCol(bin=self.content['block2']['bin'][self.content['block2']['processId'].index(processid)],processId=processid)
+		else:
+			print 'REMOVING: ',kwargs
+			#start
+			index1 = self.commonIndex(part='block1',bin=kwargs[sets[iset][0]])
+			if 'process' in kwargs:
+				index2 = self.commonIndex(part='block2',bin=kwargs[sets[iset][0]],process=kwargs[sets[iset][1]])
+			elif 'processId' in kwargs:
+				index2 = self.commonIndex(part='block2',bin=kwargs[sets[iset][0]],processId=kwargs[sets[iset][1]])
+			#block2
+			del self.content['block2']['bin'][index2]
+			del self.content['block2']['process'][index2]
+			del self.content['block2']['processId'][index2]
+			del self.content['block2']['rate'][index2]
+			#systs
+			for systtype in self.content['systs']:
+				if systtype in ['lnN','lnU','gmN','shape'] or systtype[0:5] == 'shape':
+					for tag in self.content['systs'][systtype]:
+						del self.content['systs'][systtype][tag][index2 if not systtype=='gmN' else index2+1]
+					remtags = []
+					for tag in self.content['systs'][systtype]:
+						if (not systtype=='gmN') and all([x=='-' for x in self.content['systs'][systtype][tag]]):
+							remtags.append([systtype,tag])
+						if (systtype=='gmN') and all([x=='-' for x in self.content['systs'][systtype][tag][1:]]):
+							remtags.append([systtype,tag])
+					for systtype,tag in remtags:
+						print 'removed syst for tag %s: '%tag, self.content['systs'][systtype][tag]
+						del self.content['systs'][systtype][tag]
+
+			#block1
+			allbins = dc(self.content['block1']['bin'])
+			for entry in allbins:
+				if not entry in self.content['block2']['bin']:
+					del self.content['block1']['observation'][self.content['block1']['bin'].index(entry)]
+					del self.content['block1']['bin'][self.content['block1']['bin'].index(entry)]
+					self.content['header1']['imax'] = str(int(self.content['header1']['imax'])-1)
+				
 #FUNCTION: getCol################################
 	def getCol(self,**kwargs):
 		'''Method getCol.'''
@@ -431,6 +498,82 @@ class card():
 		self.content['systs'][kwargs[keyset[1]]][kwargs[keyset[0]]][index] = str(kwargs['value'])
 
 ##################################################
+	def setgmN0(self,tag,value):
+		if not 'gmN' in self.content['systs']:
+			sys.exit('No gmN section in dictionary.')
+		if not tag in self.content['systs']['gmN']:
+			sys.exit('No tag: %s in gmN section in dictionary.'%tag)
+		self.content['systs']['gmN'][tag][0] = str(value)
+
+##################################################
+	def remSystLine(self,**kwargs):
+		sets = [['systtype','tag'],['tag']]
+		iset = -999
+		for i,s in enumerate(sets):
+			if (set(s)).issubset(kwargs.keys()):
+				iset = i
+				break
+		if iset == -999:
+			sys.exit('Not enough information. Check arguments: '+str(kwargs))
+		# check
+		if iset == 0:
+			if not kwargs['systtype'] in self.content['systs']:
+				sys.exit('Systtype: %s is not present in the dictionary.'%kwargs['systtype'])
+			if not kwargs['tag'] in self.content['systs'][kwargs['systtype']]:
+				sys.exit('Tag: %s is not present in the dictionary.'%kwargs['tag'])
+			del self.content['systs'][kwargs['systtype']][kwargs['tag']]
+		elif iset == 1:
+			tagfound = False
+			systtypefound = ''
+			for systtype in self.content['systs']:
+				if kwargs['tag'] in self.content['systs']:
+					tagfound=True
+					systtypefound=systtype
+					break
+			if not tagfound:
+				sys.exit('Tag: %s is not present in the dictionary.'%kwargs['tag'])
+			del self.content['systs'][systtypefound][kwargs['tag']]
+		else:
+			sys.exit('Something is wrong. Check arguments: '+str(kwargs))
+		
+##################################################
+	def addSystLine(self,**kwargs):
+		sets = [['systtype','tag']]
+		iset = -999
+		for i,s in enumerate(sets):
+			if (set(s)).issubset(kwargs.keys()):
+				 iset = i
+				 break
+		if iset == -999:
+			sys.exit('Not enough information. Check arguments: '+str(kwargs))
+		# check preexisting
+		for systtype in self.content['systs']:
+			for tag in self.content['systs'][systtype]:
+				if kwargs['tag'] == tag:
+					sys.exit('Systematic line with tag %s already exists, in systematic section: %s'%(tag,systtype))
+		# check type
+		if not (kwargs['systtype'] in ['lnN','lnU','gmN','param']) and not (kwargs['systtype'][0:5]=='shape'):
+			sys.exit('Systtype: %s is unknown in dictionary.'%systtype)
+		# make new line:
+		if kwargs['systtype'] == 'param':
+			if not kwargs['systtype'] in self.content['systs']: self.content['systs'][kwargs['systtype']] = {}
+			self.content['systs'][kwargs['systtype']][kwargs['tag']] = ['-']*2
+			if kwargs['systtype'] in [x for x,y in self.linenumbers]: 
+				self.linenumbers[(kwargs['systtype'],kwargs['tag'])] = str(  max(  [float(self.linenumbers[(x,y)]) for x,y in self.linenumbers.keys() if x == kwargs['systtype']]  )+0.01  )
+			else:
+				self.linenumbers[(kwargs['systtype'],kwargs['tag'])] = str(max([float(self.linenumbers[(x,y)]) for x,y in self.linenumbers if x == 'param'])+10)
+		elif kwargs['systtype'] in ['lnN','lnU','gmN'] or kwargs['systtype'][0:5]=='shape':
+			if not kwargs['systtype'] in self.content['systs']: self.content['systs'][kwargs['systtype']] = {}
+			linelen = len(self.content['block2']['process'])
+			self.content['systs'][kwargs['systtype']][kwargs['tag']] = (['-'] if kwargs['systtype']=='gmN' else [])+['-']*linelen
+			if kwargs['systtype'] in [x for x,y in self.linenumbers]:
+				self.linenumbers[(kwargs['systtype'],kwargs['tag'])] = str(max([float(self.linenumbers[(x,y)]) for x,y in self.linenumbers if x == kwargs['systtype']])+0.01)
+			else:
+				self.linenumbers[(kwargs['systtype'],kwargs['tag'])] = str(max([float(self.linenumbers[(x,y)]) for x,y in self.linenumbers if x == 'param'])+10)
+		else:
+			sys.exit('Something is wrong. Check arguments: '+str(kwargs))
+
+##################################################
 #FUNCTION: write##################################
 	def write(self,cardNameOut=''):
 		'''Method write() print the card in memory to the screen, or to a file if a filename is specified.'''
@@ -574,6 +717,38 @@ def demo2():
 	dc.write()
 
 ####################################################################################################
+def demo3():
+	dc = card('hww-19.47fb.mH110.sf_vh2j_shape.txt')
+	dc.write()
+	dc.remShape('data_obs','*') # or remShape('data_obs')  (= remove everything with data_obs inside)
+	dc.write()
+
+####################################################################################################
+def demo4():
+	dc = card('hww-19.47fb.mH110.sf_vh2j_shape.txt')
+	dc.write()
+	dc.remCol(process='WW')
+	dc.write()
+	dc.remCol(processId='2')
+	dc.write()
+
+####################################################################################################
+def demo5():
+	dc = card('datacard_mbbCor_m115_CATMIN1_Binned.txt')
+	dc.write()
+	dc.addSystLine(systtype='param',tag='systparam')
+	dc.write()
+	dc.addSystLine(systtype='gmN',tag='systgmN')
+	dc.setgmN0('systgmN','12.5')
+	dc.write()
+	dc.addSystLine(systtype='shapeN2',tag='systshapeN2')
+	dc.write()
+	dc.addSystLine(systtype='lnN',tag='systlnN')
+	dc.write()
+	dc.remSystLine(systtype='lnN',tag='sgnAcc_pdf')
+	dc.write()
+
+####################################################################################################
 def myparser():
 	mp = OptionParser()
 	mp.add_option('--help_card',help='print info on how to use card class.',action='store_true',default=False,dest='help_card')
@@ -581,11 +756,17 @@ def myparser():
 
 ####################################################################################################
 def main():
-	demo0()
-	makebreak()
-	demo1()
-	makebreak()
-	demo2()
+	#demo0()
+	#makebreak()
+	#demo1()
+	#makebreak()
+	#demo2()
+	#makebreak()
+	#demo3()
+	#makebreak()
+	#demo4()
+	#makebreak()
+	demo5()
 
 ####################################################################################################
 if __name__=='__main__':
