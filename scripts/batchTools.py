@@ -3,6 +3,10 @@ import sys, re, os, os.path
 
 from Config import *
 import combTools
+import subprocess
+import string
+import os.path
+from optparse import OptionParser
 
 class batchJobs :
    def __init__ (self,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version):
@@ -13,6 +17,7 @@ class batchJobs :
       for iComb in combList:
         if not 'Comb' in batchSplit and len(combList)>1 :
           kComb = 'AllComb'
+          for jComb in combList: kComb+='-'+jComb
         else:
           kComb = iComb 
         self.jobsDic[iComb] = {}
@@ -20,6 +25,7 @@ class batchJobs :
         for iModel in PhysModelList:
           if not 'Model' in batchSplit and len(PhysModelList)>1 :    
             kModel = 'AllModel'
+            for jModel in PhysModelList: kModel+='-'+jModel
           else:
             kModel = iModel
           self.jobsDic[iComb][iModel] = {}  
@@ -36,6 +42,7 @@ class batchJobs :
               if unblind or targets[iTarget]['notblind'] : 
                 if not 'Target' in batchSplit and len(TargetList)>1 :
                   kTarget = 'AllTarget'
+                  for jTarget in TargetList: kTarget+='-'+jTarget
                 else:
                   kTarget = iTarget
                 # More than one job ?
@@ -91,8 +98,44 @@ class batchJobs :
         jFile.write('mv '+jidFile+' '+jidFile.replace('.jid','.done') )
         jFile.close()
         jidFile=jobdir+'/'+jName+'.jid'
+        print 'Submit',jName
         jobid=os.system('cd '+jobdir+'; bsub -q 8nh -o '+outFile+' -e '+errFile+' '+jName+'.sh | grep submitted > '+jidFile)
 
+def batchResub():
+    fileCmd = 'ls '+jobdir+'/'+'*.sh'
+    proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+    out, err = proc.communicate()
+    FileList=string.split(out)
+    os.system('cd '+jobdir)
+    for iFile in FileList:
+      jidFile=iFile.replace('.sh','.jid')
+      doneFile=iFile.replace('.sh','.done')
+      if not ( os.path.isfile(jidFile) or os.path.isfile(doneFile) ) :
+        print 'Resubmit',iFile
+        errFile=iFile.replace('.sh','.err')
+        outFile=iFile.replace('.sh','.out')
+        jobid=os.system('cd '+jobdir+'; bsub -q 8nh -o '+outFile+' -e '+errFile+' '+iFile+' | grep submitted > '+jidFile)
 
+def batchClean():
+    fileCmd = 'ls '+jobdir+'/'+'*.sh'
+    proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+    out, err = proc.communicate()
+    FileList=string.split(out)
+    for iFile in FileList:
+      doneFile=iFile.replace('.sh','.done')
+      if os.path.isfile(doneFile):
+        cleanFile=iFile.replace('.sh','.*')
+        print 'Clean',cleanFile
+        os.system('cd '+jobdir+'; rm '+cleanFile)
 
+def batchStatus():
+    fileCmd = 'ls '+jobdir+'/'+'*.sh'
+    proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+    out, err = proc.communicate()
+    FileList=string.split(out)
+    for iFile in FileList:
+      jidFile=iFile.replace('.sh','.jid')
+      if os.path.isfile(jidFile):
+        print 'Status', jidFile
+        os.system('cat '+jidFile+' | awk \'{print $2}\' | awk -F\'<\' \'{print $2}\' | awk -F\'>\' \'{print $1}\' | xargs -n 1 bjobs')  
 

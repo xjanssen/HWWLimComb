@@ -33,7 +33,8 @@ class CombList_Filter:
           self.found    = True
           self.combList = [X for X in self.combinations ]    
         else:
-          self.combList = [X for X in self.combinations if (X in self.combFilter)]    
+          #self.combList = [X for X in self.combinations if (X in self.combFilter)]    
+          self.combList = [X for X in self.combFilter if (X in self.combinations)]    
           if  len(self.combList):  self.found    = True 
 
     def get(self):

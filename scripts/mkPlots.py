@@ -9,7 +9,7 @@ from copy import deepcopy as dc
 
 # --------------------------------------------------------- getAllMass ------------------------
 
-def getAllMass(iModel,combList):
+def getAllMass(iModel,combList,Version):
    allList = []
    for iComb in combList:
       massList  = combTools.MassList_Filter(cardtypes,channels[Version],combinations,physmodels[iModel]['cardtype'],[],iComb,energyList).get()
@@ -24,14 +24,15 @@ parser.add_option("-c", "--combs",      dest="combs",       help="Produce all co
 parser.add_option("-n", "--dry-run",    dest="pretend",     help="(use with -v) just list the datacards that will go into this combination", default=False, action="store_true")
 parser.add_option("-M", "--models",     dest="models",      help="Physics Model (OneHiggs,TwoHiggs,NoModel , ... )", default=['OneHiggs'], type='string' , action='callback' , callback=combTools.list_maker('models',','))
 parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default="0", metavar="SQRT(S)")
-parser.add_option("-m", "--mrange",     dest="mrange",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('mrange',',',int))
+parser.add_option("-m", "--mrange",     dest="mrange",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('mrange',',',float))
 parser.add_option("-p", "--plots",      dest="plots",       help="What to do "             , default=[], type='string' , action='callback' , callback=combTools.list_maker('plots',','))
 parser.add_option("-u", "--unblind",    dest="unblind",     help="Unblind results",          default=True, action="store_false")
 parser.add_option("-i", "--inject",     dest="inject",      help="Inject mH=125",          default=False, action="store_true")
 parser.add_option("-f", "--postfix",    dest="postFix",     help="Figure post-fix",        default='', metavar="PATTERN")
 parser.add_option("-x", "--logx"   ,    dest="logx",        help="logX",                   default=False, action="store_true")
 parser.add_option("-y", "--logy"   ,    dest="logy",        help="logY",                   default=False, action="store_true")
-parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default="V1" ,  type='string' )
+parser.add_option("-v", "--version",    dest="Version",     help="Datacards version"     , default=DefaultVersion ,  type='string' )
+parser.add_option("-P", "--printList",  dest="printList",   help="What to print "        , default=['ACLsObs','ACLsExp','SObs','SExpPre'], type='string' , action='callback' , callback=combTools.list_maker('printList',','))
 
 (options, args) = parser.parse_args()
 
@@ -48,7 +49,7 @@ for iPlot in options.plots:
    #
    # Plot with single iComb,iModel
    #
-   if   iPlot in ['Limit','Sign','BestFit','PVal']:
+   if   iPlot in ['Limit','Sign','BestFit','PVal','Print']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
        for iComb in combList:
@@ -58,10 +59,11 @@ for iPlot in options.plots:
             mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
             postFix += '_mH'+str(options.mrange[0])+'-'+str(options.mrange[1])
           else                           : mLF = massList
-          plot=combPlots.combPlot(options.unblind,options.Version,postFix,options.logx,options.logy)
+          plot=combPlots.combPlot(options.Version,options.unblind,postFix,options.logx,options.logy)
           if iPlot == 'Limit'   : plot.plotOneLimit(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'Sign'    : plot.plotSignVsMh(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'BestFit' : plot.plotMuVsMh(iComb,options.energy,iModel,mLF)
+          if iPlot == 'Print'   : plot.printResults(iComb,options.energy,iModel,mLF,options.printList)
 
    #
    # Plot with single iModel and several Comb
@@ -69,20 +71,34 @@ for iPlot in options.plots:
    elif iPlot in ['ExpLim','ExpSign']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
-       massList=dc(getAllMass(iModel,combList))
+       massList=dc(getAllMass(iModel,combList,options.Version))
        if (len(options.mrange) >= 2 ) : 
          mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
          postFix += '_mH'+str(options.mrange[0])+'-'+str(options.mrange[1])
        else                           : mLF = massList
-       plot=combPlots.combPlot(options.unblind,options.Version,postFix,options.logx,options.logy)
+       plot=combPlots.combPlot(options.Version,options.unblind,postFix,options.logx,options.logy)
        if iPlot == 'ExpLim'  : plot.plotExpLimits(combList,options.energy,iModel,mLF)
        if iPlot == 'ExpSign' : plot.plotExpSignVsMh(combList,options.energy,iModel,mLF)
- 
+
    elif iPlot in ['MuCC']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
-       plot=combPlots.combPlot(options.unblind,options.Version,postFix)
-       plot.plotMuChannel() 
+       plot=combPlots.combPlot(options.Version,options.unblind,postFix)
+       CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
+       plot.plotMuChannel(CombList,options.energy,iModel,[125.7]) 
+
+   elif iPlot in ['MDFSum','MDFSumFast','MDF2D','MDF2DFast']:
+     for iModel in PhysModelList:
+       print '---------------------------> Model = '+iModel
+       for iComb in combList:
+         print '------------------------------> Comb = '+iComb
+         massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get() 
+         for iMass in massList:
+           plot=combPlots.combPlot(options.Version,options.unblind,postFix)
+           if iPlot == 'MDFSum'    : plot.MDF2DSum(iComb,options.energy,iModel,[iMass],False) 
+           if iPlot == 'MDFSumFast': plot.MDF2DSum(iComb,options.energy,iModel,[iMass],True) 
+           if iPlot == 'MDF2D'     : plot.MDF2D(iComb,options.energy,iModel,[iMass],False) 
+           if iPlot == 'MDF2DFast' : plot.MDF2D(iComb,options.energy,iModel,[iMass],True) 
 
 
    else:

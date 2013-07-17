@@ -13,12 +13,12 @@ parser.add_option("-n", "--dry-run",    dest="pretend",     help="(use with -v) 
 parser.add_option("-z", "--zip",        dest="zip",         help="compress output datacard", default=False, action="store_true")
 parser.add_option("-M", "--models",     dest="models",      help="Physics Model (OneHiggs,TwoHiggs,NoModel , ... )", default=['OneHiggs'], type='string' , action='callback' , callback=combTools.list_maker('models',','))
 parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default="0", metavar="SQRT(S)")
-parser.add_option("-m", "--masses",     dest="masses",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('masses',',',int))
+parser.add_option("-m", "--masses",     dest="masses",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('masses',',',float))
 parser.add_option("-T", "--targets",    dest="targets",     help="What to do ( PVSObs, BestFit, ... )", default=[], type='string' , action='callback' , callback=combTools.list_maker('targets',','))
 parser.add_option("-u", "--unblind",    dest="unblind",     help="Unblind results",                default=False, action="store_true")
 parser.add_option("-b", "--batch"  ,    dest="runBatch",    help="Run in batch",                   default=False, action="store_true")
 parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode for batch jobs" , default=[], type='string' , action='callback' , callback=combTools.list_maker('batchSplit',','))
-parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default="V1" ,  type='string' )
+parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
 
 
 (options, args) = parser.parse_args()
@@ -71,12 +71,26 @@ for iComb in combList:
                 NJobs=len(ToysList)
               
               for iJob in xrange(1,NJobs+1):
+                PF=''
                 if NJobs == 1 : logfile  = logbase+'_'+iTarget+'.mH'+str(iMass)+'.log' 
                 else          : logfile  = logbase+'_'+iTarget+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
                 command  = 'cd '+TargetDir+'/'+str(iMass)+' && '
-                command += 'combine '+wspace+' -M '+targets[iTarget]['method']+' -n '+outname+'_'+iTarget+' -m '+str(iMass)+' '+targets[iTarget]['options']
+                command += 'combine '+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
+                # toys
                 if len(ToysList) > 0:
                   command += ' -t '+str(targets[iTarget]['Toys']['NToysJob'])+' --toysFile='+ToysList[iJob-1]+' -s '+os.path.splitext(os.path.splitext(ToysList[iJob-1])[0])[1].replace('.','')
+                # MultiDim Grid
+                if 'MDFGridParam' in targets[iTarget] :
+                  NPJobs=int(targets[iTarget]['MDFGridParam']['NPOINTS']/NJobs)
+                  FPoint=(iJob-1)*NPJobs
+                  LPoint=(iJob)*NPJobs-1
+                  command += ' --points='+str(targets[iTarget]['MDFGridParam']['NPOINTS'])
+                  command += ' --firstPoint '+str(FPoint)+' --lastPoint '+str(LPoint)
+                  #command += ' --rMin '+str(targets[iTarget]['MDFGridParam']['RMIN'])+' --rMax '+str(targets[iTarget]['MDFGridParam']['RMAX'])
+                  PF='_Points'+str(FPoint)+'-'+str(LPoint)
+                # outfile
+                command +=' -n '+outname+'_'+iTarget+PF
+                # logfile 
                 command += ' 2>&1 | tee '+logfile
                 if options.pretend: 
                   print command

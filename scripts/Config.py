@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-workspace = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/workspace/'
-jobdir    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/jobs/'
-plotsdir  = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/plots/'
-cardbase  = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/'
-
+workspace   = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/workspace/'
+jobdir      = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/jobs/'
+plotsdir    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/plots/'
+cardbase    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/'
+combscripts = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/'
 
 cardtypes = {
-  'couplings' : { 'dir' : 'couplings' , 'masses' : [125,125.7] } ,
+  'couplings' : { 'dir' : 'couplings' , 'masses' : [125.7] } ,
   'smhiggs'   : { 'dir' : 'couplings' , 'targetdir' : 'smhiggs' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
   'searches'  : { 'dir' : 'searches'  ,                           'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
   'wjetfix'   : { 'dir' : 'searches'  , 'targetdir' : 'wjetfix' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['WJetFix'] } , 
@@ -29,13 +29,15 @@ preProc = {
                                  ] , 
                  'processList' : ['WjetsM','WjetsE','Wjets'] , 'massWJ' : '$MASS'  } ,
   'SMInject' : {} ,
+  
 }
 
+DefaultVersion = 'V3'
 channels = { 
 
 # ============ V2: Cards for HWW Paper (datacrds from comb svn) ==========================
 
-'V2' : {
+'V3' : {
   # ============ H -> WW 0/1-jet cut-based ================== 
   'hww0jof_cut' :   { 
                     '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_7TeV.txt'} ,
@@ -370,8 +372,8 @@ combinations = {
   'hww0jet_cut'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut' , 'hww0jof_cut'   ] ,                                   'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 0-jet (Cut)'   } ,
   'hww1jet_shape'  : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww1jsf_cut' , 'hww1jof_shape' ] ,                                   'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 1-jet (2d)'    } ,
   'hww1jet_cut'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww1jsf_cut' , 'hww1jof_cut'   ] ,                                   'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 1-jet (Cut)'   } ,
-  'hww01jet_shape' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut' , 'hww1jsf_cut' , 'hww0jof_shape' , 'hww1jof_shape' ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 0/1-jet (2d)'  } ,
-  'hww01jet_cut'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut' , 'hww1jsf_cut' , 'hww0jof_cut'   , 'hww1jof_cut'   ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 0/1-jet (Cut)' } ,
+  'hww01jet_shape' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut' , 'hww1jsf_cut' , 'hww0jof_shape' , 'hww1jof_shape' ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'H #rightarrow WW #rightarrow 2l2#nu 0/1-jet (2d)'  } ,
+  'hww01jet_cut'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut' , 'hww1jsf_cut' , 'hww0jof_cut'   , 'hww1jof_cut'   ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'WW 0/1-jet (Cut)' } ,
   'hww2j_hcp'      : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2j_hcp' , 'hww2jsf_hcp' , 'hww2jof_hcp' ] ,                       'purposes' : [ 'searches' , 'couplings' ] , 'legend' : 'HWW 2j (HCP)' } ,
   'hww2j_cut'      : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2jof_cut' , 'hww2jsf_cut' ]  ,                                    'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 2j (Cut)'      } , 
   'hww2j_shape'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2jof_shape' , 'hww2jsf_cut' ]  ,                                  'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 2j (Shape)'    } , 
@@ -427,7 +429,7 @@ combinations = {
                                          'zh3l2j_eee_cut', 'zh3l2j_eem_cut', 'zh3l2j_emm_cut', 'zh3l2j_mmm_cut' 
                                        ] ,
                           'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
-                          'legend'   : '0/1/2-jet + VH3l + VH2j (Cut)'
+                          'legend'   : '0/1/2-jet + VH3l + VH2j + ZH3l2j (Cut)'
                         } ,
 
   'hww012j_vh3l_vh2j_zh3l2j_shape' :
@@ -440,13 +442,14 @@ combinations = {
                                          'zh3l2j_eee_shape', 'zh3l2j_eem_shape', 'zh3l2j_emm_shape', 'zh3l2j_mmm_shape' 
                                        ] ,
                           'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
-                          'legend'   : '0/1/2-jet + VH3l + VH2j (Shape)'
+                          'legend'   : '0/1/2-jet + VH3l + VH2j + ZH3l2j (Shape)'
                         } ,
 
 }
 
 physmodels = {
   'NoModel'  : { 'cardtype' : 'couplings' } ,
+  '125dot7'  : { 'cardtype' : 'couplings' } ,
   'SMHiggs'  : { 'cardtype' : 'smhiggs'   } ,
   'MH125BG'  : { 'cardtype' : 'searches'  } ,
 #
@@ -455,6 +458,8 @@ physmodels = {
 #
   'SMInject' : { 'cardtype' : 'sminject' } ,
   'SMToys'   : { 'cardtype' : 'smtoys' } ,
+  'rVrFXSH'  : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs' , 'cardtype' : 'couplings' , 
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF+VH}','#mu_{ggH+ttH}'] , 'Min' : [-2.,-2.] , 'Max' : [5.,5.] } } ,
 #  'Test'     : { 'model' : '' , 'cardtype' : 'searches' } , 
 }
 
@@ -471,12 +476,24 @@ targets = {
   'SObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 'treeKeys' : ['Val'] } , 
   'SExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --minimizerAlgo=Minuit' , 'treeKeys' : ['Val'] } ,  
   'SExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --minimizerAlgo=Minuit  --toysFreq'  , 'treeKeys' : ['Val'] } ,  
-  'SObsSMToysNoSyst' : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
-                                              'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 500 } ,
-                                              'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
-  'SObsSMToysNoSyst50' : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
-                                              'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 50 } ,
-                                              'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  #
+  # significance SM Higgs Injection
+  #
+  #'SObsSMToysNoSyst'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 500 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  #'SObsSMToysNoSyst50' : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 50 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  #'SObsSMToysSyst'     : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysSyst' , 'NToysJob' : 500 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} }
+  #'SObsSMToysSyst50'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysSyst' , 'NToysJob' : 50 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} }
+  #'SObsSMToysAsimov'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysAsimov' , 'NToysJob' : -1 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} }
   #
   # Limits: Standard
   #
@@ -484,9 +501,18 @@ targets = {
   'ACLsExp'      : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run expected' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
   'ACLsInjPre'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1' },
   'ACLsInjPost'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1 --toysFreq' },
-  'ACLsSMToysNoSyst' : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 500 } ,
+  #
+  # ACLs SM Higgs Injection
+  # 
+  'ACLsSMToysNoSyst'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 500 } ,
                          'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
   'ACLsSMToysNoSyst50' : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 50 } ,
+                         'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  'ACLsSMToysSyst'     : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysSyst' , 'NToysJob' : 500 } ,
+                         'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  'ACLsSMToysSyst50'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysSyst' , 'NToysJob' : 50 } ,
+                         'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  'ACLsSMToysAsimov'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysAsimov' , 'NToysJob' : -1  } ,
                          'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
   #
   # BestFit
@@ -499,6 +525,8 @@ targets = {
   # Toys
   # 
   'ToysNoSyst'    : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 500 --toysNoSystematics --saveToys --expectSignal=1 -s -1' , 'NJobs' : 10 },
+  'ToysSyst'      : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 500 --saveToys --expectSignal=1 -s -1' , 'NJobs' : 10 },
+  'ToysAsimov'    : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t -1 --saveToys --expectSignal=1' },
   #
   # Toys Debug
   #
@@ -511,11 +539,63 @@ targets = {
   #'ACLsToys'     : { 'notblind' : True  , 'method' : 'Asymptotic'   , 'options' : '-t 200 --saveToys --expectSignal=1 --run observed'} ,
   #'MLToys'        : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --saveNormalizations --noErrors --minos none --verbose 1 -t 100 --saveToys' } ,
   #'MLToysB'       : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--saveNormalizations --noErrors --minos none --verbose 1 -t 100 --saveToys' } ,
+  #
+  # MultiDim Fit
+  #
+  # Central value (no errors)
+  'MDFObs'         : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '-v 2'},
+  'MDFExp'         : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '-v 2 -t -1 --expectSignal=1'},
+  # 1D Errors (other parameter fixed to fit value)
+  'MDFSnglObs68'   : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=singles -v 2 --minimizerAlgo=Minuit --cl=0.68 ' },
+  #'MDFSnglObs95'   : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=singles -v 2 --minimizerAlgo=Minuit --cl=0.95 ' },
+  'MDFSnglExp68'   : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=singles -v 2 --minimizerAlgo=Minuit --cl=0.68 -t -1 --expectSignal=1' },
+  #'MDFSnglExp95'   : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=singles -v 2 --minimizerAlgo=Minuit --cl=0.95 -t -1 --expectSignal=1' },
+  # MultiDim "Cross" Errors (other parameter fixed to fit value)
+  'MDFCrossObs68'  : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.68 ' },
+  #'MDFCrossObs95'  : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.95 ' },
+  'MDFCrossExp68'  : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.68 -t -1 --expectSignal=1' },
+  #'MDFCrossExp95'  : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.95 -t -1 --expectSignal=1' },
+  # Full Grid Scan
+  'MDFGridObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 200 , 'MDFGridParam' :{ 'NPOINTS' : 20000 }},
+  'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 200 , 'MDFGridParam' :{ 'NPOINTS' : 20000 }},
+  'MDFGridFastObs' : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
+  'MDFGridFastExp' : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1 -t -1 --expectSignal=1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
 }
 
 toys = {
   'SExp'        : { },
 }
 
+# Plot Axis range et al.
+plotStyle = {
+
+  'Limit' : 
+     { 
+       'Default'        : { 'linY' : [0.0 ,50.] , 'logY' : [0.01,500.] } ,
+       'hww0jet_shape'  : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
+       'hww0jet_cut'    : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
+       'hww1jet_shape'  : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
+       'hww1jet_cut'    : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
+       'hww01jet_shape' : { 'linY' : [0.0 , 5.] , 'logY' : [0.02, 50.] } ,
+       'hww01jet_cut'   : { 'linY' : [0.0 , 5.] , 'logY' : [0.02, 50.] } ,
+       'hww2j_hcp'      : { 'linY' : [0.0 ,10.] , 'logY' : [0.05,100.] } ,
+       'hww2j_cut'      : { 'linY' : [0.0 ,10.] , 'logY' : [0.05,100.] } ,
+       'hww2j_shape'    : { 'linY' : [0.0 ,10.] , 'logY' : [0.05,100.] } ,
+       'vh3l_cut'       : { 'linY' : [0.0 ,20.] , 'logY' : [0.01,500.] } ,
+       'vh3l_shape'     : { 'linY' : [0.0 ,20.] , 'logY' : [0.01,500.] } ,
+       'hwwvh2j_cut'    : { 'linY' : [0.0 ,50.] , 'logY' : [0.01,500.] } ,
+       'hwwvh2j_shape'  : { 'linY' : [0.0 ,50.] , 'logY' : [0.01,500.] } ,
+       'zh3l2j_cut'     : { 'linY' : [0.0 ,150.] , 'logY' : [0.5,700.] } ,
+       'zh3l2j_shape'   : { 'linY' : [0.0 ,150.] , 'logY' : [0.5,700.] } ,
+       'hww012j_vh3l_vh2j_shape'        : { 'linY' : [0.0 , 5.] , 'logY' : [0.02,50.] } ,
+       'hww012j_vh3l_vh2j_zh3l2j_shape' : { 'linY' : [0.0 , 5.] , 'logY' : [0.02,50.] } ,
+     },
+
+  'Sign'  :
+     { 
+       'Default'        : { 'linY' : [0.0 ,25.] , 'logY' : [0.01,200.] } ,
+     }
+
+}
 
 
