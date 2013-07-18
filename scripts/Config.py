@@ -17,6 +17,7 @@ cardtypes = {
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 500, 600] } ,
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250 , 300 ] } ,
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200 ] } ,
+  'jcp'       : { 'dir' : 'jcp'       , 'masses' : [125] } , 
 }
 
 preProc = {
@@ -38,6 +39,15 @@ channels = {
 # ============ V2: Cards for HWW Paper (datacrds from comb svn) ==========================
 
 'V3' : {
+  # ============ H --> WW 0/1-jet JCP=2+m ===================
+  'hww0jof_jcp2pm': {
+                    '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [120,130]  , 'dir' : 'summer2013' , 'subdir' : '2+m/hww2l2v' , 'card' : 'hwwof_0j_7TeV.txt' , 'files' : ['hwwof_0j.input_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [120,130]  , 'dir' : 'summer2013' , 'subdir' : '2+m/hww2l2v' , 'card' : 'hwwof_0j_8TeV.txt' , 'files' : ['hwwof_0j.input_8TeV.root'] } ,
+                    } ,
+  'hww1jof_jcp2pm': {
+                    '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [120,130]  , 'dir' : 'summer2013' , 'subdir' : '2+m/hww2l2v' , 'card' : 'hwwof_1j_7TeV.txt' , 'files' : ['hwwof_1j.input_7TeV.root'] } ,
+                    '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [120,130]  , 'dir' : 'summer2013' , 'subdir' : '2+m/hww2l2v' , 'card' : 'hwwof_1j_8TeV.txt' , 'files' : ['hwwof_1j.input_8TeV.root'] } ,
+                    } , 
   # ============ H -> WW 0/1-jet cut-based ================== 
   'hww0jof_cut' :   { 
                     '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [110,600]  , 'dir' : 'summer2013' , 'subdir' : 'hww2l2v/$MASS' , 'card' : 'hwwof_0j_cut_7TeV.txt'} ,
@@ -383,7 +393,10 @@ combinations = {
   'hwwvh2j_shape'  : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hwwvh2jsf_shape' , 'hwwvh2jof_shape' ] ,                             'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'VHWW 2-jet (Shape)'} ,
   'zh3l2j_cut'     : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'zh3l2j_eee_cut'  , 'zh3l2j_eem_cut'  , 'zh3l2j_emm_cut'  , 'zh3l2j_mmm_cut'   ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'ZHWW 3l2j (Cut)'  } ,
   'zh3l2j_shape'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'zh3l2j_eee_shape', 'zh3l2j_eem_shape', 'zh3l2j_emm_shape', 'zh3l2j_mmm_shape' ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'ZHWW 3l2j (Shape)'} ,
-
+#
+# JCP
+#
+  'hww01jet_jcp2pm': { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp2pm' , 'hww1jof_jcp2pm' ] , 'purposes' : [ 'jcp' ] , 'legend' : 'H #rightarrow WW #rightarrow 2l2#nu 0/1-jet (2d)'  } ,
 #
 # Combination of channels (old Moriond)
 #
@@ -460,6 +473,7 @@ physmodels = {
   'SMToys'   : { 'cardtype' : 'smtoys' } ,
   'rVrFXSH'  : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs' , 'cardtype' : 'couplings' , 
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF+VH}','#mu_{ggH+ttH}'] , 'Min' : [-2.,-2.] , 'Max' : [5.,5.] } } ,
+  'JCP2pm'   : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs  --PO=fqqFloating' , 'cardtype' : 'jcp' } 
 #  'Test'     : { 'model' : '' , 'cardtype' : 'searches' } , 
 }
 
@@ -517,9 +531,9 @@ targets = {
   #
   # BestFit
   #
-  #'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-2 --rMax=4 --robustFit=1 --X-rtd FITTER_DYN_STEP ' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
+  'BestFitG'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --plot --signalPdfNames=\'*ZH*,*WH*,*qqH*,*ggH*\' --backgroundPdfNames=\'*qqWW*,*ggWW*,*VV*,*Top*,*Zjets*,*Wjets*,*Wgamma*,*Wg3l*,*Ztt*\' --saveNorm --rMin=-5 --rMax=20 --robustFit=1 --X-rtd FITTER_DYN_STEP ' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   #'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-2 --rMax=4 --robustFit=1 --X-rtd FITTER_DYN_STEP -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
-  'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit --rMin=-2 --rMax=4' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
+  'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit --rMin=-5 --rMax=200' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit --rMin=-2 --rMax=4 -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   #
   # Toys
@@ -560,6 +574,13 @@ targets = {
   'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 200 , 'MDFGridParam' :{ 'NPOINTS' : 20000 }},
   'MDFGridFastObs' : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
   'MDFGridFastExp' : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1 -t -1 --expectSignal=1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
+  #
+  # JCP
+  #
+  'JCP2pm'         : {'notblind' : True  , 'method' : 'HybridNew'   , 
+                      'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000' , 'NJobs' : 5 , 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } },
+
+                                    
 }
 
 toys = {

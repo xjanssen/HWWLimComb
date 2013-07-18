@@ -64,6 +64,17 @@ for iComb in combList:
                 NJobs = targets[iTarget]['NJobs']
               else:
                 NJobs = 1
+              # Job Multiple parameter ?
+              JobParamName=[]
+              JobParamSize=[]
+              if 'JobsParam' in targets[iTarget]:
+                NParam=1
+                for iJobParam in targets[iTarget]['JobsParam']:
+                  JobParamName.append(iJobParam)
+                  JobParamSize.append(len(targets[iTarget]['JobsParam'][iJobParam])) 
+                  NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
+                NJobs=NJobs*NParam
+                print NJobs, JobParamName , JobParamSize
               # Toys ?
               ToysList = []
               if 'Toys' in targets[iTarget]: 
@@ -88,6 +99,19 @@ for iComb in combList:
                   command += ' --firstPoint '+str(FPoint)+' --lastPoint '+str(LPoint)
                   #command += ' --rMin '+str(targets[iTarget]['MDFGridParam']['RMIN'])+' --rMax '+str(targets[iTarget]['MDFGridParam']['RMAX'])
                   PF='_Points'+str(FPoint)+'-'+str(LPoint)
+                # Job Multiple parameter
+                if 'JobsParam' in targets[iTarget]:
+                  if len(JobParamSize) == 2:  
+                    iPar1=((iJob-1)/JobParamSize[0])%JobParamSize[0]
+                    iPar2=(iJob-1)/(JobParamSize[0]*targets[iTarget]['NJobs'])
+                    command=command.replace('$'+JobParamName[0],str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar1]))
+                    command=command.replace('$'+JobParamName[1],str(targets[iTarget]['JobsParam'][JobParamName[1]][iPar2]))
+                    PF=PF+'_'+JobParamName[0]+str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar1]).replace('.','d')
+                    PF=PF+'_'+JobParamName[1]+str(targets[iTarget]['JobsParam'][JobParamName[1]][iPar2]).replace('.','d')
+                  else : sys.exit() 
+                #  for iParam in range(0,len(JobsParam)):
+                    
+ 
                 # outfile
                 command +=' -n '+outname+'_'+iTarget+PF
                 # logfile 

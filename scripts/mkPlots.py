@@ -100,6 +100,20 @@ for iPlot in options.plots:
            if iPlot == 'MDF2D'     : plot.MDF2D(iComb,options.energy,iModel,[iMass],False) 
            if iPlot == 'MDF2DFast' : plot.MDF2D(iComb,options.energy,iModel,[iMass],True) 
 
+   elif iPlot in ['JCPSum','JCPFit','JCPPlot']:
+      for iModel in PhysModelList:
+       print '---------------------------> Model = '+iModel
+       for iComb in combList:
+         print '------------------------------> Comb = '+iComb
+         massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get() 
+         for iMass in massList:
+           plot=combPlots.combPlot(options.Version,options.unblind,postFix)
+           if iPlot == 'JCPSum'    : plot.JCPSum(iComb,options.energy,iModel,[iMass]) 
+           if iPlot == 'JCPFit'    : plot.JCPFit(iComb,options.energy,iModel,[iMass]) 
+           if iPlot == 'JCPPlot'   : plot.JCPPlt(iComb,options.energy,iModel,[iMass]) 
+
+
+
 
    else:
      print 'ERROR: Unknown plot !'

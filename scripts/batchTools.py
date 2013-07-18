@@ -51,6 +51,12 @@ class batchJobs :
                   NJobs = targets[iTarget]['NJobs']
                 else:
                   NJobs = 1 
+                # Job Multiple parameter ?
+                if 'JobsParam' in targets[iTarget]:
+                  NParam=1
+                  for iJobParam in targets[iTarget]['JobsParam']:
+                    NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
+                  NJobs=NJobs*NParam
                 # Toys ?
                 ToysList = []
                 if iTarget in targets:
