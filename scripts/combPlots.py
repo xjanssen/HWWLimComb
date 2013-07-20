@@ -284,13 +284,24 @@ class combPlot :
              minY=str(physmodels[iModel]['MDFTree']['Min'][1])
              maxX=str(physmodels[iModel]['MDFTree']['Max'][0])
              maxY=str(physmodels[iModel]['MDFTree']['Max'][1])
-             objName=keyX+'-'+keyX
+             print minX,maxX
+             print minY,maxY
+
+             minXP=str(physmodels[iModel]['MDFTree']['MinPlt'][0])
+             minYP=str(physmodels[iModel]['MDFTree']['MinPlt'][1])
+             maxXP=str(physmodels[iModel]['MDFTree']['MaxPlt'][0])
+             maxYP=str(physmodels[iModel]['MDFTree']['MaxPlt'][1])
+             print minXP,maxXP
+             print minYP,maxYP
+
+             objName=keyX+'-'+keyY
              gROOT.ProcessLine('gROOT->cd()')
              gROOT.ProcessLine('TH2* h2d=0')
              gROOT.ProcessLine('TGraph *gr0=0')
              gROOT.ProcessLine('TList* c68')
              gROOT.ProcessLine('TList* c95')
-             gROOT.ProcessLine('h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+minX+')')
+             print 'h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+maxY+')'
+             gROOT.ProcessLine('h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+maxY+')')
              gROOT.ProcessLine('c68 = contourFromTH2(h2d,2.30)')
              gROOT.ProcessLine('c95 = contourFromTH2(h2d,5.99)')
              gROOT.ProcessLine('gr0 = bestFit(tree,"'+keyX+'","'+keyY+'",TCut(""))')
@@ -300,15 +311,16 @@ class combPlot :
              self.Obj2Plot['c68__'+objName] = { 'Obj' : ROOT.c68.Clone('c68'+objName) , 'Type' : 'TList' , 'Legend' : ''}
              self.Obj2Plot['c95__'+objName] = { 'Obj' : ROOT.c95.Clone('c95'+objName) , 'Type' : 'TList' , 'Legend' : ''}
              self.Obj2Plot['gr0__'+objName] = { 'Obj' : ROOT.gr0.Clone('gr0'+objName) , 'Type' : 'Point' , 'Legend' : ''}
+             print self.Obj2Plot['h2d__'+objName],self.Obj2Plot['h2d__'+objName]['Obj']
              gROOT.ProcessLine('delete h2d')
              gROOT.ProcessLine('delete c68')
              gROOT.ProcessLine('delete c95')
              gROOT.ProcessLine('delete gr0')
              # Set some Default Style and Legend
              self.Obj2Plot['h2d__'+objName]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
-             self.Obj2Plot['h2d__'+objName]['Obj'].GetXaxis().SetRangeUser(0.,2.5)
+             self.Obj2Plot['h2d__'+objName]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
              self.Obj2Plot['h2d__'+objName]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
-             self.Obj2Plot['h2d__'+objName]['Obj'].GetYaxis().SetRangeUser(0.,2.5)
+             self.Obj2Plot['h2d__'+objName]['Obj'].GetYaxis().SetRangeUser(minYP,maxYP)
              self.Obj2Plot['h2d__'+objName]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
              self.Obj2Plot['h2d__'+objName]['Obj'].GetZaxis().SetRangeUser(0.00001,20.)
              #for X in TIter(self.Obj2Plot['c68__'+objName]['Obj']) : X.SetLineColor(kRed) 
@@ -582,20 +594,29 @@ class combPlot :
        elif iEnergy == 8 : return '8TeV'
        else              : return 'UndefE'
 
-   def plotLogXAxis(self,mhMin=110,mhMax=600):
+   def plotLogXAxis(self,mhMin,mhMax,PlotType,iComb):
        self.c1.cd()
-       #uxmin = self.c1.GetUxmin();
-       #uxmax = self.c1.GetUxmax();
-       #dx    = uxmax-uxmin
-       uymin = self.c1.GetUymin();
-       uymax = self.c1.GetUymax();
-       dy    = uymax-uymin
-       print dy, uymin, uymax
+
+       keyComb='UNDEFINED'
+       if PlotType in plotStyle:
+         if   iComb in plotStyle[PlotType]      : keyComb=iComb
+         elif 'Default' in plotStyle[PlotType]  : keyComb='Default' 
+       if keyComb != 'UNDEFINED':
+         if (self.logY) and 'logY' in plotStyle[PlotType][keyComb] :
+           uymin =  plotStyle[PlotType][keyComb]['logY'][0] 
+           uymax =  plotStyle[PlotType][keyComb]['logY'][1] 
+         elif 'linY' in plotStyle[PlotType][keyComb] :
+           uymin =  plotStyle[PlotType][keyComb]['linY'][0] 
+           uymax =  plotStyle[PlotType][keyComb]['linY'][1] 
+       else:
+         uymin = self.c1.GetUymin();
+         uymax = self.c1.GetUymax();
+       dy = uymax-uymin
+
        # Remove Original Axis
        for X in self.Obj2Plot:
          self.Obj2Plot[X]['Obj'].GetXaxis().SetNdivisions(0) 
          self.Obj2Plot[X]['Obj'].GetXaxis().SetRangeUser(mhMin,mhMax) 
-         self.Obj2Plot[X]['Obj'].GetYaxis().SetRangeUser(.1,10) 
          
        
        # Create New Axis Tick
@@ -606,19 +627,20 @@ class combPlot :
          if iMass >= mhMin and iMass <= mhMax:
            xx=float(iMass)
            if self.logY:
-             yMax = uymin
-             if iMass%100 == 0 : yMax+=0.04*dy  
-             else              : yMax+=0.02*dy  
-             self.AXtick.DrawLine(xx, pow(10,uymin), xx, pow(10,yMax))
+             if iMass%100 == 0 : yMax = log10(uymin) + log10(dy)*0.08
+             else              : yMax = log10(uymin) + log10(dy)*0.04
+             self.AXtick.DrawLine(xx, uymin , xx, pow(10,yMax))
            else:
              yMax = uymin
              if iMass%100 == 0 : yMax+=0.04*dy
              else              : yMax+=0.02*dy 
-             self.AXtick.DrawLine(xx, uymin, xx, uymin + yMax)
+             self.AXtick.DrawLine(xx, uymin, xx, yMax)
 
        # Create New Label
        ylatex = uymin - 0.035*dy
-       if self.logY: ylatex = pow(10,ylatex)
+       if self.logY: 
+         ylatex = log10(uymin) - log10(dy)*0.07 
+         ylatex = pow(10,ylatex)
        xbins=[100,200,300,400,500,600]
        while (mhMin > xbins[0]) : xbins[0] += 10
        self.AXLabel = [] 
@@ -694,7 +716,7 @@ class combPlot :
        self.SetRange('Limit',iComb)
        self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Inj68D','Inj95D','Inj68U','Inj95U','Obs','Line'])
        self.plotObjLeg(['Obs','Exp','68CL','95CL','Inj'],combinations[iComb]['legend'])
-       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1])
+       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Limit',iComb)
        self.addTitle() 
        #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
        #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.1,500.)
@@ -716,6 +738,11 @@ class combPlot :
        self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
        self.yAxisTitle = "best fit for #mu"
 
+       if (self.logX) : gPad.SetLogx()
+       if (self.logY) : gPad.SetLogy()
+       if (self.logX) : self.postFix += '_logX'
+       if (self.logY) : self.postFix += '_logY'
+
        aMass    = self.Results[iComb][iEnergy][iModel]['BestFit']['mass']
        muVal    = self.Results[iComb][iEnergy][iModel]['BestFit']['Val']
        mu68U    = self.Results[iComb][iEnergy][iModel]['BestFit']['68U']
@@ -731,8 +758,10 @@ class combPlot :
        lMass.append(aMass[-1]+1)  
        self.plotHorizLine('Line', lMass , 1. , kBlack , 1    , '#mu=1')
        
+       self.SetRange('BestFit',iComb)
        self.plotAllObj(['68CL','Obs','Line'])
        self.plotObjLeg(['Obs'],combinations[iComb]['legend']) 
+       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'BestFit',iComb)
 
        self.addTitle() 
        self.c1.Update() 
@@ -750,17 +779,26 @@ class combPlot :
        self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
        self.yAxisTitle = "significance"
 
+       if (self.logX) : gPad.SetLogx()
+       if (self.logY) : gPad.SetLogy()
+       if (self.logX) : self.postFix += '_logX'
+       if (self.logY) : self.postFix += '_logY'
+
        aMass    = self.Results[iComb][iEnergy][iModel]['SExp'+fitType]['mass']
        SExp     = self.Results[iComb][iEnergy][iModel]['SExp'+fitType]['Val']
        if (not self.blind) : SObs     = self.Results[iComb][iEnergy][iModel]['SObs']['Val']
        #self.plotHorizLine('3Sig', aMass , 3. , kBlack , 3    , 'S=3')
        #self.plotHorizLine('5Sig', aMass , 5. , kRed   , 3    , 'S=5')
 
+ 
        self.plotHorizCurve('Exp', aMass , SExp , kBlack ,2    , 2    , 'Expected' ) 
        if (not self.blind) :  self.plotHorizCurve('Obs', aMass , SObs , kBlack ,1   , 3     , 'Observed' ) 
 
+       self.SetRange('Sign',iComb)
        self.plotAllObj(['Exp','Obs'])
        self.plotObjLeg(['Exp','Obs'],combinations[iComb]['legend']) 
+       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Sign',iComb)
+
 
        self.addTitle() 
        self.c1.Update() 
@@ -773,6 +811,11 @@ class combPlot :
 
        self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
        self.yAxisTitle = "95% CL expected limit on #sigma/#sigma_{SM}"
+
+       if (self.logX) : gPad.SetLogx()
+       if (self.logY) : gPad.SetLogy()
+       if (self.logX) : self.postFix += '_logX'
+       if (self.logY) : self.postFix += '_logY'
 
        LCol = [ kBlack , kBlack , kBlack , kBlue , kBlue , kBlue , kRed , kRed ]
        LTyp = [    1   ,    2   ,   3    ,   1   ,   2   ,   3   ,   2  ,   3  ]      
@@ -788,14 +831,16 @@ class combPlot :
        aMass = [110,600] 
        self.plotHorizLine('Line', aMass , 1. , kRed , 1    , 'CL=1')
   
-       self.c1.SetLogy()
-       self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.05,200.)
+       #self.c1.SetLogy()
+       #self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.05,200.)
 
-
+       self.SetRange('LimitExp',CombList[0])
        toPlot = dc(CombList)
        toPlot.append('Line')
        self.plotAllObj(toPlot)
        self.plotObjLeg(CombList)
+       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'LimitExp',CombList[0])
+
 
        self.addTitle() 
        self.c1.Update() 
@@ -810,6 +855,11 @@ class combPlot :
        self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
        self.yAxisTitle = "Expected significance"
 
+       if (self.logX) : gPad.SetLogx()
+       if (self.logY) : gPad.SetLogy()
+       if (self.logX) : self.postFix += '_logX'
+       if (self.logY) : self.postFix += '_logY'
+
        LCol = [ kBlack , kBlack , kBlack , kBlue , kBlue , kBlue , kRed , kRed ]
        LTyp = [    1   ,    2   ,   3    ,   1   ,   2   ,   3   ,   2  ,   3  ]      
 
@@ -821,17 +871,19 @@ class combPlot :
           self.plotHorizCurve(iComb, aMass , aMedExpLimit , LCol[iLC] , LTyp[iLC] , 2 , combinations[iComb]['legend'] )
           iLC+=1
       
-       #aMass = [110,600] 
+       aMass = [110,600] 
        #self.plotHorizLine('Line', aMass , 1. , kRed , 1    , 'CL=1')
   
        #self.c1.SetLogy()
-       self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.0,25.)
+       #self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.0,25.)
 
-
+       self.SetRange('Sign',CombList[0])
        toPlot = dc(CombList)
        #toPlot.append('Line')
        self.plotAllObj(toPlot)
        self.plotObjLeg(CombList)
+       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Sign',CombList[0])
+
 
        self.addTitle() 
        self.c1.Update() 
@@ -957,20 +1009,31 @@ class combPlot :
        
        self.xAxisTitle = physmodels[iModel]['MDFTree']['AxisTitle'][0]
        self.yAxisTitle = physmodels[iModel]['MDFTree']['AxisTitle'][1]
+
+       minXP=physmodels[iModel]['MDFTree']['MinPlt'][0]
+       minYP=physmodels[iModel]['MDFTree']['MinPlt'][1]
+       maxXP=physmodels[iModel]['MDFTree']['MaxPlt'][0]
+       maxYP=physmodels[iModel]['MDFTree']['MaxPlt'][1]
             
        # Expected
        self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglExp68',algo='Single')
        self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossExp68',algo='Cross')
        self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Exp')
        objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Exp'
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetYaxis().SetRangeUser(minYP,maxYP)
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetZaxis().SetRangeUser(0.00001,10.)
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].Draw("colz")  
        self.Obj2Plot['c68__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['c95__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].Draw("samep")  
        objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglExp68_Single'
        self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
-       objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossExp68_Cross'
-       self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
+       #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossExp68_Cross'
+       #self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
        self.addTitle() 
        self.c1.Update() 
        self.Save(objNameExp)
@@ -982,14 +1045,20 @@ class combPlot :
          self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossObs68',algo='Cross')
          self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Obs') 
          objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Obs'
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetYaxis().SetRangeUser(minYP,maxYP)
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetZaxis().SetRangeUser(0.00001,10.)
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].Draw("colz")  
          self.Obj2Plot['c68__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['c95__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")  
          objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglObs68_Single'
          self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
-         objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossObs68_Cross'
-         self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
+         #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossObs68_Cross'
+         #self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
          self.addTitle() 
          self.c1.Update() 
          self.Save(objNameObs)
@@ -998,16 +1067,22 @@ class combPlot :
        
        self.c1.SetRightMargin(0.05)
        self.c1.SetLogz(False)
-       frame = TH1F("Frame","Frame",5,0.,2.5)
+       minXP=physmodels[iModel]['MDFTree']['MinPlt'][0]
+       minYP=physmodels[iModel]['MDFTree']['MinPlt'][1]
+       maxXP=physmodels[iModel]['MDFTree']['MaxPlt'][0]
+       maxYP=physmodels[iModel]['MDFTree']['MaxPlt'][1]
+
+       frame = TH1F("Frame","Frame",5,float(minXP),float(maxXP))
        frame.GetXaxis().SetTitle(self.xAxisTitle) 
        frame.GetYaxis().SetTitle(self.yAxisTitle) 
-       frame.GetYaxis().SetRangeUser(0.,2.5)
+       frame.GetYaxis().SetRangeUser(float(minYP),float(maxYP))
        frame.GetXaxis().SetNdivisions(505)
        frame.GetYaxis().SetNdivisions(505)
        frame.Draw()
        self.Obj2Plot['c68__'+objNameExp]['Legend'] = '68% CL Expected'
        self.Obj2Plot['c95__'+objNameExp]['Legend'] = '95% CL Expected'
        self.Obj2Plot['c68__'+objNameExp]['Obj'].Draw("same")  
+       for X in TIter(self.Obj2Plot['c95__'+objNameExp]['Obj']) : X.SetLineStyle(2) 
        self.Obj2Plot['c95__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].Draw("samep")  
        LegList = ['c68__'+objNameExp]
@@ -1017,6 +1092,7 @@ class combPlot :
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].SetMarkerColor(kRed)  
          for X in TIter(self.Obj2Plot['c68__'+objNameObs]['Obj']) : X.SetLineColor(kRed) 
          for X in TIter(self.Obj2Plot['c95__'+objNameObs]['Obj']) : X.SetLineColor(kRed) 
+         for X in TIter(self.Obj2Plot['c95__'+objNameObs]['Obj']) : X.SetLineStyle(2) 
          self.Obj2Plot['c68__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['c95__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")  

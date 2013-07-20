@@ -394,6 +394,33 @@ combinations = {
   'zh3l2j_cut'     : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'zh3l2j_eee_cut'  , 'zh3l2j_eem_cut'  , 'zh3l2j_emm_cut'  , 'zh3l2j_mmm_cut'   ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'ZHWW 3l2j (Cut)'  } ,
   'zh3l2j_shape'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'zh3l2j_eee_shape', 'zh3l2j_eem_shape', 'zh3l2j_emm_shape', 'zh3l2j_mmm_shape' ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'ZHWW 3l2j (Shape)'} ,
 #
+# All VH
+#
+
+  'hww_vh3l_vh2j_zh3l2j_cut' :
+                        {
+                          'energies' : [ '7TeV' , '8TeV' ] , 
+                          'channels' : [ 'vh3l_sssf_cut'  , 'vh3l_ossf_cut' , 
+                                         'hwwvh2jsf_cut' , 'hwwvh2jof_cut' ,
+                                         'zh3l2j_eee_cut', 'zh3l2j_eem_cut', 'zh3l2j_emm_cut', 'zh3l2j_mmm_cut' 
+                                       ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : '0/1/2-jet + VH3l + VH2j + ZH3l2j (Cut)'
+                        } ,
+
+
+  'hww_vh3l_vh2j_zh3l2j_shape' :
+                        {
+                          'energies' : [ '7TeV' , '8TeV' ] , 
+                          'channels' : [ 'vh3l_sssf_shape'  , 'vh3l_ossf_shape' , 
+                                         'hwwvh2jsf_cut' , 'hwwvh2jof_cut' ,
+                                         'zh3l2j_eee_shape', 'zh3l2j_eem_shape', 'zh3l2j_emm_shape', 'zh3l2j_mmm_shape' 
+                                       ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : '0/1/2-jet + VH3l + VH2j + ZH3l2j (Shape)'
+                        } ,
+
+#
 # JCP
 #
   'hww01jet_jcp2pm': { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp2pm' , 'hww1jof_jcp2pm' ] , 'purposes' : [ 'jcp' ] , 'legend' : 'H #rightarrow WW #rightarrow 2l2#nu 0/1-jet (2d)'  } ,
@@ -458,6 +485,8 @@ combinations = {
                           'legend'   : '0/1/2-jet + VH3l + VH2j + ZH3l2j (Shape)'
                         } ,
 
+
+
 }
 
 physmodels = {
@@ -471,8 +500,17 @@ physmodels = {
 #
   'SMInject' : { 'cardtype' : 'sminject' } ,
   'SMToys'   : { 'cardtype' : 'smtoys' } ,
+#
+# Couplings
+#
   'rVrFXSH'  : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs' , 'cardtype' : 'couplings' , 
-                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF+VH}','#mu_{ggH+ttH}'] , 'Min' : [-2.,-2.] , 'Max' : [5.,5.] } } ,
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF+VH}','#mu_{ggH+ttH}'] , 'Min' : [-2.,-2.] , 'Max' : [4.,4.] ,  'MinPlt' : [0.,0.] , 'MaxPlt' : [2.5,2.5]  } } ,
+  'cVcF'     : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF'      , 'cardtype' : 'couplings' , 
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{F}'] , 'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,2.]  }  } ,
+
+#
+# Spin
+#
   'JCP2pm'   : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs  --PO=fqqFloating' , 'cardtype' : 'jcp' } 
 #  'Test'     : { 'model' : '' , 'cardtype' : 'searches' } , 
 }
@@ -570,8 +608,8 @@ targets = {
   'MDFCrossExp68'  : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.68 -t -1 --expectSignal=1' },
   #'MDFCrossExp95'  : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.95 -t -1 --expectSignal=1' },
   # Full Grid Scan
-  'MDFGridObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 200 , 'MDFGridParam' :{ 'NPOINTS' : 20000 }},
-  'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 200 , 'MDFGridParam' :{ 'NPOINTS' : 20000 }},
+  'MDFGridObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 50 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
+  'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 50 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
   'MDFGridFastObs' : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
   'MDFGridFastExp' : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1 -t -1 --expectSignal=1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
   #
@@ -612,9 +650,14 @@ plotStyle = {
        'hww012j_vh3l_vh2j_zh3l2j_shape' : { 'linY' : [0.0 , 5.] , 'logY' : [0.02,50.] } ,
      },
 
+  'LimitExp' : 
+     { 
+       'Default'        : { 'linY' : [0.0 ,70.] , 'logY' : [0.05,200.] } ,
+     },
+
   'Sign'  :
      { 
-       'Default'        : { 'linY' : [0.0 ,25.] , 'logY' : [0.01,200.] } ,
+       'Default'        : { 'linY' : [0.0 ,25.] , 'logY' : [0.1,200.] } ,
      }
 
 }
