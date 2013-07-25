@@ -22,7 +22,7 @@ gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 
 CMSText=["CMS Preliminary","CMS"] 
-LumText=["#sqrt{s} = 7 TeV, L #leq 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L #leq 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L #leq 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L #leq 19.5 fb^{-1}"]
+LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 
 class combPlot :
    def __init__(self,Version,blind=True,postFix='',logX=False,logY=False):
@@ -59,6 +59,7 @@ class combPlot :
        self.c1 = TCanvas("c1","c1",700,700);
        self.c1.cd()
        self.c1.SetRightMargin(0.05)
+       self.c1.SetTopMargin(0.07)
        self.c1.SetGridy(gridy)
        self.c1.SetGridx(gridx)
        self.isSquareCanvas = True;
@@ -79,15 +80,19 @@ class combPlot :
        self.h.Draw()
 
    
-   def addTitle(self,iCMS=1,iLumi=0):
+   def addTitle(self,iCMS=0,iLumi=0):
        self.c1.cd()
    
-       x1=0.13
-       y1=0.93
+       x1=0.10
+       y1=0.92
        x2=0.99
        y2=0.98
-       fontSize = 0.04 
-       if self.isSquareCanvas : fontSize = 0.025
+       if iCMS == 0 :
+         fontSize = 0.04 
+         if self.isSquareCanvas : fontSize = 0.027 
+       else:
+         fontSize = 0.04 
+         if self.isSquareCanvas : fontSize = 0.035
    
        self.cmsprel = TPaveText(x1,y1,x2,y2,"brtlNDC");  
        self.cmsprel.SetTextSize(fontSize);
@@ -96,7 +101,7 @@ class combPlot :
        self.cmsprel.SetLineStyle(0)
        self.cmsprel.SetLineWidth(0)
        self.cmsprel.SetTextAlign(11)
-       self.cmsprel.SetTextFont(42);
+       #self.cmsprel.SetTextFont(42);
        self.cmsprel.AddText(CMSText[iCMS]);
        self.cmsprel.SetBorderSize(0);
        self.cmsprel.Draw("same");
@@ -108,7 +113,7 @@ class combPlot :
        self.lumi.SetLineStyle(0)
        self.lumi.SetLineWidth(0)
        self.lumi.SetTextAlign(31)
-       self.lumi.SetTextFont(42);
+       #self.lumi.SetTextFont(42);
        self.lumi.AddText(LumText[iLumi]);
        self.lumi.SetBorderSize(0);
        self.lumi.Draw("same");
@@ -544,12 +549,25 @@ class combPlot :
                self.Obj2Plot[X]['Obj'].Draw("L") 
        self.c1.Update() 
 
-   def plotObjLeg(self,Order=[],Title=''):
+   def plotObjLeg(self,Order=[],Title='',Position='TopRight'):
        if len( self.Obj2Plot ) == 0 : return
        self.c1.cd()
        iFirst=True
        if len( Order ) == 0 : Order = [X for X in self.Obj2Plot] 
-       self.Legend = TLegend(0.50,0.65,0.85,0.85)   
+       if   'Right' in Position :
+         x1 = 0.47
+         x2 = 0.8  
+       elif 'Left'  in Position :
+         x1 = 0.17
+         x2 = 0.47  
+       if   'Top'   in Position :
+         y1 = 0.87-(len(Order)+1)*.040
+         y2 = 0.87 
+       elif 'Bottom' in Position : 
+         y1 = 0.50-(len(Order)+1)*.040
+         y2 = 0.50 
+       #self.Legend = TLegend(0.50,0.65,0.85,0.85)   
+       self.Legend = TLegend(x1,y1,x2,y2)
        self.Legend.SetTextSize(0.035)
        self.Legend.SetFillColor(0)
        self.Legend.SetFillStyle(0)
@@ -670,7 +688,7 @@ class combPlot :
        if (self.logX) : self.postFix += '_logX'
        if (self.logY) : self.postFix += '_logY'
  
-       self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
+       self.xAxisTitle = "Higgs mass [GeV]"
        self.yAxisTitle = "95% CL limit on #sigma/#sigma_{SM}"
 
  
@@ -691,16 +709,16 @@ class combPlot :
 
        if (not self.blind ) :  aObsLimit = self.Results[iComb][iEnergy][iModel]['ACLsObs']['Val']
 
-       self.plotHorizBand('95CL', aMass , aMedExpLimit , aExpLimit95U , aExpLimit95D ,  90 , 1001 , 'CL_{S} Expected #pm 2#sigma')
-       self.plotHorizBand('68CL', aMass , aMedExpLimit , aExpLimit68U , aExpLimit68D , 211 , 1001 , 'CL_{S} Expected #pm 1#sigma')
-       self.plotHorizCurve('Exp', aMass , aMedExpLimit , kBlack , 2          ,  2          ,     'CL_{S} Expected')
+       self.plotHorizBand('95CL', aMass , aMedExpLimit , aExpLimit95U , aExpLimit95D ,  90 , 1001 , 'Expected #pm 2#sigma')
+       self.plotHorizBand('68CL', aMass , aMedExpLimit , aExpLimit68U , aExpLimit68D , 211 , 1001 , 'Expected #pm 1#sigma')
+       self.plotHorizCurve('Exp', aMass , aMedExpLimit , kBlack , 2          ,  2          ,     'Median Expected')
 
-       if (not self.blind ) : self.plotHorizCurve('Obs', aMass , aObsLimit , kBlack , 1  , 3 , 'CL_{S} Observed')
+       if (not self.blind ) : self.plotHorizCurve('Obs', aMass , aObsLimit , kBlack , 1  , 3 , 'Observed')
 
        if  bInject :  
-         self.plotHorizBand('95CLInj', aMass , aMedInjLimit , aInjLimit95U , aInjLimit95D , kBlue , 3356 , 'CL_{S} Injected #pm 2#sigma')
-         self.plotHorizBand('68CLInj', aMass , aMedInjLimit , aInjLimit68U , aInjLimit68D , kRed  , 3356 , 'CL_{S} Injected #pm 1#sigma')
-         self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H}=125 GeV #pm 1(2)#sigma_{stat}')
+         self.plotHorizBand('95CLInj', aMass , aMedInjLimit , aInjLimit95U , aInjLimit95D , kBlue , 3356 , 'Injected #pm 2#sigma_{stat}')
+         self.plotHorizBand('68CLInj', aMass , aMedInjLimit , aInjLimit68U , aInjLimit68D , kRed  , 3356 , 'Injected #pm 1#sigma_{stat}')
+         self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H}=125 GeV Injected')
          #self.plotHorizCurve('InjFast', aMass , aMedInjLimit , kRed , 1                        , 'CL_{S} Injected')
          #self.plotHorizCurve('Inj68D'   , aMass , aInjLimit68D , kBlue , 2                        , 'CL_{S} Injected')
          #self.plotHorizCurve('Inj95D'   , aMass , aInjLimit95D , kBlue , 3                        , 'CL_{S} Injected')
@@ -714,8 +732,9 @@ class combPlot :
 
 
        self.SetRange('Limit',iComb)
-       self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Inj68D','Inj95D','Inj68U','Inj95U','Obs','Line'])
-       self.plotObjLeg(['Obs','Exp','68CL','95CL','Inj'],combinations[iComb]['legend'])
+       self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(aMass[0],aMass[-1])
+       self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Obs','Line'])
+       self.plotObjLeg(['Obs','Exp','68CL','95CL','Inj','68CLInj','95CLInj'],combinations[iComb]['legend'])
        if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Limit',iComb)
        self.addTitle() 
        #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
@@ -735,7 +754,7 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
+       self.xAxisTitle = "Higgs mass [GeV]"
        self.yAxisTitle = "best fit for #mu"
 
        if (self.logX) : gPad.SetLogx()
@@ -776,7 +795,7 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
+       self.xAxisTitle = "Higgs mass [GeV]"
        self.yAxisTitle = "significance"
 
        if (self.logX) : gPad.SetLogx()
@@ -809,7 +828,7 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
+       self.xAxisTitle = "Higgs mass [GeV]"
        self.yAxisTitle = "95% CL expected limit on #sigma/#sigma_{SM}"
 
        if (self.logX) : gPad.SetLogx()
@@ -852,7 +871,9 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV/c^{2}]"
+       if CombList[0] == 'HWW' : CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
+
+       self.xAxisTitle = "Higgs mass [GeV]"
        self.yAxisTitle = "Expected significance"
 
        if (self.logX) : gPad.SetLogx()
@@ -910,6 +931,8 @@ class combPlot :
        #frame.GetXaxis().SetNdivisions(505)
        frame.Draw()
 
+       print self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0]
+       print self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0]
        globalFitBand = TBox(self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0], 0, self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0] , nChann);
        globalFitBand.SetFillStyle(3013);
        globalFitBand.SetFillColor(65);
@@ -926,6 +949,8 @@ class combPlot :
        TlMu=TLatex()
        TlMu.SetTextAlign(23);
        TlMu.SetTextSize(0.03);
+
+       asymTolerance = 0.15
        for iChann in xrange(1,nChann+1):
          Val = self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['Val'][0]
          eDo = self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['Val'][0] - self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['68D'][0]
@@ -934,14 +959,17 @@ class combPlot :
          print Val, eDo, eUp
          points.SetPoint(iChann-1,      Val , iChann-0.5);
          points.SetPointError(iChann-1, eDo, eUp , 0, 0);
-         frame.GetYaxis().SetBinLabel(iChann,  combinations[CombList[iChann]]['legend'] );
+         muTxt = '#mu = '+str(round(Val,2))+'^{+'+str(round(eUp,2))+'}_{-'+str(round(eDo,2))+'}'
+         label = '#splitline{'+combinations[CombList[iChann]]['legend']+'}{#scale[0.8]{'+muTxt+'}}'
+         frame.GetYaxis().SetBinLabel(iChann, label  );
+         #frame.GetYaxis().SetBinLabel(iChann,  combinations[CombList[iChann]]['legend'] );
          #frame.GetYaxis().SetBinLabel(iChann-.5,'#mu = 0.76^{+0.19}_{-0.19}')
          #TlMu.DrawLatex(0.2,0.95,'#mu = 0.76^{+0.19}_{-0.19}')
 
        TlMH=TLatex()
        TlMH.SetTextSize(0.03);
        TlMH.SetNDC()
-       TlMH.DrawLatex(0.72,0.91,'m_{H} = '+str(massFilter[0])+' GeV')
+       TlMH.DrawLatex(0.72,0.89,'m_{H} = '+str(massFilter[0])+' GeV')
 
        points.SetLineColor(kRed);
        points.SetLineWidth(3);
@@ -964,8 +992,8 @@ class combPlot :
 
        Fast=''
        if bFast  : Fast='Fast'
-       TargetList= ['MDFGrid'+Fast+'Exp']
-       if (not self.blind ) : TargetList.append('MDFGrid'+Fast+'Obs')     
+       TargetList= ['MDFGrid'+Fast+'Exp'+self.postFix]
+       if (not self.blind ) : TargetList.append('MDFGrid'+Fast+'Obs'+self.postFix)     
 
        for iTarget in TargetList:
          for iMass in massList:
@@ -1016,10 +1044,10 @@ class combPlot :
        maxYP=physmodels[iModel]['MDFTree']['MaxPlt'][1]
             
        # Expected
-       self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglExp68',algo='Single')
-       self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossExp68',algo='Cross')
-       self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Exp')
-       objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Exp'
+       #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglExp68',algo='Single')
+       #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossExp68',algo='Cross')
+       self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Exp'+self.postFix)
+       objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Exp'+self.postFix
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
@@ -1030,8 +1058,8 @@ class combPlot :
        self.Obj2Plot['c68__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['c95__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].Draw("samep")  
-       objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglExp68_Single'
-       self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
+       #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglExp68_Single'
+       #self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
        #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossExp68_Cross'
        #self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
        self.addTitle() 
@@ -1041,10 +1069,10 @@ class combPlot :
 
        # Observed 
        if (not self.blind ) : 
-         self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglObs68',algo='Single')
-         self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossObs68',algo='Cross')
-         self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Obs') 
-         objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Obs'
+         #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglObs68',algo='Single')
+         #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossObs68',algo='Cross')
+         self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Obs'+self.postFix) 
+         objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Obs'+self.postFix
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
@@ -1055,8 +1083,8 @@ class combPlot :
          self.Obj2Plot['c68__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['c95__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")  
-         objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglObs68_Single'
-         self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
+         #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglObs68_Single'
+         #self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
          #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossObs68_Cross'
          #self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
          self.addTitle() 

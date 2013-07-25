@@ -37,7 +37,7 @@ parser.add_option("-P", "--printList",  dest="printList",   help="What to print 
 (options, args) = parser.parse_args()
 
 print '==== Data Cards Version : ',options.Version
-
+if options.combs[0] == 'HWW2l3l' : options.combs=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
 combList      = combTools.CombList_Filter(combinations,options.combs).get()
 energyList    = combTools.EnergyList_Filter(options.energy).get()
 PhysModelList = combTools.PhysModelList_Filter(physmodels,options.models).get()
@@ -57,7 +57,7 @@ for iPlot in options.plots:
           massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],[],iComb,energyList).get()
           if (len(options.mrange) >= 2 ) : 
             mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
-            postFix += '_mH'+str(options.mrange[0])+'-'+str(options.mrange[1])
+            postFix += '_mH'+str(options.mrange[0]).replace('.','d')+'-'+str(options.mrange[1]).replace('.','d')
           else                           : mLF = massList
           plot=combPlots.combPlot(options.Version,options.unblind,postFix,options.logx,options.logy)
           if iPlot == 'Limit'   : plot.plotOneLimit(iComb,options.energy,iModel,mLF,options.inject)
