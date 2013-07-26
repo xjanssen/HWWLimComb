@@ -7,17 +7,62 @@ cardbase    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/
 combscripts = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/'
 
 cardtypes = {
-  'couplings' : { 'dir' : 'couplings' , 'masses' : [125.7] } ,
-  'smhiggs'   : { 'dir' : 'couplings' , 'targetdir' : 'smhiggs' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
-  'searches'  : { 'dir' : 'searches'  ,                           'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] } ,
-  'wjetfix'   : { 'dir' : 'searches'  , 'targetdir' : 'wjetfix' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['WJetFix'] } , 
-  'sminject'  : { 'dir' : 'searches'  , 'targetdir' : 'sminject', 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['SMInject'] } ,
-  'smtoys'    : { 'dir' : 'searches'  , 'targetdir' : 'smtoys'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['SMToys'] } ,
+  #
+  # SM Higgs: Coupling/Limit/Toys
+  #
+  'couplings' : { 'dir' : 'couplings' , 'masses' : [125.7] 
+                } ,
+  'smhiggs'   : { 'dir' : 'couplings' , 'targetdir' : 'smhiggs' ,
+                  'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] 
+                } ,
+  'sminject'  : { 'dir' : 'searches'  , 'targetdir' : 'sminject', 
+                  'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] ,
+                  'preProc' : ['SMInject'] 
+                } ,
+  'smtoys'    : { 'dir' : 'searches'  , 'targetdir' : 'smtoys'  , 
+                  'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] ,
+                  'preProc' : ['SMToys'] 
+                } ,
+  #
+  # Second Higgs
+  #
+  'searches'  : { 'dir' : 'searches'  ,                           
+                  'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] 
+                } ,
+  # 
+  # Mass Scan
+  #
+  'mass'      : { 'dir' : 'couplings' , 'targetdir' : 'mass'    , 
+                  'masses' : [110, 110.5, 111, 111.5, 112, 112.5, 113, 113.5, 114, 114.5, 115, 115.5, 116, 116.5, 117, 117.5, 118, 118.5, 119, 119.5,
+                              120, 120.5, 121, 121.5, 122, 122.5, 123, 123.5, 124, 124.5, 125, 125.5, 126, 126.5, 127, 127.5, 128, 128.5, 129, 129.5,
+                              130, 130.5, 131, 131.5, 132, 132.5, 133, 133.5, 134, 134.5, 135, 135.5, 136, 136.5, 137, 137.5, 138, 138.5, 139, 139.5,
+                              140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                              150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
+                              160 ] 
+                }, 
+  'masssminj' : { 'dir' : 'couplings' , 'targetdir' : 'masssminj'    , 
+                  'masses' : [110, 110.5, 111, 111.5, 112, 112.5, 113, 113.5, 114, 114.5, 115, 115.5, 116, 116.5, 117, 117.5, 118, 118.5, 119, 119.5,
+                              120, 120.5, 121, 121.5, 122, 122.5, 123, 123.5, 124, 124.5, 125, 125.5, 126, 126.5, 127, 127.5, 128, 128.5, 129, 129.5,
+                              130, 130.5, 131, 131.5, 132, 132.5, 133, 133.5, 134, 134.5, 135, 135.5, 136, 136.5, 137, 137.5, 138, 138.5, 139, 139.5,
+                              140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                              150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
+                              160 ] ,
+                  'preProc' : ['SMInject'] 
+                } , 
+
+  #
+  # Spin/Parity
+  #  
+  'jcp'       : { 'dir' : 'jcp'       , 'masses' : [125] 
+                } , 
+  #  
+  # Old stuff
+  #
 # 'custom'    : { 'dir' : 'couplings' , 'masses' : [125] } , 
+#  'wjetfix'   : { 'dir' : 'searches'  , 'targetdir' : 'wjetfix' , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] , 'preProc' : ['WJetFix'] } , 
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 500, 600] } ,
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250 , 300 ] } ,
 # 'searches'  : { 'dir' : 'searches'  , 'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200 ] } ,
-  'jcp'       : { 'dir' : 'jcp'       , 'masses' : [125] } , 
 }
 
 preProc = {
@@ -373,8 +418,15 @@ combinations = {
 # 0/1 jet separated
 #
 # 'hww0jsf'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut'                   ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'HWW 0-jet (SF)'} ,
- 'hww0jof'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [                 'hww0jof_shape' ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys'  , 'smhiggs'] , 'legend' : 'HWW 0-jet (DF)'} ,
-
+# 'hww0jof'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [                 'hww0jof_shape' ] , 'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys'  , 'smhiggs' , 'mass' , 'masssminj' ] , 'legend' : 'HWW 0-jet (DF)'} ,
+#
+# 0+1 jet: SF and DF separated
+#
+  'hww01jof_shape' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [                                 'hww0jof_shape' , 'hww1jof_shape' ] , 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' , 'mass' , 'masssminj' ] , 'legend' : 'H #rightarrow WW #rightarrow 2l2#nu 0/1-jet (DF)'  } ,
+  'hww01jsf_shape' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jsf_cut' , 'hww1jsf_cut'                                     ] , 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'H #rightarrow WW #rightarrow 2l2#nu 0/1-jet (SF)'  } ,
+#
 #
 # Single channel (as in PASes/ paper section)
 #
@@ -537,7 +589,11 @@ physmodels = {
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF+VH}','#mu_{ggH+ttH}'] , 'Min' : [-2.,-2.] , 'Max' : [4.,4.] ,  'MinPlt' : [0.,0.] , 'MaxPlt' : [2.5,2.5]  } } ,
   'cVcF'     : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF'      , 'cardtype' : 'couplings' , 
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{F}'] , 'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,2.]  }  } ,
-
+#
+# Mass/mu scan from Histo cards
+#
+  'mHmuHist' : { 'cardtype' : 'mass' , }
+#                 'MDFTree' : { 'NDim' : 1 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{F}'] , 'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,2.]  }  } ,
 #
 # Spin
 #
@@ -621,6 +677,11 @@ targets = {
   #'ACLsToys'     : { 'notblind' : True  , 'method' : 'Asymptotic'   , 'options' : '-t 200 --saveToys --expectSignal=1 --run observed'} ,
   #'MLToys'        : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --saveNormalizations --noErrors --minos none --verbose 1 -t 100 --saveToys' } ,
   #'MLToysB'       : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--saveNormalizations --noErrors --minos none --verbose 1 -t 100 --saveToys' } ,
+  #
+  # MultiDim Fit
+  #
+  'MDF1DObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100 }},
+  'MDF1DExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100 }}, 
   #
   # MultiDim Fit
   #
