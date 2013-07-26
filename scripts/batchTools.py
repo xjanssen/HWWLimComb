@@ -52,7 +52,7 @@ class batchJobs :
                 else:
                   NJobs = 1 
                 # Job Multiple parameter ?
-                if 'JobsParam' in targets[iTarget]:
+                if iTarget in targets and 'JobsParam' in targets[iTarget]:
                   NParam=1
                   for iJobParam in targets[iTarget]['JobsParam']:
                     NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
