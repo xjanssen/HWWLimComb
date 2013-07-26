@@ -680,7 +680,7 @@ targets = {
   #
   # MultiDim Fit
   #
-  'MDF1DObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100 }},
+  'MDF1DObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 10 }},
   'MDF1DExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100 }}, 
   #
   # MultiDim Fit
