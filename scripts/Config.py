@@ -592,7 +592,7 @@ physmodels = {
 #
 # Mass/mu scan from Histo cards
 #
-  'mHmuHist' : { 'cardtype' : 'mass' , }
+  'mHmuHist' : { 'cardtype' : 'mass' , } ,
 #                 'MDFTree' : { 'NDim' : 1 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{F}'] , 'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,2.]  }  } ,
 #
 # Spin
