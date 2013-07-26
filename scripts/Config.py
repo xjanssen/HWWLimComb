@@ -594,6 +594,8 @@ physmodels = {
 #
   'mHmuHist' : { 'cardtype' : 'mass' , 
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgd Mass','#mu'] , 'Min' : [110.,0.] , 'Max' : [140,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
+  'mHmuHistSMInj' : { 'cardtype' : 'masssminj' , 
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgd Mass','#mu'] , 'Min' : [110.,0.] , 'Max' : [140,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
 #
 # Spin
 #
