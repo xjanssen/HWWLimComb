@@ -15,7 +15,7 @@ import rootlogonTDR
 from Config import *
 import combTools
 
-gROOT.SetBatch()
+#gROOT.SetBatch()
 #gROOT.ProcessLine(".x tdrstyle.cc")
 gROOT.ProcessLine('.L '+combscripts+'contours.cxx')
 gStyle.SetOptTitle(0)
@@ -80,7 +80,7 @@ class combPlot :
        self.h.Draw()
 
    
-   def addTitle(self,iCMS=0,iLumi=0):
+   def addTitle(self,iCMS=1,iLumi=0):
        self.c1.cd()
    
        x1=0.10
@@ -524,10 +524,11 @@ class combPlot :
        self.Obj2Plot[Name] = { 'Obj' : obj , 'Type' : 'Point' , 'Legend' : Legend }
 
  
-   def plotAllObj(self,Order=[]):
+   def plotAllObj(self,Order=[],onTop=False):
        if len( self.Obj2Plot ) == 0 : return
        self.c1.cd()
        iFirst=True
+       if onTop:iFirst=False
        if len( Order ) == 0 : Order = [X for X in self.Obj2Plot]  
        for X in Order: 
          if X in self.Obj2Plot:    
@@ -1401,7 +1402,298 @@ class combPlot :
    # if unblind: grData.Write()
    # canv.SetName('fqq')
    # canv.Write()  
+
+
+   def MUMHSum(self,iComb,iEnergy,iModel,massFilter):
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,channels[self.Version],combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
+       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+         TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+       else:
+         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+ 
+       iTarget = 'MDF1DObs'
+       VarName = ['r','deltaNLL','quantileExpected']
+       self.TreeContent = {}
+
+       # ---- Load all tree in memory
+       for iMass in massList:
+         fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+         fileName += '_'+iModel+'_'+iTarget+'_Points*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
+         fileCmd = 'ls '+fileName 
+         proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+         out, err = proc.communicate()
+         FileList=string.split(out)
+         Result = {}
+         Result ['rfit'] = 0
+         Result ['scan'] = {}
+         for iFile in FileList :
+           #print 'Opening :',iFile
+           try:
+             fTree = TFile.Open(iFile)
+             tree = fTree.Get('limit')
+             nentries = tree.GetEntries()  
+             lm, mh, var = self.treeAccess(tree,VarName)
+             for ientry in range(nentries):
+               tree.GetEntry(ientry)
+               if var[2] != 1 :
+                 Result['scan'][dc(var[0])] = dc(var[1])
+               else:
+                 Result ['rfit'] = dc(var[0])
+             fTree.Close() 
+           except:
+             print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
+         self.TreeContent[iMass] = Result
+
+       # ---- Find Some basic values
+       unsortMu   = []
+       for iMu in self.TreeContent[massList[0]]['scan']: unsortMu.append(iMu) 
+       Mu = sorted(unsortMu)
+       minMu=Mu[0]
+       maxMu=Mu[-1]
+       nMu=len(Mu)
+       deltaMu = (maxMu-minMu) / nMu
+
+       # ---- apply shift "bad events" --> Andrea not foing it nDo == 0 !!!
+       Origin='scan' 
+
+       #for iMass in massList:
+       #  hObs = TH1F("Frame","Frame",len(Mu),Mu[0],Mu[-1])
+       #  for iMu in Mu: 
+       #    if iMu in self.TreeContent[iMass][Origin]: 
+       #      hObs.Fill(iMu,2*self.TreeContent[iMass]['scan'][iMu])
+       #  hObs.Draw()
+       #  self.c1.Update()
+       #  self.Wait() 
+
+       MuRef20= 99.
+       MuRef15= 99.
+       MuRef10= 99.
+       MuRef05= 99.
+       MuRef01= 99.
+       MuRef02= 99.
+       for iMu in Mu:
+         if abs(iMu-2.0) < abs(MuRef20-2.0) : MuRef20 = iMu
+         if abs(iMu-1.5) < abs(MuRef15-1.5) : MuRef15 = iMu
+         if abs(iMu-1.0) < abs(MuRef10-1.0) : MuRef10 = iMu
+         if abs(iMu-0.5) < abs(MuRef05-0.5) : MuRef05 = iMu
+         if abs(iMu-0.1) < abs(MuRef01-0.1) : MuRef01 = iMu
+         if abs(iMu-0.2) < abs(MuRef02-0.2) : MuRef02 = iMu
+       MuRef = []
+       MuRef.append(Mu[0])
+       #MuRef.append(Mu[1])
+       #if ( MuRef01 < 99 ) :  MuRef.append( MuRef01 )
+       #if ( MuRef02 < 99 ) :  MuRef.append( MuRef02 )
+       #if ( MuRef05 < 99 ) :  MuRef.append( MuRef05 )
+       #if ( MuRef10 < 99 ) :  MuRef.append( MuRef10 )
+       #if ( MuRef15 < 99 ) :  MuRef.append( MuRef15 )
+       #if ( MuRef20 < 99 ) :  MuRef.append( MuRef20 )
+       #MuRef.append(Mu[-1])
+
+       Tolerance = 0.02
+       CorrFactor= [1.]
+       for iMu in MuRef:        
+         print "MuRef = ",iMu
+         hScan = TH1F("Scan","Scan",len(massList),massList[0],massList[-1])
+         hFit  = TH1F("Scan","Scan",len(massList),massList[0],massList[-1])
+         jMass=-1
+         for iMass in massList:
+           jMass+=1
+           if iMu in self.TreeContent[iMass][Origin]: 
+             hScan.Fill(iMass,2*self.TreeContent[iMass]['scan'][iMu])
+             if not iMass==massList[0]: 
+               Actual   = 2*self.TreeContent[iMass]['scan'][iMu]             * CorrFactor[jMass-1]
+               Previous = 2*self.TreeContent[massList[jMass-1]]['scan'][iMu] * CorrFactor[jMass-1]
+               Delta    = abs(Actual-Previous)
+               DeltaRel = Delta/Previous
+
+               print jMass, Actual, Previous, Delta , Delta/Previous
+               if DeltaRel > Tolerance: 
+                 if   jMass == 1 : nPFit = 1
+                 elif jMass == 2 : nPFit = 2
+                 else            : nPFit = 3
+                 fit = TF1("pol1","[0]*x+[1]",massList[jMass-nPFit],massList[jMass-1])
+                 hFit.Fit(fit,"R")
+                 A = fit.GetParameter(0)
+                 B = fit.GetParameter(1)
+                 hFit.Draw()
+                 self.c1.Update()
+                 self.Wait()
+                 Corrected = A*iMass+B
+                 print '-->', Corrected , abs(Corrected-Previous) , abs(Corrected-Previous)/Previous
+               else: 
+                 Corrected = Actual
+               CorrFactor.append(CorrFactor[jMass-1]*Corrected/Actual)]               
+               hFit.Fill(iMass,Corrected)
+
+         print CorrFactor
+         hScan.Draw()
+         self.c1.Update()
+         self.Wait() 
+
+
+       # ---- apply shift for mu=0 same performance ----
+       Origin='scan'
+       for iMass in massList:
+         #print   iMass, self.TreeContent[iMass][Origin][Mu[1]] 
+         shift = self.TreeContent[massList[0]][Origin][Mu[0]] - self.TreeContent[iMass][Origin][Mu[0]] + 0.1 # 0.1 arbitrary
+         self.TreeContent[iMass]['mu0corr'] = {}  
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]: 
+             self.TreeContent[iMass]['mu0corr'][iMu] = self.TreeContent[iMass][Origin][iMu] + shift
+
+       # ---- apply shift for minLL = 0 ----
+       Origin='mu0corr'
+       minZ  = 9999
+       muMin = -1
+       mhMin = -1
+       for iMass in massList:
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]:  
+             if self.TreeContent[iMass][Origin][iMu] < minZ :
+               minZ  = self.TreeContent[iMass][Origin][iMu]
+               muMin = iMu
+               mhMin = iMass
+       for iMass in massList:
+         self.TreeContent[iMass]['minLLcorr'] = {} 
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]: 
+             self.TreeContent[iMass]['minLLcorr'][iMu] = self.TreeContent[iMass][Origin][iMu] - minZ
+       
+       # --- Write 2D Tree
+       Origin='minLLcorr'
+       #Origin='mu0corr'
+       Origin='scan'
+       fModel = 'mHmuHist'
+       if   iModel == 'mHmuHist' :
+         fTarget = 'MDFGridObs'
+       elif iModel == 'mHmuHistSMInj' :
+         fTarget = 'MDFGridExp'
+         TargetDir = TargetDir.replace('masssminj','mass')
+       else:
+         return
+
+       fileName =  TargetDir+'/125/higgsCombine_'+iComb+'_'+fModel+'_'+fTarget+'.MultiDimFit.mH125.root'
+       print fileName
+       f = TFile(fileName,'RECREATE')
+       t = TTree('limit','My test tree')
+       gROOT.ProcessLine(\
+              "struct MyStruct{\
+                Float_t mh;\
+                Float_t limit;\
+                Float_t r;\
+                Float_t deltaNLL;\
+                Float_t quantileExpected;\
+               };")  
+       from ROOT import MyStruct 
+       s = MyStruct()
+       t.Branch('mh',AddressOf(s,'mh'),'mh/F')
+       t.Branch('limit',AddressOf(s,'limit'),'limit/F')
+       t.Branch('r',AddressOf(s,'r'),'r/F')
+       t.Branch('deltaNLL',AddressOf(s,'deltaNLL'),'deltaNLL/F')
+       t.Branch('quantileExpected',AddressOf(s,'quantileExpected'),'quantileExpected/F')
+       s.limit = 0
+       for iMass in massList:
+         s.mh       = iMass 
+         s.r        = self.TreeContent[iMass]['rfit']
+         s.deltaNLL = 0
+         s.quantileExpected = 1 
+         t.Fill()
+         for iMu in Mu:
+           if iMu in self.TreeContent[iMass][Origin]:
+             s.mh       = iMass 
+             s.r        = iMu
+             s.deltaNLL =  self.TreeContent[iMass][Origin][iMu]
+             s.quantileExpected = 0 
+             t.Fill()
+    
+       f.Write()
+       f.Close()
+       
+
+       #print  self.TreeContent[125]['minLLcorr']
+       #print  self.TreeContent[130]['minLLcorr']
+
+
    
+   def MHFit(self,iComb,iEnergy,iModel,muVal):
+      
+       self.squareCanvas(False,False)  
+       self.c1.cd()
+
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+         TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+       else:
+         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+ 
+       iTarget = 'MDFGridObs'
+       fileName =  TargetDir+'/125/higgsCombine_'+iComb+'_'+iModel+'_'+iTarget+'.MultiDimFit.mH125.root'
+       VarName = ['r','deltaNLL','quantileExpected','mh']
+       
+       fTree = TFile.Open(fileName)
+       fTree.ls()
+       tree = fTree.Get('limit')
+       tree.Print()
+       nentries = tree.GetEntries()  
+       lm, mh, var = self.treeAccess(tree,VarName)
+       Result  = {}
+       usmList = []
+       for ientry in range(nentries):
+         tree.GetEntry(ientry)
+         if abs(var[0]-muVal)<0.008 : 
+           print var[0], var[3] , var[1] 
+           usmList.append(dc(var[3])) 
+           Result[dc(var[3])] = dc(var[1]) 
+       fTree.Close()
+       mList = sorted(usmList)
+
+       minXP = mList[0]  - 0.5
+       maxXP = mList[-1] + 0.5
+       hObs = TH1F("Frame","Frame",len(mList),float(minXP),float(maxXP))
+       for iMass in mList :
+         hObs.Fill(iMass,2*Result[iMass])
+       hObs.GetXaxis().SetRangeUser(110,140)
+       hObs.GetYaxis().SetRangeUser(0,20)
+       hObs.GetXaxis().SetTitle("Higgs mass [GeV]")
+       hObs.GetYaxis().SetTitle("-2 #Delta ln L")
+
+       hObs.SetFillStyle(0)
+       hObs.SetLineWidth(2)
+       hObs.Draw("hist")
+       fit = TF1("pol2","[0]*x*x+[1]*x+[2]",110,140)
+       fit.SetLineWidth(3)
+       fit.SetLineColor(kBlue)
+       hObs.Fit(fit,"R")
+       fMin = fit.GetMinimum()
+
+       lMass=[]
+       lMass.append(100.)
+       lMass.append(150.)
+       self.plotHorizLine('Zero', lMass , fMin ,   kRed , 1    , 'Zero')
+       self.plotHorizLine('One' , lMass , fMin+1 , kRed , 1    , '1sigma')
+       self.plotHorizLine('Four', lMass , fMin+4 , kRed , 1    , '2sigma')
+   
+       A = fit.GetParameter(0)
+       B = fit.GetParameter(1)
+       C = fit.GetParameter(2)
+
+       m = fMin+1
+       x1Sl = ((-B + m - sqrt(4*A*B + B*B - 4*A*C - 2*B*m + m*m))/(2*A))
+       x1Sr = ((-B + m + sqrt(4*A*B + B*B - 4*A*C - 2*B*m + m*m))/(2*A))
+       print x1Sl,x1Sl
+
+       self.plotAllObj(['Zero','One','Four'],True)
+        
+
+
+       self.addTitle()
+
+       self.c1.Update()
+       self.Wait()
+       self.Save("mfit")
 
    def printResults(self,iComb='hww012j_vh3l_vh2j_zh3l2j_shape',iEnergy=0,iModel='SMHiggs',massFilter=[125],printList=[]):
       

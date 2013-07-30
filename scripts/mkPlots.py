@@ -80,6 +80,9 @@ for iPlot in options.plots:
        if iPlot == 'ExpLim'  : plot.plotExpLimits(combList,options.energy,iModel,mLF)
        if iPlot == 'ExpSign' : plot.plotExpSignVsMh(combList,options.energy,iModel,mLF)
 
+   #
+   # Channel compatibility
+   #
    elif iPlot in ['MuCC']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
@@ -87,6 +90,9 @@ for iPlot in options.plots:
        CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
        plot.plotMuChannel(CombList,options.energy,iModel,[125.7]) 
 
+   #
+   # 2D MutliDim Fits
+   #
    elif iPlot in ['MDFSum','MDFSumFast','MDF2D','MDF2DFast']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel
@@ -100,6 +106,9 @@ for iPlot in options.plots:
            if iPlot == 'MDF2D'     : plot.MDF2D(iComb,options.energy,iModel,[iMass],False) 
            if iPlot == 'MDF2DFast' : plot.MDF2D(iComb,options.energy,iModel,[iMass],True) 
 
+   #
+   # JCP
+   #
    elif iPlot in ['JCPSum','JCPFit','JCPPlot']:
       for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel
@@ -111,9 +120,20 @@ for iPlot in options.plots:
            if iPlot == 'JCPSum'    : plot.JCPSum(iComb,options.energy,iModel,[iMass]) 
            if iPlot == 'JCPFit'    : plot.JCPFit(iComb,options.energy,iModel,[iMass]) 
            if iPlot == 'JCPPlot'   : plot.JCPPlt(iComb,options.energy,iModel,[iMass]) 
-
-
-
+ 
+   #
+   # Mu-mH Scan: Sum disjunct mH 1D mu scan
+   #
+   elif iPlot in ['MUMHSum','MHFit']:
+      for iModel in PhysModelList:
+       print '---------------------------> Model = '+iModel
+       for iComb in combList:
+         print '------------------------------> Comb = '+iComb
+         massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get()     
+         plot=combPlots.combPlot(options.Version,options.unblind,postFix)
+         if iPlot == 'MUMHSum'   : plot.MUMHSum(iComb,options.energy,iModel,massList)
+         muVal = 1.
+         if iPlot == 'MHFit'     : plot.MHFit(iComb,options.energy,iModel,muVal)  
 
    else:
      print 'ERROR: Unknown plot !'
