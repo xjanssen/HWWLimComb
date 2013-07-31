@@ -132,7 +132,7 @@ for iPlot in options.plots:
          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get()     
          plot=combPlots.combPlot(options.Version,options.unblind,postFix)
          if iPlot == 'MUMHSum'   : plot.MUMHSum(iComb,options.energy,iModel,massList)
-         muVal = 1.
+         muVal = 1.0 
          if iPlot == 'MHFit'     : plot.MHFit(iComb,options.energy,iModel,muVal)  
 
    else:

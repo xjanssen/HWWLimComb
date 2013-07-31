@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-workspace   = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/workspace/'
-jobdir      = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/jobs/'
-plotsdir    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/plots/'
-cardbase    = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/'
-combscripts = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/'
+homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
+homedir     = '/Users/xjanssen/cms/HWW2012/HWWLimComb/'
+
+workspace   = homedir+'workspace/'
+jobdir      = homedir+'jobs/'
+plotsdir    = homedir+'plots/'
+cardbase    = homedir+'cmshcg/trunk/'
+combscripts = homedir+'cmshcg/trunk/summer2013/scripts/'
 
 cardtypes = {
   #
@@ -601,9 +604,9 @@ physmodels = {
 # Mass/mu scan from Histo cards
 #
   'mHmuHist' : { 'cardtype' : 'mass' , 
-                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgd Mass','#mu'] , 'Min' : [110.,0.] , 'Max' : [160,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgs Mass [GeV]','#mu'] , 'Min' : [110.,0.] , 'Max' : [160,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [160.,3.]  }  } ,
   'mHmuHistSMInj' : { 'cardtype' : 'masssminj' , 
-                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgd Mass','#mu'] , 'Min' : [110.,0.] , 'Max' : [160,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgs Mass [GeV]','#mu'] , 'Min' : [110.,0.] , 'Max' : [160,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
 #
 # Spin
 #
