@@ -1367,7 +1367,7 @@ class combPlot :
      dummyHist.SetStats(0)
      dummyHist.Draw("AXIS")
    
-     leg = TLegend(0.15,0.65,0.45,0.89);
+     leg = TLegend(0.20,0.70,0.45,0.89);
      leg.SetLineColor(0);
      leg.SetFillColor(0);
      #leg.AddEntry(grSM,"X#rightarrow#gamma#gamma 0^{+}","lp");
@@ -1605,12 +1605,72 @@ class combPlot :
          #print   iMass, self.TreeContent[iMass][Origin][Mu[1]] 
          shift = self.TreeContent[massList[0]][Origin][Mu[1]] - self.TreeContent[iMass][Origin][Mu[1]] + 0.1 # 0.1 arbitrary
          self.TreeContent[iMass]['mu0corr'] = {}  
+         print "mu0corr = ", shift 
          for iMu in Mu: 
            if iMu in self.TreeContent[iMass][Origin]: 
              self.TreeContent[iMass]['mu0corr'][iMu] = self.TreeContent[iMass][Origin][iMu] + shift
+    
+       # ---- Fit Mu close to zero
+       Origin='scan'
+       C0 = 0.
+       for iMass in massList: 
+         hFit = TH1F("Fit" ,"Fit" ,len(Mu),0,3.)
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]: 
+             hFit.Fill(iMu,self.TreeContent[iMass][Origin][iMu])
+         hFit.Draw()
+         fit = TF1("pol2","[0]*x*x+[1]*x+[2]",0,0.5)
+         hFit.Fit(fit,"R")
+         C = fit.GetParameter(2)
+         if iMass == massList[0] : 
+           C0    = C
+           shift = 1
+         else:
+           shift = C0 - C
+         print "mu0fit  = ", shift 
+         self.TreeContent[iMass]['mu0fit'] = {}  
+
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]: 
+             self.TreeContent[iMass]['mu0fit'][iMu] = self.TreeContent[iMass][Origin][iMu] + shift
+         #self.c1.Update()
+         #self.Wait() 
+
+       # ---- Average -------
+
+       Origin='mu0fit' 
+       for iMass in massList:
+         self.TreeContent[iMass]['Average'] = {} 
+         cMu    =0
+         nMuAvg =0
+         Mu2Avg =[]
+         NLL2Avg=0
+         MuNew  =[]
+         for iMu in Mu:
+           cMu+=1 
+           if cMu == 1 : Mu2Avg.append(dc(iMu))
+           if cMu ==10 : Mu2Avg.append(dc(iMu))
+           if iMu in self.TreeContent[iMass][Origin]: 
+             nMuAvg+=1
+             NLL2Avg+= self.TreeContent[iMass][Origin][iMu]
+           if cMu ==10 :
+             NLLAvg= NLL2Avg/nMuAvg 
+             MuAvg = Mu2Avg[0]+(Mu2Avg[1]-Mu2Avg[0])/2 
+             self.TreeContent[iMass]['Average'][MuAvg] = NLLAvg
+             if not MuAvg in MuNew : MuNew.append(dc(MuAvg))
+             cMu    =0
+             nMuAvg =0
+             Mu2Avg =[]
+             NLL2Avg=0
+       print Mu
+       #Mu = MuNew
+       print Mu
+
 
        # ---- apply shift for minLL = 0 ----
        Origin='mu0corr'
+       Origin='mu0fit' 
+       #Origin='Average'
        minZ  = 9999
        muMin = -1
        mhMin = -1
@@ -1626,11 +1686,93 @@ class combPlot :
          for iMu in Mu: 
            if iMu in self.TreeContent[iMass][Origin]: 
              self.TreeContent[iMass]['minLLcorr'][iMu] = self.TreeContent[iMass][Origin][iMu] - minZ
-       
+      
+       # ---- repair mu=0.5 plo2 behaviour ----
+       Origin='minLLcorr'
+       MuRef=99
+       DMU=99
+       for iMu in Mu:
+         if abs(iMu-0.2) < DMU:
+           DMU=abs(iMu-0.2) 
+           MuRef=iMu
+       hFit  = TH1F("Scan","Scan",len(massList),massList[0]-0.5,massList[-1]+0.5) 
+       hOri  = TH1F("Scan","Scan",len(massList),massList[0]-0.5,massList[-1]+0.5) 
+       hFit.Fill(massList[-1],self.TreeContent[massList[-1]][Origin][MuRef])
+       jMass=-1
+       CorrFac=[1.]
+       for iMass in massList:
+         jMass+=1
+         print self.TreeContent[iMass][Origin][MuRef],CorrFac[jMass],self.TreeContent[iMass][Origin][MuRef]*CorrFac[jMass]
+         hFit.Fill(iMass,self.TreeContent[iMass][Origin][MuRef]*CorrFac[jMass])
+         hOri.Fill(iMass,self.TreeContent[iMass][Origin][MuRef])
+         if iMass < 120 :
+           CorrFac.append(1.)
+         else:
+           fit = TF1("pol2","[0]*x*x+[1]*x+[2]",115,massList[-1]+0.5)
+           hFit.Fit(fit,"R")
+           #hFit.Draw()
+           #self.c1.Update()
+           if jMass+1 < len(massList) :
+            A = fit.GetParameter(0)
+            B = fit.GetParameter(1)
+            C = fit.GetParameter(2)
+            X = massList[jMass+1] 
+            Y = A*X*X+B*X+C
+            V = self.TreeContent[massList[jMass+1]][Origin][MuRef]*CorrFac[jMass]
+            print jMass , iMass , massList[jMass+1] , Y , V , abs(1-V/Y)      
+            if abs(1-V/Y)>0.10: 
+             print '--> Need Correction '
+             CorrFac.append(CorrFac[jMass]*Y/V)
+             #CorrFac.append(CorrFac[jMass-1])
+            else:
+             CorrFac.append(CorrFac[jMass])
+
+            #self.Wait() 
+           #  if  abs(V/Y) > .20:
+           #    CorrFac.append(CorrFac[jMass])
+           #  else:
+           #    CorrFac.append(CorrFac[jMass])
+
+       hFit.Draw()
+       hOri.Draw("histsame")
+       self.c1.Update()
+       self.Wait() 
+
+       jMass=-1
+       for iMass in massList:
+         jMass+=1
+         self.TreeContent[iMass]['mu05pol2'] = {} 
+         for iMu in self.TreeContent[iMass][Origin]: 
+           #if iMu in self.TreeContent[iMass][Origin]:
+           print iMass, iMu , self.TreeContent[iMass][Origin][iMu]
+           self.TreeContent[iMass]['mu05pol2'][iMu] = self.TreeContent[iMass][Origin][iMu] * CorrFac[jMass]
+
+       # ---- re-apply shift for minLL = 0 ----
+       Origin='mu05pol2'
+       minZ  = 9999
+       muMin = -1
+       mhMin = -1
+       for iMass in massList:
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]:  
+             if self.TreeContent[iMass][Origin][iMu] < minZ :
+               minZ  = self.TreeContent[iMass][Origin][iMu]
+               muMin = iMu
+               mhMin = iMass
+       for iMass in massList:
+         self.TreeContent[iMass]['minLLcorr2'] = {} 
+         for iMu in Mu: 
+           if iMu in self.TreeContent[iMass][Origin]: 
+             self.TreeContent[iMass]['minLLcorr2'][iMu] = self.TreeContent[iMass][Origin][iMu] - minZ
+      
+
+
+ 
        # --- Write 2D Tree
        Origin='scan'
        #Origin='mu0corr'
-       #Origin='minLLcorr'
+       Origin='minLLcorr'
+       #Origin='minLLcorr2'
        #Origin='mu0fit'
        #Origin=Pass
        fModel = 'mHmuHist'
@@ -1696,8 +1838,12 @@ class combPlot :
          TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
- 
-       iTarget = 'MDFGridObs'
+
+       if self.blind : 
+         iTarget = 'MDFGridExp'
+       else:
+         iTarget = 'MDFGridObs'
+
        fileName =  TargetDir+'/125/higgsCombine_'+iComb+'_'+iModel+'_'+iTarget+'.MultiDimFit.mH125.root'
        VarName = ['r','deltaNLL','quantileExpected','mh']
        
@@ -1730,15 +1876,15 @@ class combPlot :
        hObs = TH1F("Frame","Frame",len(mList),float(minXP),float(maxXP))
        for iMass in mList :
          hObs.Fill(iMass,2*Result[iMass])
-       hObs.GetXaxis().SetRangeUser(110,140)
-       hObs.GetYaxis().SetRangeUser(0,20)
+       hObs.GetXaxis().SetRangeUser(109.5,135.5)
+       hObs.GetYaxis().SetRangeUser(0,15)
        hObs.GetXaxis().SetTitle("Higgs mass [GeV]")
        hObs.GetYaxis().SetTitle("-2 #Delta ln L")
 
        hObs.SetFillStyle(0)
        hObs.SetLineWidth(2)
        hObs.Draw("hist")
-       fit = TF1("pol2","[0]*x*x+[1]*x+[2]",109.5,140.5)
+       fit = TF1("pol2","[0]*x*x+[1]*x+[2]",109.5,135.5)
        fit.SetLineWidth(3)
        fit.SetLineColor(kBlue)
        hObs.Fit(fit,"R")
@@ -1816,7 +1962,10 @@ class combPlot :
 
        self.c1.Update()
        self.Wait()
-       self.Save("mhfit_"+iComb+'_'+self.EnergyName(iEnergy)+'_mu'+str(muVal).replace('.','d') )
+       if self.blind : 
+         self.Save("mhfit_SMInj_"+iComb+'_'+self.EnergyName(iEnergy)+'_mu'+str(muVal).replace('.','d') )
+       else:
+         self.Save("mhfit_"+iComb+'_'+self.EnergyName(iEnergy)+'_mu'+str(muVal).replace('.','d') )
 
 
    def printResults(self,iComb='hww012j_vh3l_vh2j_zh3l2j_shape',iEnergy=0,iModel='SMHiggs',massFilter=[125],printList=[]):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
-homedir     = '/Users/xjanssen/cms/HWW2012/HWWLimComb/'
+#homedir     = '/Users/xjanssen/cms/HWW2012/HWWLimComb/'
 
 workspace   = homedir+'workspace/'
 jobdir      = homedir+'jobs/'
@@ -40,24 +40,34 @@ cardtypes = {
                               #110, 110.5, 111, 111.5, 112, 112.5, 113, 113.5, 114, 114.5, 115, 115.5, 116, 116.5, 117, 117.5, 118, 118.5, 119, 119.5,
                               #120, 120.5, 121, 121.5, 122, 122.5, 123, 123.5, 124, 124.5, 125, 125.5, 126, 126.5, 127, 127.5, 128, 128.5, 129, 129.5,
                               #130, 130.5, 131, 131.5, 132, 132.5, 133, 133.5, 134, 134.5, 135, 135.5, 136, 136.5, 137, 137.5, 138, 138.5, 139, 139.5,
+                              # 1 GeV
                               110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
                               120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
                               130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 
-                              140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
-                              150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
-                              160 ] 
+                              140
+                              #140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                              #150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
+                              #160 
+                              # 5 GeV
+                              #110, 115, 120, 125, 130, 135, 140 , 145 , 150 , 155 , 160 
+                             ] 
                 }, 
   'masssminj' : { 'dir' : 'searches' , 'targetdir' : 'masssminj'    , 
                   'masses' : [
                               #110, 110.5, 111, 111.5, 112, 112.5, 113, 113.5, 114, 114.5, 115, 115.5, 116, 116.5, 117, 117.5, 118, 118.5, 119, 119.5,
                               #120, 120.5, 121, 121.5, 122, 122.5, 123, 123.5, 124, 124.5, 125, 125.5, 126, 126.5, 127, 127.5, 128, 128.5, 129, 129.5,
                               #130, 130.5, 131, 131.5, 132, 132.5, 133, 133.5, 134, 134.5, 135, 135.5, 136, 136.5, 137, 137.5, 138, 138.5, 139, 139.5,
+                              # 1 GeV
                               110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
                               120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
                               130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
-                              140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
-                              150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
-                              160 ] ,
+                              140
+                              #140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+                              #150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 
+                              #160 
+                              # 5 Gev
+                              # 110, 115, 120, 125, 130, 135, 140 , 145 , 150 , 155 , 160
+                             ] ,
                   'preProc' : ['SMInject'] 
                 } , 
 
@@ -89,12 +99,19 @@ preProc = {
   
 }
 
-DefaultVersion = 'V5'
+# V3 Most results
+# V4 Debug version for KV,KF 
+# V5 MHFit 100  mu points + 125 Injection
+# V6 MHFit 120  mu points
+# V7 MHFit 1000 mu points
+
+
+DefaultVersion = 'V3'
 channels = { 
 
 # ============ V2: Cards for HWW Paper (datacrds from comb svn) ==========================
 
-'V5' : {
+'V3' : {
   # ============ H --> WW 0/1-jet JCP=2+m ===================
   'hww0jof_jcp2pm': {
                     '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [120,130]  , 'dir' : 'summer2013' , 'subdir' : '2+m/hww2l2v' , 'card' : 'hwwof_0j_7TeV.txt' , 'files' : ['hwwof_0j.input_7TeV.root'] } ,
@@ -604,9 +621,9 @@ physmodels = {
 # Mass/mu scan from Histo cards
 #
   'mHmuHist' : { 'cardtype' : 'mass' , 
-                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgs Mass [GeV]','#mu'] , 'Min' : [110.,0.] , 'Max' : [160,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [160.,3.]  }  } ,
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgs Mass [GeV]','#mu'] , 'Min' : [110.,0.] , 'Max' : [140,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
   'mHmuHistSMInj' : { 'cardtype' : 'masssminj' , 
-                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgs Mass [GeV]','#mu'] , 'Min' : [110.,0.] , 'Max' : [160,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['mh','r'] , 'AxisTitle' : ['Higgs Mass [GeV]','#mu'] , 'Min' : [110.,0.] , 'Max' : [140,3.] , 'MinPlt' : [110.,0.] , 'MaxPlt' : [140.,3.]  }  } ,
 #
 # Spin
 #
@@ -693,7 +710,7 @@ targets = {
   #
   # MultiDim Fit
   #
-  'MDF1DObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 --rMin=0 --rMax=3' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 120 }},
+  'MDF1DObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 --rMin=0 --rMax=3' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 1000 }},
   'MDF1DExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100 }}, 
   #
   # MultiDim Fit
