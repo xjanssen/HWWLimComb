@@ -475,7 +475,7 @@ combinations = {
   'hww2j_cut'      : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2jof_cut' , 'hww2jsf_cut' ]  ,                                  
                        'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'VBF H #rightarrow WW #rightarrow 2l2#nu (Cut)' }, 
   'hww2j_shape'    : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2jof_shape' , 'hww2jsf_cut' ]  ,                                 
-                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'VBF H #rightarrow WW #rightarrow 2l2#nu (Shape)'}, 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'VBF H #rightarrow WW #rightarrow 2l2#nu'}, 
   'vh3l_cut'       : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'vh3l_sssf_cut'    , 'vh3l_ossf_cut'    ] ,                           
                        'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 'legend' : 'VHWW 3l (Cut)'     } ,
   'vh3l_shape'     : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'vh3l_sssf_shape'  , 'vh3l_ossf_shape'  ] ,                          

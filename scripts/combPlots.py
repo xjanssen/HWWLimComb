@@ -15,14 +15,15 @@ import rootlogonTDR
 from Config import *
 import combTools
 
-#gROOT.SetBatch()
+gROOT.SetBatch()
 #gROOT.ProcessLine(".x tdrstyle.cc")
 gROOT.ProcessLine('.L '+combscripts+'contours.cxx')
 gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 
-CMSText=["CMS Preliminary","CMS"] 
-LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
+CMSText=["CMS Preliminary","#bf{CMS}"] 
+LumText=["4.9 fb^{-1} (7 TeV) + 19.5 fb^{-1} (8 TeV)","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
+#LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 
 class combPlot :
    def __init__(self,Version,blind=True,postFix='',logX=False,logY=False):
@@ -92,7 +93,7 @@ class combPlot :
          if self.isSquareCanvas : fontSize = 0.027 
        else:
          fontSize = 0.04 
-         if self.isSquareCanvas : fontSize = 0.035
+         if self.isSquareCanvas : fontSize = 0.033
    
        self.cmsprel = TPaveText(x1,y1,x2,y2,"brtlNDC");  
        self.cmsprel.SetTextSize(fontSize);
@@ -101,7 +102,7 @@ class combPlot :
        self.cmsprel.SetLineStyle(0)
        self.cmsprel.SetLineWidth(0)
        self.cmsprel.SetTextAlign(11)
-       #self.cmsprel.SetTextFont(42);
+       self.cmsprel.SetTextFont(42);
        self.cmsprel.AddText(CMSText[iCMS]);
        self.cmsprel.SetBorderSize(0);
        self.cmsprel.Draw("same");
@@ -113,7 +114,7 @@ class combPlot :
        self.lumi.SetLineStyle(0)
        self.lumi.SetLineWidth(0)
        self.lumi.SetTextAlign(31)
-       #self.lumi.SetTextFont(42);
+       self.lumi.SetTextFont(42);
        self.lumi.AddText(LumText[iLumi]);
        self.lumi.SetBorderSize(0);
        self.lumi.Draw("same");
@@ -544,19 +545,28 @@ class combPlot :
        if len( Order ) == 0 : Order = [X for X in self.Obj2Plot]  
        for X in Order: 
          if X in self.Obj2Plot:    
+           if iFirst: 
+             self.Obj2Plot[X]['Obj'].GetXaxis().SetTitle(self.xAxisTitle)
+             self.Obj2Plot[X]['Obj'].GetYaxis().SetTitle(self.yAxisTitle)
+             self.Obj2Plot[X]['Obj'].GetXaxis().SetLabelFont (   42)
+             self.Obj2Plot[X]['Obj'].GetYaxis().SetLabelFont (   42)
+             self.Obj2Plot[X]['Obj'].GetXaxis().SetTitleFont (   42)
+             self.Obj2Plot[X]['Obj'].GetYaxis().SetTitleFont (   42)
+             self.Obj2Plot[X]['Obj'].GetXaxis().SetTitleOffset( 1.2)
+             self.Obj2Plot[X]['Obj'].GetYaxis().SetTitleOffset( 1.2)
+             self.Obj2Plot[X]['Obj'].GetXaxis().SetTitleSize (0.050)
+             self.Obj2Plot[X]['Obj'].GetYaxis().SetTitleSize (0.050)
+             self.Obj2Plot[X]['Obj'].GetXaxis().SetLabelSize (0.045)
+             self.Obj2Plot[X]['Obj'].GetYaxis().SetLabelSize (0.045)
            if   self.Obj2Plot[X]['Type'] == 'Band':
              if iFirst: 
                iFirst=False
-               self.Obj2Plot[X]['Obj'].GetXaxis().SetTitle(self.xAxisTitle)
-               self.Obj2Plot[X]['Obj'].GetYaxis().SetTitle(self.yAxisTitle)
                self.Obj2Plot[X]['Obj'].Draw("A3")
              else: 
                self.Obj2Plot[X]['Obj'].Draw("3")   
            elif self.Obj2Plot[X]['Type'] == 'Curve':
              if iFirst: 
                iFirst=False
-               self.Obj2Plot[X]['Obj'].GetXaxis().SetTitle(self.xAxisTitle)
-               self.Obj2Plot[X]['Obj'].GetYaxis().SetTitle(self.yAxisTitle)
                self.Obj2Plot[X]['Obj'].Draw("AL")
              else: 
                self.Obj2Plot[X]['Obj'].Draw("L") 
@@ -581,17 +591,18 @@ class combPlot :
          y2 = 0.50 
        #self.Legend = TLegend(0.50,0.65,0.85,0.85)   
        self.Legend = TLegend(x1,y1,x2,y2)
-       self.Legend.SetTextSize(0.035)
+       self.Legend.SetTextSize(0.033)
        self.Legend.SetFillColor(0)
        self.Legend.SetFillStyle(0)
        self.Legend.SetBorderSize(0)
+       self.Legend.SetTextFont (42)
        for X in Order: 
          if X in self.Obj2Plot:    
            if   self.Obj2Plot[X]['Type'] == 'Band':
              self.Legend.AddEntry(self.Obj2Plot[X]['Obj'],self.Obj2Plot[X]['Legend'],'f')
            elif self.Obj2Plot[X]['Type'] == 'Curve':
              self.Legend.AddEntry(self.Obj2Plot[X]['Obj'],self.Obj2Plot[X]['Legend'],'l')
-       self.Legend.SetHeader(Title)
+       if not Title == '' : self.Legend.SetHeader(Title)
        self.Legend.Draw('same')
 
    def SetRange(self,PlotType,iComb): 
@@ -680,7 +691,7 @@ class combPlot :
            self.AXLabel.append(TLatex(xbins[i], ylatex, str(xbins[i])))          
            self.AXLabel[-1].SetTextAlign(  22);
            self.AXLabel[-1].SetTextFont (  42);
-           self.AXLabel[-1].SetTextSize (0.040);
+           self.AXLabel[-1].SetTextSize (0.045);
            self.AXLabel[-1].Draw("same");
 
    def plotOneLimit(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],bInject=True):
@@ -768,7 +779,8 @@ class combPlot :
        self.resetPlot()
 
        self.xAxisTitle = "Higgs mass [GeV]"
-       self.yAxisTitle = "best fit for #mu"
+       #self.yAxisTitle = "Best fit for #mu"
+       self.yAxisTitle = "Best fit for #sigma/#sigma_{SM}"
 
        if (self.logX) : gPad.SetLogx()
        if (self.logY) : gPad.SetLogy()
@@ -809,7 +821,7 @@ class combPlot :
        self.resetPlot()
 
        self.xAxisTitle = "Higgs mass [GeV]"
-       self.yAxisTitle = "significance"
+       self.yAxisTitle = "Significance"
 
        if (self.logX) : gPad.SetLogx()
        if (self.logY) : gPad.SetLogy()
@@ -887,7 +899,7 @@ class combPlot :
        if CombList[0] == 'HWW' : CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
 
        self.xAxisTitle = "Higgs mass [GeV]"
-       self.yAxisTitle = "Expected significance"
+       self.yAxisTitle = "Expected Significance"
 
        if (self.logX) : gPad.SetLogx()
        if (self.logY) : gPad.SetLogy()
@@ -937,23 +949,35 @@ class combPlot :
        for iComb in CombList:
          self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
 
-       frame = TH2F("frame",";best fit #sigma/#sigma_{SM};",1,-1,7,nChann,0,nChann);
-       frame.GetXaxis().SetTitleSize(0.05);
-       frame.GetXaxis().SetLabelSize(0.04);
-       frame.GetYaxis().SetLabelSize(0.06);
+       frame = TH2F("frame",";Best fit for #sigma/#sigma_{SM};",1,-1,7,nChann+1,0,nChann+1);
+       #frame.GetXaxis().SetTitleSize(0.05);
+       #frame.GetXaxis().SetLabelSize(0.04);
+       #frame.GetYaxis().SetLabelSize(0.06);
        #frame.GetXaxis().SetNdivisions(505)
+       frame.GetXaxis().SetLabelFont (   42)
+       frame.GetYaxis().SetLabelFont (   42)
+       frame.GetXaxis().SetTitleFont (   42)
+       frame.GetYaxis().SetTitleFont (   42)
+       frame.GetXaxis().SetTitleOffset( 1.2)
+       frame.GetYaxis().SetTitleOffset( 1.2)
+       frame.GetXaxis().SetTitleSize (0.050)
+       frame.GetYaxis().SetTitleSize (0.050)
+       frame.GetXaxis().SetLabelSize (0.045)
+       frame.GetYaxis().SetLabelSize (0.055)
+
+
        frame.Draw()
 
        print self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0]
        print self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0]
-       globalFitBand = TBox(self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0], 0, self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0] , nChann);
+       globalFitBand = TBox(self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0], 0, self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0] , nChann+1);
        globalFitBand.SetFillStyle(3013);
        globalFitBand.SetFillColor(65);
        globalFitBand.SetLineStyle(0);
        globalFitBand.Draw("same");
 
        Val = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0]
-       globalFitLine = TLine (Val, 0, Val, nChann);
+       globalFitLine = TLine (Val, 0, Val, nChann+1);
        globalFitLine.SetLineWidth(4);
        globalFitLine.SetLineColor(214);
        globalFitLine.Draw("same");
@@ -972,12 +996,23 @@ class combPlot :
          print Val, eDo, eUp
          points.SetPoint(iChann-1,      Val , iChann-0.5);
          points.SetPointError(iChann-1, eDo, eUp , 0, 0);
-         muTxt = '#mu = '+str(round(Val,2))+'^{+'+str(round(eUp,2))+'}_{-'+str(round(eDo,2))+'}'
-         label = '#splitline{'+combinations[CombList[iChann]]['legend']+'}{#scale[0.8]{'+muTxt+'}}'
+         #muTxt = '#mu = '+str(round(Val,2))+'^{ +'+str(round(eUp,2))+'}_{ -'+str(round(eDo,2))+'}'
+         muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{ - %.2f}'%(Val,eUp,eDo)
+         label = '#splitline{   '+combinations[CombList[iChann]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
          frame.GetYaxis().SetBinLabel(iChann, label  );
          #frame.GetYaxis().SetBinLabel(iChann,  combinations[CombList[iChann]]['legend'] );
          #frame.GetYaxis().SetBinLabel(iChann-.5,'#mu = 0.76^{+0.19}_{-0.19}')
          #TlMu.DrawLatex(0.2,0.95,'#mu = 0.76^{+0.19}_{-0.19}')
+       frame.GetYaxis().LabelsOption("v")
+       # ... Combined result 
+       Val = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0]
+       eDo = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0] - self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0]
+       eUp = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0] - self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0]
+       muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{ - %.2f}'%(Val,eUp,eDo) 
+       label = '#splitline{   Combined}{                    #scale[0.8]{'+muTxt+'}  }'
+       frame.GetYaxis().SetBinLabel(nChann+1, label  );
+       #frame.GetYaxis().SetTickLength(0);
+
 
        TlMH=TLatex()
        TlMH.SetTextSize(0.03);
@@ -1335,10 +1370,10 @@ class combPlot :
      grSM.SetLineWidth(2)
      grSM.SetLineColor(kRed)
    
-     grSM68.SetLineColor(kYellow)
-     grSM68.SetFillColor(kYellow)
-     grSM95.SetLineColor(kGreen)
-     grSM95.SetFillColor(kGreen)
+     grSM95.SetLineColor(kYellow)
+     grSM95.SetFillColor(kYellow)
+     grSM68.SetLineColor(kGreen)
+     grSM68.SetFillColor(kGreen)
    
      grGRAV.SetMarkerStyle(kFullTriangleUp)
      grGRAV.SetMarkerColor(kBlue)
@@ -1361,15 +1396,32 @@ class combPlot :
      ymin=-10.
      ymax=40.
     
-     dummyHist = TH1F("d",";f_{q#bar{q}} (%);-2#times ln (L_{2^{+}_{m}}/L_{0^{+}}) ",100,0,100)
+     dummyHist = TH1F("d",";f_{q#bar{q}} (%);-2 ln (L_{2^{+}_{m}}/L_{0^{+}}) ",100,0,100)
      dummyHist.SetMinimum(ymin)
      dummyHist.SetMaximum(ymax)
      dummyHist.SetStats(0)
+     dummyHist.GetXaxis().SetLabelFont (   42)
+     dummyHist.GetYaxis().SetLabelFont (   42)
+     dummyHist.GetXaxis().SetTitleFont (   42)
+     dummyHist.GetYaxis().SetTitleFont (   42)
+     dummyHist.GetXaxis().SetTitleOffset( 1.2)
+     dummyHist.GetYaxis().SetTitleOffset( 1.2)
+     dummyHist.GetXaxis().SetTitleSize (0.050)
+     dummyHist.GetYaxis().SetTitleSize (0.050)
+     dummyHist.GetXaxis().SetLabelSize (0.045)
+     dummyHist.GetYaxis().SetLabelSize (0.045)
+
      dummyHist.Draw("AXIS")
    
      leg = TLegend(0.20,0.70,0.45,0.89);
      leg.SetLineColor(0);
      leg.SetFillColor(0);
+     leg.SetTextSize(0.033)
+     leg.SetFillStyle(0)
+     leg.SetBorderSize(0)
+     leg.SetTextFont (42)
+
+
      #leg.AddEntry(grSM,"X#rightarrow#gamma#gamma 0^{+}","lp");
      leg.AddEntry(grSM,"X#rightarrow WW 0^{+}","lp");
      leg.AddEntry(grSM68,"#pm 1#sigma expected","f");
@@ -1880,6 +1932,18 @@ class combPlot :
        hObs.GetYaxis().SetRangeUser(0,15)
        hObs.GetXaxis().SetTitle("Higgs mass [GeV]")
        hObs.GetYaxis().SetTitle("-2 #Delta ln L")
+
+       hObs.GetXaxis().SetLabelFont (   42)
+       hObs.GetYaxis().SetLabelFont (   42)
+       hObs.GetXaxis().SetTitleFont (   42)
+       hObs.GetYaxis().SetTitleFont (   42)
+       hObs.GetXaxis().SetTitleOffset( 1.2)
+       hObs.GetYaxis().SetTitleOffset( 1.2)
+       hObs.GetXaxis().SetTitleSize (0.050)
+       hObs.GetYaxis().SetTitleSize (0.050)
+       hObs.GetXaxis().SetLabelSize (0.045)
+       hObs.GetYaxis().SetLabelSize (0.045)
+
 
        hObs.SetFillStyle(0)
        hObs.SetLineWidth(2)
