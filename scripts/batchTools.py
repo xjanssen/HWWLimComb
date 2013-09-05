@@ -94,7 +94,7 @@ class batchJobs :
 
 #     print jName,  command
 
-   def Sub(self):
+   def Sub(self,queue='8nh'):
      os.system('cd '+jobdir)
      for jName in self.jobsList:
         errFile=jobdir+'/'+jName+'.err'
@@ -105,7 +105,7 @@ class batchJobs :
         jFile.close()
         jidFile=jobdir+'/'+jName+'.jid'
         print 'Submit',jName
-        jobid=os.system('cd '+jobdir+'; bsub -q 8nh -o '+outFile+' -e '+errFile+' '+jName+'.sh | grep submitted > '+jidFile)
+        jobid=os.system('cd '+jobdir+'; bsub -q '+queue+' -o '+outFile+' -e '+errFile+' '+jName+'.sh | grep submitted > '+jidFile)
 
 def batchResub():
     fileCmd = 'ls '+jobdir+'/'+'*.sh'

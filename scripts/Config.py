@@ -105,13 +105,14 @@ preProc = {
 # V6 MHFit 120  mu points
 # V7 MHFit 1000 mu points
 
+# V8: Pixel lumi
 
-DefaultVersion = 'V3'
+DefaultVersion = 'V8'
 channels = { 
 
 # ============ V2: Cards for HWW Paper (datacrds from comb svn) ==========================
 
-'V3' : {
+'V8' : {
   # ============ H --> WW 0/1-jet JCP=2+m ===================
   'hww0jof_jcp2pm': {
                     '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [120,130]  , 'dir' : 'summer2013' , 'subdir' : '2+m/hww2l2v' , 'card' : 'hwwof_0j_7TeV.txt' , 'files' : ['hwwof_0j.input_7TeV.root'] } ,
@@ -741,7 +742,7 @@ targets = {
   # JCP
   #
   'JCP2pm'         : {'notblind' : True  , 'method' : 'HybridNew'   , 
-                      'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000' , 'NJobs' : 5 , 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } },
+                      'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000' , 'NJobs' : 50 , 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } },
 
                                     
 }

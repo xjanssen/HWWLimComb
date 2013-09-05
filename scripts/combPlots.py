@@ -22,7 +22,7 @@ gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 
 CMSText=["CMS Preliminary","#bf{CMS}"] 
-LumText=["4.9 fb^{-1} (7 TeV) + 19.5 fb^{-1} (8 TeV)","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
+LumText=["4.9 fb^{-1} (7 TeV) + 19.4 fb^{-1} (8 TeV)","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 #LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 
 class combPlot :
@@ -772,7 +772,8 @@ class combPlot :
        
    def plotMuVsMh(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[]):
 
-       self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
+       BestFit='BestFit'
+       self.readResults(iComb,iEnergy,iModel,massFilter,BestFit)
 
        self.squareCanvas(False,False)
        self.c1.cd()
@@ -787,10 +788,10 @@ class combPlot :
        if (self.logX) : self.postFix += '_logX'
        if (self.logY) : self.postFix += '_logY'
 
-       aMass    = self.Results[iComb][iEnergy][iModel]['BestFit']['mass']
-       muVal    = self.Results[iComb][iEnergy][iModel]['BestFit']['Val']
-       mu68U    = self.Results[iComb][iEnergy][iModel]['BestFit']['68U']
-       mu68D    = self.Results[iComb][iEnergy][iModel]['BestFit']['68D']
+       aMass    = self.Results[iComb][iEnergy][iModel][BestFit]['mass']
+       muVal    = self.Results[iComb][iEnergy][iModel][BestFit]['Val']
+       mu68U    = self.Results[iComb][iEnergy][iModel][BestFit]['68U']
+       mu68D    = self.Results[iComb][iEnergy][iModel][BestFit]['68D']
 
        if (self.blind) : return
 
@@ -942,14 +943,17 @@ class combPlot :
        self.c1.SetLeftMargin(0.4) 
        self.c1.SetGridx(1)
 
+       BestFit='BestFitG'
+
        if len(massFilter) != 1 : return
        nChann=len(CombList)-1
        if nChann == 0 : return
 
        for iComb in CombList:
-         self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
+         self.readResults(iComb,iEnergy,iModel,massFilter,BestFit)
 
-       frame = TH2F("frame",";Best fit for #sigma/#sigma_{SM};",1,-1,7,nChann+1,0,nChann+1);
+       MuMax=3.
+       frame = TH2F("frame",";Best fit for #sigma/#sigma_{SM};",1,-1,MuMax,nChann+1,0,nChann+1);
        #frame.GetXaxis().SetTitleSize(0.05);
        #frame.GetXaxis().SetLabelSize(0.04);
        #frame.GetYaxis().SetLabelSize(0.06);
@@ -964,40 +968,52 @@ class combPlot :
        frame.GetYaxis().SetTitleSize (0.050)
        frame.GetXaxis().SetLabelSize (0.045)
        frame.GetYaxis().SetLabelSize (0.055)
+       frame.GetXaxis().SetNdivisions(505)
 
 
        frame.Draw()
 
-       print self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0]
-       print self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0]
-       globalFitBand = TBox(self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0], 0, self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0] , nChann+1);
+       print self.Results[CombList[0]][iEnergy][iModel][BestFit]['68D'][0]
+       print self.Results[CombList[0]][iEnergy][iModel][BestFit]['68U'][0]
+       globalFitBand = TBox(self.Results[CombList[0]][iEnergy][iModel][BestFit]['68D'][0], 0, self.Results[CombList[0]][iEnergy][iModel][BestFit]['68U'][0] , nChann+1);
        globalFitBand.SetFillStyle(3013);
        globalFitBand.SetFillColor(65);
        globalFitBand.SetLineStyle(0);
        globalFitBand.Draw("same");
 
-       Val = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0]
+       Val = self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0]
        globalFitLine = TLine (Val, 0, Val, nChann+1);
        globalFitLine.SetLineWidth(4);
        globalFitLine.SetLineColor(214);
        globalFitLine.Draw("same");
 
        points = TGraphAsymmErrors (nChann)
+       invpts = TGraphAsymmErrors (nChann)
        TlMu=TLatex()
        TlMu.SetTextAlign(23);
        TlMu.SetTextSize(0.03);
 
        asymTolerance = 0.15
        for iChann in xrange(1,nChann+1):
-         Val = self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['Val'][0]
-         eDo = self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['Val'][0] - self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['68D'][0]
-         eUp = self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['68U'][0] - self.Results[CombList[iChann]][iEnergy][iModel]['BestFit']['Val'][0]
+         Val = self.Results[CombList[iChann]][iEnergy][iModel][BestFit]['Val'][0]
+         eDo = self.Results[CombList[iChann]][iEnergy][iModel][BestFit]['Val'][0] - self.Results[CombList[iChann]][iEnergy][iModel][BestFit]['68D'][0]
+         eUp = self.Results[CombList[iChann]][iEnergy][iModel][BestFit]['68U'][0] - self.Results[CombList[iChann]][iEnergy][iModel][BestFit]['Val'][0]
          if eUp > 100 : eUp=100
          print Val, eDo, eUp
-         points.SetPoint(iChann-1,      Val , iChann-0.5);
-         points.SetPointError(iChann-1, eDo, eUp , 0, 0);
+         if Val <= MuMax : 
+           points.SetPoint(iChann-1,      Val , iChann-0.5);
+           points.SetPointError(iChann-1, eDo, eUp , 0, 0);
+           invpts.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
+         else:
+           invVal=MuMax
+           inveDo=MuMax - self.Results[CombList[iChann]][iEnergy][iModel][BestFit]['68D'][0]
+           inveUp=0.
+           invpts.SetPoint(iChann-1,      invVal , iChann-0.5);
+           invpts.SetPointError(iChann-1, inveDo, inveUp , 0, 0);
+           points.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
+ 
          #muTxt = '#mu = '+str(round(Val,2))+'^{ +'+str(round(eUp,2))+'}_{ -'+str(round(eDo,2))+'}'
-         muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{ - %.2f}'%(Val,eUp,eDo)
+         muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{  - %.2f}'%(Val,eUp,eDo)
          label = '#splitline{   '+combinations[CombList[iChann]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
          frame.GetYaxis().SetBinLabel(iChann, label  );
          #frame.GetYaxis().SetBinLabel(iChann,  combinations[CombList[iChann]]['legend'] );
@@ -1005,10 +1021,10 @@ class combPlot :
          #TlMu.DrawLatex(0.2,0.95,'#mu = 0.76^{+0.19}_{-0.19}')
        frame.GetYaxis().LabelsOption("v")
        # ... Combined result 
-       Val = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0]
-       eDo = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0] - self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68D'][0]
-       eUp = self.Results[CombList[0]][iEnergy][iModel]['BestFit']['68U'][0] - self.Results[CombList[0]][iEnergy][iModel]['BestFit']['Val'][0]
-       muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{ - %.2f}'%(Val,eUp,eDo) 
+       Val = self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0]
+       eDo = self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0] - self.Results[CombList[0]][iEnergy][iModel][BestFit]['68D'][0]
+       eUp = self.Results[CombList[0]][iEnergy][iModel][BestFit]['68U'][0] - self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0]
+       muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{  - %.2f}'%(Val,eUp,eDo) 
        label = '#splitline{   Combined}{                    #scale[0.8]{'+muTxt+'}  }'
        frame.GetYaxis().SetBinLabel(nChann+1, label  );
        #frame.GetYaxis().SetTickLength(0);
@@ -1023,7 +1039,12 @@ class combPlot :
        points.SetLineWidth(3);
        points.SetMarkerStyle(21);
        points.Draw("PSAME");
-    
+
+       invpts.SetLineColor(kRed);
+       invpts.SetLineWidth(3);
+       invpts.SetMarkerStyle(0);
+       invpts.Draw("PSAME");
+ 
        self.addTitle() 
        self.c1.Update() 
        self.Save('MuCC_'+self.EnergyName(iEnergy)+'_'+iModel+'_'+str(massFilter[0]).replace('.','d'))
@@ -2043,6 +2064,7 @@ class combPlot :
         if 'ACLsObs' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsObs') 
         if 'SObs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SObs') 
         if 'BestFit' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
+        if 'BestFitG' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitG')
 
       # build Mass List
       allList = []
@@ -2065,6 +2087,9 @@ class combPlot :
          txtPrint+='| SExp '
       if 'BestFit' in printList : 
          txtPrint+='| BestFit '
+      if 'BestFitG' in printList : 
+         txtPrint+='| BestFit '
+
 
       print txtPrint
       # Loop on mass and print values
@@ -2102,7 +2127,17 @@ class combPlot :
             eu=u68-Val 
             #print Val, u68, d68
             txtPrint+='| '+str(round(Val,2))+' - '+str(round(ed,2))+' + '+str(round(eu,2))+' '
-   
+        if 'BestFitG' in printList : 
+          if (not self.blind ) : 
+            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitG','Val')
+            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitG','68D')
+            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitG','68U')
+            ed=Val-d68
+            eu=u68-Val 
+            #print Val, u68, d68
+            txtPrint+='| '+str(round(Val,3))+' - '+str(round(ed,2))+' + '+str(round(eu,2))+' '
+ 
+  
         print txtPrint 
 
       #print self.Results
