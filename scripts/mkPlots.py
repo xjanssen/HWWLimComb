@@ -87,9 +87,10 @@ for iPlot in options.plots:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
        plot=combPlots.combPlot(options.Version,options.unblind,postFix)
-       CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
+       #CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
        #CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape']
-       plot.plotMuChannel(CombList,options.energy,iModel,[125.7]) 
+       CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','vh3l_shape','hwwvh2j_cut','hww2j_shape','hww01jet_shape']
+       plot.plotMuChannel(CombList,options.energy,iModel,[125.6]) 
 
    #
    # 2D MutliDim Fits

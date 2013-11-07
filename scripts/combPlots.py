@@ -308,6 +308,7 @@ class combPlot :
              gROOT.ProcessLine('TList* c95')
              print 'h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+maxY+')'
              gROOT.ProcessLine('h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+maxY+')')
+             if iModel == 'cVcF' and iTarget== 'MDFGridObs' : ROOT.h2d.Fill(0.67,1.5399999,2.30)
              gROOT.ProcessLine('c68 = contourFromTH2(h2d,2.30)')
              gROOT.ProcessLine('c95 = contourFromTH2(h2d,5.99)')
              gROOT.ProcessLine('gr0 = bestFit(tree,"'+keyX+'","'+keyY+'",TCut(""))')
@@ -570,6 +571,7 @@ class combPlot :
                self.Obj2Plot[X]['Obj'].Draw("AL")
              else: 
                self.Obj2Plot[X]['Obj'].Draw("L") 
+
        self.c1.Update() 
 
    def plotObjLeg(self,Order=[],Title='',Position='TopRight'):
@@ -602,6 +604,14 @@ class combPlot :
              self.Legend.AddEntry(self.Obj2Plot[X]['Obj'],self.Obj2Plot[X]['Legend'],'f')
            elif self.Obj2Plot[X]['Type'] == 'Curve':
              self.Legend.AddEntry(self.Obj2Plot[X]['Obj'],self.Obj2Plot[X]['Legend'],'l')
+           elif self.Obj2Plot[X]['Type'] == 'Point' :
+             self.Legend.AddEntry(self.Obj2Plot[X]['Obj'],self.Obj2Plot[X]['Legend'],'p')
+           elif self.Obj2Plot[X]['Type'] == 'TList':
+             iFirst=1
+             for I in TIter(self.Obj2Plot[X]['Obj']):
+               if iFirst == 1:
+                 self.Legend.AddEntry(I,self.Obj2Plot[X]['Legend'],'l')
+                 iFirst=0
        if not Title == '' : self.Legend.SetHeader(Title)
        self.Legend.Draw('same')
 
@@ -712,7 +722,7 @@ class combPlot :
        if (self.logX) : self.postFix += '_logX'
        if (self.logY) : self.postFix += '_logY'
  
-       self.xAxisTitle = "Higgs mass [GeV]"
+       self.xAxisTitle = "Higgs boson mass [GeV]"
        self.yAxisTitle = "95% CL limit on #sigma/#sigma_{SM}"
 
  
@@ -779,7 +789,7 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV]"
+       self.xAxisTitle = "Higgs boson mass [GeV]"
        #self.yAxisTitle = "Best fit for #mu"
        self.yAxisTitle = "Best fit for #sigma/#sigma_{SM}"
 
@@ -821,7 +831,7 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV]"
+       self.xAxisTitle = "Higgs boson mass [GeV]"
        self.yAxisTitle = "Significance"
 
        if (self.logX) : gPad.SetLogx()
@@ -854,7 +864,7 @@ class combPlot :
        self.c1.cd()
        self.resetPlot()
 
-       self.xAxisTitle = "Higgs mass [GeV]"
+       self.xAxisTitle = "Higgs boson mass [GeV]"
        self.yAxisTitle = "95% CL expected limit on #sigma/#sigma_{SM}"
 
        if (self.logX) : gPad.SetLogx()
@@ -899,7 +909,7 @@ class combPlot :
 
        if CombList[0] == 'HWW' : CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
 
-       self.xAxisTitle = "Higgs mass [GeV]"
+       self.xAxisTitle = "Higgs boson mass [GeV]"
        self.yAxisTitle = "Expected Significance"
 
        if (self.logX) : gPad.SetLogx()
@@ -943,7 +953,7 @@ class combPlot :
        self.c1.SetLeftMargin(0.4) 
        self.c1.SetGridx(1)
 
-       BestFit='BestFitG'
+       BestFit='BestFit'
 
        if len(massFilter) != 1 : return
        nChann=len(CombList)-1
@@ -952,8 +962,9 @@ class combPlot :
        for iComb in CombList:
          self.readResults(iComb,iEnergy,iModel,massFilter,BestFit)
 
+       MuMin=-1.
        MuMax=3.
-       frame = TH2F("frame",";Best fit for #sigma/#sigma_{SM};",1,-1,MuMax,nChann+1,0,nChann+1);
+       frame = TH2F("frame",";Best fit for #sigma/#sigma_{SM};",1,MuMin,MuMax,nChann+1,0,nChann+1);
        #frame.GetXaxis().SetTitleSize(0.05);
        #frame.GetXaxis().SetLabelSize(0.04);
        #frame.GetYaxis().SetLabelSize(0.06);
@@ -987,7 +998,7 @@ class combPlot :
        globalFitLine.SetLineColor(214);
        globalFitLine.Draw("same");
 
-       points = TGraphAsymmErrors (nChann)
+       points = TGraphAsymmErrors (nChann+1)
        invpts = TGraphAsymmErrors (nChann)
        TlMu=TLatex()
        TlMu.SetTextAlign(23);
@@ -1024,9 +1035,17 @@ class combPlot :
        Val = self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0]
        eDo = self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0] - self.Results[CombList[0]][iEnergy][iModel][BestFit]['68D'][0]
        eUp = self.Results[CombList[0]][iEnergy][iModel][BestFit]['68U'][0] - self.Results[CombList[0]][iEnergy][iModel][BestFit]['Val'][0]
+       points.SetPoint(nChann,      Val , nChann+0.5);
+       points.SetPointError(iChann, eDo, eUp , 0, 0);
        muTxt = '#sigma/#sigma_{SM} = %.2f^{ + %.2f}_{  - %.2f}'%(Val,eUp,eDo) 
-       label = '#splitline{   Combined}{                    #scale[0.8]{'+muTxt+'}  }'
+       #label = '#splitline{   Combined}{                    #scale[0.8]{'+muTxt+'}  }'
+       label = '#splitline{   '+combinations[CombList[0]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
        frame.GetYaxis().SetBinLabel(nChann+1, label  );
+       sepLine = TLine (MuMin, nChann, MuMax, nChann);
+       sepLine.SetLineWidth(2);
+       sepLine.SetLineStyle(2);
+       sepLine.Draw("same")
+
        #frame.GetYaxis().SetTickLength(0);
 
 
@@ -1181,21 +1200,31 @@ class combPlot :
        self.Obj2Plot['c68__'+objNameExp]['Obj'].Draw("same")  
        for X in TIter(self.Obj2Plot['c95__'+objNameExp]['Obj']) : X.SetLineStyle(2) 
        self.Obj2Plot['c95__'+objNameExp]['Obj'].Draw("same")  
+       self.Obj2Plot['gr0__'+objNameExp]['Obj'].SetMarkerStyle(22)
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].Draw("samep")  
-       LegList = ['c68__'+objNameExp]
+       self.Obj2Plot['gr0__'+objNameExp]['Legend']= 'Exp. for SM H'
+       LegList = ['c68__'+objNameExp,'c68__'+objNameExp,'c95__'+objNameExp]
+    
        if (not self.blind ) :
          self.Obj2Plot['c68__'+objNameObs]['Legend'] = '68% CL Observed'
          self.Obj2Plot['c95__'+objNameObs]['Legend'] = '95% CL Observed'
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].SetMarkerColor(kRed)  
          for X in TIter(self.Obj2Plot['c68__'+objNameObs]['Obj']) : X.SetLineColor(kRed) 
          for X in TIter(self.Obj2Plot['c95__'+objNameObs]['Obj']) : X.SetLineColor(kRed) 
+         for X in TIter(self.Obj2Plot['c68__'+objNameObs]['Obj']) : X.SetLineWidth(3) 
+         for X in TIter(self.Obj2Plot['c95__'+objNameObs]['Obj']) : X.SetLineWidth(3) 
          for X in TIter(self.Obj2Plot['c95__'+objNameObs]['Obj']) : X.SetLineStyle(2) 
          self.Obj2Plot['c68__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['c95__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")  
-         LegList = ['c68__'+objNameObs,'c68__'+objNameExp]
+         self.Obj2Plot['gr0__'+objNameObs]['Legend']= 'Observed'
+         LegList = ['gr0__'+objNameObs,'c68__'+objNameObs,'c95__'+objNameObs,'gr0__'+objNameExp,'c68__'+objNameExp,'c95__'+objNameExp]
 
-       self.plotObjLeg(LegList)
+       if iModel == "rVrFXSH" :
+         self.plotObjLeg(LegList,combinations[iComb]['legend'],'TopRight')
+       else:
+         self.plotObjLeg(LegList,combinations[iComb]['legend'],'TopLeft')
+       
 
        self.addTitle() 
        self.c1.Update() 
@@ -1227,7 +1256,7 @@ class combPlot :
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
 
-       iTarget='JCP2pm' 
+       iTarget='JCP' 
        for iMass in massList:
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
          for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
@@ -1267,7 +1296,7 @@ class combPlot :
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
 
-       iTarget='JCP2pm' 
+       iTarget='JCP' 
        for iMass in massList:
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
          for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
@@ -1291,7 +1320,14 @@ class combPlot :
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
 
-       iTarget='JCP2pm' 
+       iTarget='JCP' 
+
+       jcp='undef'
+       if '2pm' in iComb : jcp='2pm'
+       if '0m'  in iComb : 
+         jcp='0m'
+         targets[iTarget]['JobsParam']['FQQ'] = [0.]
+
        for iMass in massList:
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
          for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
@@ -1316,6 +1352,23 @@ class combPlot :
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.png  '+workDir+'/'+baseName+'.png') 
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.pdf  '+workDir+'/'+baseName+'.pdf') 
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.root '+workDir+'/'+baseName+'.root') 
+             if jcp == '0m':
+               if iFQQ == 0.   : mText = '0^{-}'
+               #if iFQQ == 0.25 : mText = '0^{-}(f_{q#bar{q}}=25%)'
+               #if iFQQ == 0.50 : mText = '0^{-}(f_{q#bar{q}}=50%)'
+               #if iFQQ == 0.75 : mText = '0^{-}(f_{q#bar{q}}=75%)'
+               #if iFQQ == 1.   : mText = '0^{-}(f_{q#bar{q}}=100%)'
+             if jcp == '2pm':
+               if iFQQ == 0.   : mText = '2^{+}_{min}(f_{q#bar{q}}=0%)'
+               if iFQQ == 0.25 : mText = '2^{+}_{min}(f_{q#bar{q}}=25%)'
+               if iFQQ == 0.50 : mText = '2^{+}_{min}(f_{q#bar{q}}=50%)'
+               if iFQQ == 0.75 : mText = '2^{+}_{min}(f_{q#bar{q}}=75%)'
+               if iFQQ == 1.   : mText = '2^{+}_{min}(f_{q#bar{q}}=100%)'
+
+             if iFITNUIS == -1 :
+               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" ')
+             else :
+               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(true,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" > /dev/null')
              for line in open(logName):
                if "RESULTS_SUMMARY" in line:
                  print "%-4s %s"%(str(iFQQ),line.replace('RESULTS_SUMMARY',''))
@@ -1323,10 +1376,18 @@ class combPlot :
 
            subfile.close()
            print  tableName,unblind,'25.'
-           self.plotFqqLim(tableName,unblind,'25.') 
+           if jcp != '0m' :  
+            if iFITNUIS == 0 :
+             self.plotFqqLim(tableName,0,'25.',massFilter[0],jcp) 
+            else:
+             self.plotFqqLim(tableName,unblind,'25.',massFilter[0],jcp) 
 
-   def plotFqqLim(self,limFile,unblind,lumi):
-   
+   def plotFqqLim(self,limFile,unblind,lumi,mass,jcp):
+  
+     mText = 'Undef'
+     if jcp == '0m'  : mText = '0^{-}'
+     if jcp == '2pm' : mText = '2^{+}_{min}'
+ 
      print "limFile = "+limFile
      self.squareCanvas(False,False)  
      self.c1.cd()
@@ -1402,22 +1463,24 @@ class combPlot :
      grGRAV.SetLineWidth(2)
      grGRAV.SetLineColor(kBlue)
    
-     grGR68.SetMarkerColor(kBlue)
+     grGR68.SetMarkerColor(kRed)
      grGR68.SetLineWidth(2)
-     grGR68.SetLineColor(kBlue)
+     grGR68.SetLineColor(kRed)
+     grGR68.SetFillColor(kRed)
      grGR68.SetLineStyle(kDashed)
-     grGR68.SetFillStyle(0)
+     grGR68.SetFillStyle(3356)
    
-     grGR95.SetMarkerColor(kBlue)
+     grGR95.SetMarkerColor(kBlack)
      grGR95.SetLineWidth(2)
      grGR95.SetLineColor(kBlue)
+     grGR95.SetFillColor(kBlack)
      grGR95.SetLineStyle(kDotted)
-     grGR95.SetFillStyle(0)
+     grGR95.SetFillStyle(3356)
    
      ymin=-10.
      ymax=40.
     
-     dummyHist = TH1F("d",";f_{q#bar{q}} (%);-2 ln (L_{2^{+}_{m}}/L_{0^{+}}) ",100,0,100)
+     dummyHist = TH1F("d",";f_{q#bar{q}} (%);-2 ln (L_{"+mText+"}/L_{0^{+}}) ",100,0,100)
      dummyHist.SetMinimum(ymin)
      dummyHist.SetMaximum(ymax)
      dummyHist.SetStats(0)
@@ -1434,7 +1497,8 @@ class combPlot :
 
      dummyHist.Draw("AXIS")
    
-     leg = TLegend(0.20,0.70,0.45,0.89);
+     leg = TLegend(0.20,0.65,0.40,0.89);
+     leg.SetHeader("WW #rightarrow 2l2#nu + 0/1-jet")
      leg.SetLineColor(0);
      leg.SetFillColor(0);
      leg.SetTextSize(0.033)
@@ -1443,20 +1507,32 @@ class combPlot :
      leg.SetTextFont (42)
 
 
+      
      #leg.AddEntry(grSM,"X#rightarrow#gamma#gamma 0^{+}","lp");
-     leg.AddEntry(grSM,"X#rightarrow WW 0^{+}","lp");
+     #leg.AddEntry(grSM,"Y #rightarrow WW where Y=0^{+}","lp");
+     leg.AddEntry(grSM,"0^{+}","lp");
      leg.AddEntry(grSM68,"#pm 1#sigma expected","f");
      leg.AddEntry(grSM95,"#pm 2#sigma expected","f");
      #leg.AddEntry(grGRAV,"X#rightarrow#gamma#gamma 2^{+}_{m}","lp");
-     leg.AddEntry(grGRAV,"X#rightarrow WW 2^{+}_{m}","lp");
+     #leg.AddEntry(grGRAV,"Y #rightarrow WW where Y=2^{+}_{min}","lp");
+     leg.AddEntry(grGRAV,mText,"lp");
+     leg.AddEntry(grGR68,"#pm 1#sigma expected","f");
+     leg.AddEntry(grGR95,"#pm 2#sigma expected","f");
+
      if unblind: leg.AddEntry(grData,"Observed","lp")
+
+     TlMH=TLatex()
+     TlMH.SetTextSize(0.03);
+     TlMH.SetNDC()
+     TlMH.DrawLatex(0.72,0.87,'m_{H} = '+str(mass)+' GeV')
+
    
      grSM95.Draw("E3same")
      grSM68.Draw("E3same")
      grGRAV.Draw("LPsame")
      grSM.Draw("LPsame")
-     #grGR95.Draw("E5same")
-     #grGR68.Draw("E5same")
+     grGR95.Draw("E3same")
+     grGR68.Draw("E3same")
      if unblind: grData.Draw("LPsame")
      leg.Draw("SAME")
      f = TF1('f','0.',0.,100.)
@@ -1951,7 +2027,7 @@ class combPlot :
          hObs.Fill(iMass,2*Result[iMass])
        hObs.GetXaxis().SetRangeUser(109.5,135.5)
        hObs.GetYaxis().SetRangeUser(0,15)
-       hObs.GetXaxis().SetTitle("Higgs mass [GeV]")
+       hObs.GetXaxis().SetTitle("Higgs boson mass [GeV]")
        hObs.GetYaxis().SetTitle("-2 #Delta ln L")
 
        hObs.GetXaxis().SetLabelFont (   42)
@@ -2065,6 +2141,7 @@ class combPlot :
         if 'SObs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SObs') 
         if 'BestFit' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
         if 'BestFitG' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitG')
+        if 'BestFitT' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitT')
 
       # build Mass List
       allList = []
@@ -2088,7 +2165,9 @@ class combPlot :
       if 'BestFit' in printList : 
          txtPrint+='| BestFit '
       if 'BestFitG' in printList : 
-         txtPrint+='| BestFit '
+         txtPrint+='| BestFitG '
+      if 'BestFitT' in printList : 
+         txtPrint+='| BestFitT '
 
 
       print txtPrint
@@ -2136,7 +2215,16 @@ class combPlot :
             eu=u68-Val 
             #print Val, u68, d68
             txtPrint+='| '+str(round(Val,3))+' - '+str(round(ed,2))+' + '+str(round(eu,2))+' '
- 
+        if 'BestFitT' in printList : 
+          if (not self.blind ) : 
+            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitT','Val')
+            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitT','68D')
+            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitT','68U')
+            ed=Val-d68
+            eu=u68-Val 
+            #print Val, u68, d68
+            txtPrint+='| '+str(round(Val,3))+' - '+str(round(ed,2))+' + '+str(round(eu,2))+' '
+
   
         print txtPrint 
 
