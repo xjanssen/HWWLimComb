@@ -22,6 +22,30 @@ class list_maker:
         except:
            print 'Malformed option (comma separated list expected):',value
 
+#--- channelList Filter
+class ChannelList_Filter:
+    def __init__(self, channels , channelFilter):
+        self.channels      = channels
+        self.channelFilter = channelFilter
+        self.channelList   = []
+        self.found      = False
+        if len(self.channelFilter) == 0:
+          self.found    = True
+          self.channelList = [X for X in self.channels ]  
+        else:
+          self.channelList = [X for X in self.channelFilter if (X in self.channels)]    
+          if  len(self.channelList):  self.found    = True 
+
+    def get(self):
+        if not self.found:
+          print 'Unknown combination : '
+          print self.channelFilter
+          sys.exit(2)
+        else:      
+          return self.channelList
+
+
+
 #--- CombList Filter
 class CombList_Filter:
     def __init__(self, combinations , combFilter):
@@ -97,6 +121,37 @@ class MassList_Filter:
         else:      
           return self.massList               
 
+#--- Mass List Filter
+class MassList_Filter_Chann:
+    def __init__(self, cardtypes , channels , purpose , massFilter, iChannel , energyList):
+        self.cardtypes  = cardtypes
+        self.purpose    = purpose
+        self.massFilter = massFilter
+        self.massList   = []
+        self.found      = False
+        for iPurpose in self.cardtypes: 
+           if iPurpose == self.purpose:
+             self.found = True
+             massMin = 9999999
+             massMax = 0
+             #for iChannel in combinations[iComb]['channels'] : 
+             for iEnergy in energyList :
+               if iEnergy in channels[iChannel]:
+                    #print iChannel, iEnergy, channels[iChannel][iEnergy]['mrange'] 
+                    if channels[iChannel][iEnergy]['mrange'][0] < massMin : massMin = channels[iChannel][iEnergy]['mrange'][0]
+                    if channels[iChannel][iEnergy]['mrange'][1] > massMax : massMax = channels[iChannel][iEnergy]['mrange'][1]
+             #print massMin, massMax
+             if len(self.massFilter) == 0:
+               self.massList=[X for X in self.cardtypes[iPurpose]['masses'] if ( X >= massMin and X<= massMax ) ]
+             else:
+               self.massList=[X for X in self.cardtypes[iPurpose]['masses'] if ( (X >= massMin and X<= massMax) and (X in self.massFilter) )]
+
+    def get(self):
+        if not self.found:
+          print 'Unknown purpose : '+self.purpose
+          sys.exit(2)
+        else:      
+          return self.massList           
 
 #--- energy List
 class EnergyList_Filter:
@@ -109,6 +164,8 @@ class EnergyList_Filter:
           self.energyList = ['8TeV']
         elif self.iEnergy == 0 :
           self.energyList = ['7TeV','8TeV']
+        elif  self.iEnergy == 13 :
+          self.energyList = ['13TeV']
         else:
           print 'Unknown Energy !!!!'
           sys.exit(2)

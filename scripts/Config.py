@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
+homedir     = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/' 
+#homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW13TeV/HWWLimComb/'
+#homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
 #homedir     = '/Users/xjanssen/cms/HWW2012/HWWLimComb/'
 
 workspace   = homedir+'workspace/'
@@ -19,6 +21,31 @@ cardtypes = {
                 } ,
   'smhiggs'   : { 'dir' : 'couplings' , 'targetdir' : 'smhiggs' ,
                   'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] 
+                  #'masses' : [125, 125.5,126,126.5,127 , 127.5 , 128 , 128.5 ,129 ,129.5 , 130] 
+                  #'masses' : [125,127] 
+                  #'masses' : [125] 
+                  #'masses' : [400,500,600]
+                } ,
+  'ewksinglet': { 'dir' : 'ewksinglet' , 'targetdir' : 'ewksinglet' ,
+                  'masses' : [250,300,350,400,450,500,550,600,700,800,900,1000]
+
+                } ,   
+  'smhiggs2'  : { 'dir' : 'couplings' , 'targetdir' : 'smhiggs' ,
+                  #'masses' : [125,125.5,126,126.5,127,127.5,128,128.5,129,129.5,130]
+                  'masses' : 
+                            #[124.5,124.6,124.7,124.8,124.9,125.1,125.2,125.3,125.4,125.5,125.6,125.7,125.8,125.9,126,126.1,126.2,126.3,126.4,126.5
+                            #,115, 120, 125, 130, 135,127,127.5,128,128.5,129,129.5
+                            #]
+                             [
+                              #115, 
+                              120, 
+                              124.5,124.6,124.7,124.8,124.9, 
+                              125,
+                              125.1,125.2,125.3,125.4,125.5,125.6,125.7,125.8,125.9,126,126.1,126.2,126.3,126.4,126.5,  
+                              127,127.5,128,128.5,129,129.5, 
+                              130, 
+                              #135
+                             ]
                 } ,
   'sminject'  : { 'dir' : 'searches'  , 'targetdir' : 'sminject', 
                   'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] ,
@@ -32,7 +59,8 @@ cardtypes = {
   # Second Higgs
   #
   'searches'  : { 'dir' : 'searches'  ,                           
-                  'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] 
+                  #'masses' : [110, 115, 120, 125, 130, 135, 140, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500, 550, 600] 
+                  'masses' : [250,300,350,400,450,500,550,600]
                 } ,
   # 
   # Mass Scan
@@ -101,6 +129,24 @@ preProc = {
   
 }
 
+extrapolations = { 'Mass'  : { 
+                               #125 : [125.5,126,126.5,127] ,
+                               #130 : [129.5,129,128.5,128,127.5] ,
+                               125 : [124.5,124.6,124.7,124.8,124.9,125.1,125.2,125.3,125.4,125.5,125.6,125.7,125.8,125.9,126,126.1,126.2,126.3,126.4,126.5,127],
+                               #125 : [127]
+
+                             } ,
+                   '13TeV' : {
+                               'Energy' : '8TeV' ,
+                               'Lumi'   : { 
+                                           'Origin'  : 19.4 ,
+                                           'Targets' : [30,120,300,3000] ,
+                                          } ,
+   
+                             } ,
+                 }
+
+
 # V3 Most results
 # V4 Debug version for KV,KF 
 # V5 MHFit 100  mu points + 125 Injection
@@ -109,8 +155,306 @@ preProc = {
 
 # V8: Pixel lumi
 
-DefaultVersion = 'V8'
+DefaultVersion = '13TeV'
+DefaultVersion = 'VBFBB'
 channels = { 
+
+'EWKSinglet' : {
+
+  'of0j_oldcps':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'oldcps' , 'card' : 'hww-19.47fb.mH$MASS.of_0j_shape.txt'  } ,
+             } ,
+  'of1j_oldcps':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'oldcps' , 'card' : 'hww-19.47fb.mH$MASS.of_1j_shape.txt'  } ,
+             } ,
+
+  'of0j_newcps':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'newcps' , 'card' : 'hww-19.47fb.mH$MASS.of_0j_shape.txt'  } ,
+             } ,
+  'of1j_newcps':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'newcps' , 'card' : 'hww-19.47fb.mH$MASS.of_1j_shape.txt'  } ,
+             } ,
+
+  'of0j_smbkgd':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'smbkgd' , 'card' : 'hww-19.47fb.mH$MASS.of_0j_shape.txt'  } ,
+             } ,
+  'of1j_smbkgd':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'smbkgd' , 'card' : 'hww-19.47fb.mH$MASS.of_1j_shape.txt'  } ,
+             } ,
+
+  # C^2 =  
+  'of0j_cp2_1d0':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_1d0_shape.txt'  } ,
+             } ,
+  'of1j_cp2_1d0':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_1d0_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d9':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d9_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d9':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d9_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d8':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d8_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d8':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d8_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d7':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d7_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d7':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d7_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d6':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d6_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d6':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d6_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d5':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d5_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d5':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d5_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d4':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d4_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d4':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d4_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d3':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d3_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d3':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d3_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d2':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d2_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d2':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d2_shape.txt'  } ,
+             } ,
+
+  # C^2 = 
+  'of0j_cp2_0d1':{
+               '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_0j.EWKSinglet_CP2_0d1_shape.txt'  } ,
+             } ,
+  'of1j_cp2_0d1':{
+               '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [110,1000]  , 
+                          'dir' : 'EWKSinglet', 'subdir' : 'ewkcp2' , 'card' : 'hww-19.47fb.mH$MASS.of_1j.EWKSinglet_CP2_0d1_shape.txt'  } ,
+             } ,
+
+
+
+
+},
+
+'VBFBB' : {
+  'vbfbb' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'vbfbb_8TeV.txt'  } ,              
+           } ,
+  'vbfbbsplit' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'vbfbb_8TeV_pdfsplit.txt'  } ,              
+           } ,
+  'vbfbbkostas' : { 
+              '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'datacard_split_mbbParton_m125_CATMIN1_Binned.txt'  } ,              
+           } ,
+
+},
+
+'13TeV' : {
+
+
+# =========== 13 TeV Projection @ 30 fb-1 ====================== 
+
+  # ============ H -> WW 0/1-jet SF cut-based ================== 
+  'hww0jsf_30ifb' : { 
+                    '13TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'cut' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'hwwsf_0j_cut_8TeV.txt'} ,  
+                    } ,
+  'hww1jsf_30ifb' : {
+                    '13TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'cut' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'hwwsf_1j_cut_8TeV.txt'} ,
+                    } ,
+  # ============ H -> WW 0/1-jet 2D shapes =================
+  'hww0jof_30ifb' : {
+                    '13TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'hwwof_0j_shape_8TeV.txt' , 'files' : ['hwwof_0j.input_8TeV.root'] } ,
+                    } ,
+  'hww1jof_30ifb'  : {
+                    '13TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'hwwof_1j_shape_8TeV.txt' , 'files' : ['hwwof_1j.input_8TeV.root'] } ,
+                    } , 
+  # ============ H -> WW VBF SF Cut Based =====================
+  'hww2jsf_30ifb' :   {
+                    '13TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 13 , 'method' : 'cut'  , 'mrange' : [110,600] , 
+                                'dir' : '13TeV'   ,  'subdir' : '30ifb' , 'card' : 'hwwsf_2j_cut_8TeV.txt'},
+                    } ,
+  # ============ H -> WW VBF OF Shape Based =====================
+  'hww2jof_30ifb' : {
+                    '13TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 13 , 'method' : 'shape'  , 'mrange' : [110,600] ,
+                                'dir' : '13TeV'   ,  'subdir' : '30ifb' , 'card' : 'hwwof_2j_shape_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_2j_shape.root'] },
+                    } ,
+
+  # ============ VH -> WW 3l shape-based ==================
+  'vh3l_sssf_30ifb' :  {
+                    '13TeV' : { 'tag' : '3l1'   , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200] , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb', 'card' : 'vh3l1_shape_8TeV.txt' , 'files' : ['vh3l1_input_8TeV.root'] } 
+                    } ,
+  'vh3l_ossf_30ifb' : {
+                    '13TeV' : { 'tag' : '3l2'   , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200] , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb', 'card' : 'vh3l2_shape_8TeV.txt' , 'files' : ['vh3l2_input_8TeV.root'] } 
+                    } ,
+
+  # ============ VH -> WW 2j SF cut-based ==================
+  'hwwvh2jsf_30ifb' : {
+                    '13TeV' : { 'tag' : 'sf' , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '2l2nu2j' , 'energy' : 13 , 'method' : 'cut' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'hwwsf_vh2j_cut_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.sf_vh2j_shape.root'] }
+                    } ,
+
+  # ============ VH -> WW 2j DF shape-based ================== 
+  'hwwvh2jof_30ifb' : {
+                    '13TeV' : { 'tag' : 'of' , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '2l2nu2j' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'hwwof_vh2j_shape_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_vh2j_shape_mll.root'] }
+                    } ,
+  # ============ ZH -> WW 3l 2j shape-based ================
+  'zh3l2j_eee_30ifb': {
+                    '13TeV' : { 'tag' : '3l2jeee', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'zh3l2j_shape_eee_8TeV.txt' , 'files' : ['zh3l2j_input_shape_eee_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_eem_30ifb': {
+                    '13TeV' : { 'tag' : '3l2jeem', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  ,
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'zh3l2j_shape_eem_8TeV.txt' , 'files' : ['zh3l2j_input_shape_eem_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_emm_30ifb': {
+                    '13TeV' : { 'tag' : '3l2jemm', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'zh3l2j_shape_emm_8TeV.txt' , 'files' : ['zh3l2j_input_shape_emm_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_mmm_30ifb': {
+                    '13TeV' : { 'tag' : '3l2jmmm', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '30ifb' , 'card' : 'zh3l2j_shape_mmm_8TeV.txt' , 'files' : ['zh3l2j_input_shape_mmm_8TeV.root'] } ,
+                    } ,
+
+
+# =========== 13 TeV Projection @ 120 fb-1 ====================== 
+
+  # ============ H -> WW 0/1-jet SF cut-based ================== 
+  'hww0jsf_120ifb' : { 
+                    '13TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'cut' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'hwwsf_0j_cut_8TeV.txt'} ,  
+                    } ,
+  'hww1jsf_120ifb' : {
+                    '13TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'cut' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'hwwsf_1j_cut_8TeV.txt'} ,
+                    } ,
+  # ============ H -> WW 0/1-jet 2D shapes =================
+  'hww0jof_120ifb' : {
+                    '13TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'hwwof_0j_shape_8TeV.txt' , 'files' : ['hwwof_0j.input_8TeV.root'] } ,
+                    } ,
+  'hww1jof_120ifb'  : {
+                    '13TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,600]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'hwwof_1j_shape_8TeV.txt' , 'files' : ['hwwof_1j.input_8TeV.root'] } ,
+                    } , 
+  # ============ H -> WW VBF SF Cut Based =====================
+  'hww2jsf_120ifb' :   {
+                    '13TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 13 , 'method' : 'cut'  , 'mrange' : [110,600] , 
+                                'dir' : '13TeV'   ,  'subdir' : '120ifb' , 'card' : 'hwwsf_2j_cut_8TeV.txt'},
+                    } ,
+  # ============ H -> WW VBF OF Shape Based =====================
+  'hww2jof_120ifb' : {
+                    '13TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 13 , 'method' : 'shape'  , 'mrange' : [110,600] ,
+                                'dir' : '13TeV'   ,  'subdir' : '120ifb' , 'card' : 'hwwof_2j_shape_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_2j_shape.root'] },
+                    } ,
+
+  # ============ VH -> WW 3l shape-based ==================
+  'vh3l_sssf_120ifb' :  {
+                    '13TeV' : { 'tag' : '3l1'   , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200] , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb', 'card' : 'vh3l1_shape_8TeV.txt' , 'files' : ['vh3l1_input_8TeV.root'] } 
+                    } ,
+  'vh3l_ossf_120ifb' : {
+                    '13TeV' : { 'tag' : '3l2'   , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200] , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb', 'card' : 'vh3l2_shape_8TeV.txt' , 'files' : ['vh3l2_input_8TeV.root'] } 
+                    } ,
+
+  # ============ VH -> WW 2j SF cut-based ==================
+  'hwwvh2jsf_120ifb' : {
+                    '13TeV' : { 'tag' : 'sf' , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '2l2nu2j' , 'energy' : 13 , 'method' : 'cut' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'hwwsf_vh2j_cut_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.sf_vh2j_shape.root'] }
+                    } ,
+
+  # ============ VH -> WW 2j DF shape-based ================== 
+  'hwwvh2jof_120ifb' : {
+                    '13TeV' : { 'tag' : 'of' , 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '2l2nu2j' , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'hwwof_vh2j_shape_8TeV.txt' , 'files' : ['shapes/hww-19.47fb.mH$MASS.of_vh2j_shape_mll.root'] }
+                    } ,
+  # ============ ZH -> WW 3l 2j shape-based ================
+  'zh3l2j_eee_120ifb': {
+                    '13TeV' : { 'tag' : '3l2jeee', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'zh3l2j_shape_eee_8TeV.txt' , 'files' : ['zh3l2j_input_shape_eee_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_eem_120ifb': {
+                    '13TeV' : { 'tag' : '3l2jeem', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  ,
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'zh3l2j_shape_eem_8TeV.txt' , 'files' : ['zh3l2j_input_shape_eem_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_emm_120ifb': {
+                    '13TeV' : { 'tag' : '3l2jemm', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'zh3l2j_shape_emm_8TeV.txt' , 'files' : ['zh3l2j_input_shape_emm_8TeV.root'] } ,
+                    } ,
+  'zh3l2j_mmm_120ifb': {
+                    '13TeV' : { 'tag' : '3l2jmmm', 'prod' : 'VH' , 'branch' : 'vhww' , 'decay' : '3l2j'   , 'energy' : 13 , 'method' : 'shape' , 'mrange' : [110,200]  , 
+                                'dir' : '13TeV' , 'subdir' : '120ifb' , 'card' : 'zh3l2j_shape_mmm_8TeV.txt' , 'files' : ['zh3l2j_input_shape_mmm_8TeV.root'] } ,
+                    } ,
+
+},
+
 
 # ============ V2: Cards for HWW Paper (datacrds from comb svn) ==========================
 
@@ -643,11 +987,195 @@ combinations = {
                           'legend'   : '(V)H #rightarrow (V)WW #rightarrow 2l/3l'
                         } ,
 
+#
+# 13 TeV Projection, 30 fb-1
+#
+
+  'hww01jet_30ifb' : { 'energies' : [ '13TeV' ] , 'channels' : [ 'hww0jsf_30ifb' , 'hww1jsf_30ifb' , 'hww0jof_30ifb' , 'hww1jof_30ifb' ] , 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '2l2#nu + 0/1-jet' 
+                     } ,
+
+
+  'hww2j_30ifb'    : { 'energies' : [ '13TeV' ] , 'channels' : [ 'hww2jof_30ifb' , 'hww2jsf_30ifb' ]  ,                                 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '2l2#nu + 2-jets, VBF tag'
+                     }, 
+
+  'vh3l_30ifb'     : { 'energies' : [ '13TeV' ] , 'channels' : [ 'vh3l_sssf_30ifb'  , 'vh3l_ossf_30ifb'  ] ,                          
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '3l3#nu, WH tag'  
+                     } ,
+
+  'hwwvh2j_30ifb'  : { 'energies' : [ '13TeV' ] , 'channels' : [ 'hwwvh2jsf_30ifb' , 'hwwvh2jof_30ifb' ] ,                               
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '2l2#nu + 2-jets, VH tag'  
+                     } ,
+
+  'zh3l2j_30ifb'   : { 'energies' : [ '13TeV' ] , 'channels' : [ 'zh3l2j_eee_30ifb', 'zh3l2j_eem_30ifb', 'zh3l2j_emm_30ifb', 'zh3l2j_mmm_30ifb' ] ,
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '3l#nu + 2-jets, ZH tag'
+                     } ,
+
+  'hww_vh3l_vh2j_zh3l2j_30ifb' :
+                        {
+                          'energies' : [ '13TeV' ] , 
+                          'channels' : [ 'vh3l_sssf_30ifb'  , 'vh3l_ossf_30ifb' , 
+                                         'hwwvh2jsf_30ifb' , 'hwwvh2jof_30ifb' ,
+                                         'zh3l2j_eee_30ifb', 'zh3l2j_eem_30ifb', 'zh3l2j_emm_30ifb', 'zh3l2j_mmm_30ifb' 
+                                       ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'H #rightarrow WW (all channels)'
+                        } ,
+ 
+
+  'hww012j_vh3l_vh2j_zh3l2j_30ifb' :
+                        {
+                          'energies' : [ '13TeV' ] , 
+                          'channels' : [ 'hww0jsf_30ifb' , 'hww1jsf_30ifb' , 'hww0jof_30ifb' , 'hww1jof_30ifb' , 
+                                         'hww2jof_30ifb' , 'hww2jsf_30ifb' , 
+                                         'vh3l_sssf_30ifb'  , 'vh3l_ossf_30ifb' , 
+                                         'hwwvh2jsf_30ifb' , 'hwwvh2jof_30ifb' ,
+                                         'zh3l2j_eee_30ifb', 'zh3l2j_eem_30ifb', 'zh3l2j_emm_30ifb', 'zh3l2j_mmm_30ifb' 
+                                       ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'H #rightarrow WW (all channels)'
+                        } ,
+
+#
+# 13 TeV Projection, 120 fb-1
+#
+
+  'hww01jet_120ifb': { 'energies' : [ '13TeV' ] , 'channels' : [ 'hww0jsf_120ifb' , 'hww1jsf_120ifb' , 'hww0jof_120ifb' , 'hww1jof_120ifb' ] , 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '2l2#nu + 0/1-jet' 
+                     } ,
+
+
+  'hww2j_120ifb'   : { 'energies' : [ '13TeV' ] , 'channels' : [ 'hww2jof_120ifb' , 'hww2jsf_120ifb' ]  ,                                 
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '2l2#nu + 2-jets, VBF tag'
+                     }, 
+
+  'vh3l_120ifb'    : { 'energies' : [ '13TeV' ] , 'channels' : [ 'vh3l_sssf_120ifb'  , 'vh3l_ossf_120ifb'  ] ,                          
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '3l3#nu, WH tag'  
+                     } ,
+
+  'hwwvh2j_120ifb' : { 'energies' : [ '13TeV' ] , 'channels' : [ 'hwwvh2jsf_120ifb' , 'hwwvh2jof_120ifb' ] ,                               
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '2l2#nu + 2-jets, VH tag'  
+                     } ,
+
+  'zh3l2j_120ifb'  : { 'energies' : [ '13TeV' ] , 'channels' : [ 'zh3l2j_eee_120ifb', 'zh3l2j_eem_120ifb', 'zh3l2j_emm_120ifb', 'zh3l2j_mmm_120ifb' ] ,
+                       'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] , 
+                       'legend' : '3l#nu + 2-jets, ZH tag'
+                     } ,
+
+  'hww_vh3l_vh2j_zh3l2j_120ifb' :
+                        {
+                          'energies' : [ '13TeV' ] , 
+                          'channels' : [ 'vh3l_sssf_120ifb'  , 'vh3l_ossf_120ifb' , 
+                                         'hwwvh2jsf_120ifb' , 'hwwvh2jof_120ifb' ,
+                                         'zh3l2j_eee_120ifb', 'zh3l2j_eem_120ifb', 'zh3l2j_emm_120ifb', 'zh3l2j_mmm_120ifb' 
+                                       ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'H #rightarrow WW (all channels)'
+                        } ,
+
+
+  'hww012j_vh3l_vh2j_zh3l2j_120ifb' :
+                        {
+                          'energies' : [ '13TeV' ] , 
+                          'channels' : [ 'hww0jsf_120ifb' , 'hww1jsf_120ifb' , 'hww0jof_120ifb' , 'hww1jof_120ifb' , 
+                                         'hww2jof_120ifb' , 'hww2jsf_120ifb' , 
+                                         'vh3l_sssf_120ifb'  , 'vh3l_ossf_120ifb' , 
+                                         'hwwvh2jsf_120ifb' , 'hwwvh2jof_120ifb' ,
+                                         'zh3l2j_eee_120ifb', 'zh3l2j_eem_120ifb', 'zh3l2j_emm_120ifb', 'zh3l2j_mmm_120ifb' 
+                                       ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'H #rightarrow WW (all channels)'
+                        } ,
+
+#
+# EWKSinglet
+#
+
+  'of_oldcps' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'of0j_oldcps' , 'of1j_oldcps'
+                                       ] ,
+                          'purposes' : [ 'ewksinglet' ] ,
+                          'legend'   : 'H #rightarrow WW (DF 0/1-jet), Old CPS'
+                        } ,
+
+  'of_newcps' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'of0j_newcps' , 'of1j_newcps'
+                                       ] ,
+                          'purposes' : [ 'ewksinglet' ] ,
+                          'legend'   : 'H #rightarrow WW (DF 0/1-jet), SM'
+                        } ,
+
+  'of_smbkgd' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'of0j_smbkgd' , 'of1j_smbkgd'
+                                       ] ,
+                          'purposes' : [ 'ewksinglet' ] ,
+                          'legend'   : 'H #rightarrow WW (DF 0/1-jet) + 125 GeV'
+                        } ,
+
+
+  'of_cp2_1d0' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_1d0' , 'of1j_cp2_1d0' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=1.0' } ,
+  'of_cp2_0d9' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d9' , 'of1j_cp2_0d9' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.9' } ,
+  'of_cp2_0d8' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d8' , 'of1j_cp2_0d8' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.8' } ,
+  'of_cp2_0d7' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d7' , 'of1j_cp2_0d7' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.7' } ,
+  'of_cp2_0d6' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d6' , 'of1j_cp2_0d6' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.6' } ,
+  'of_cp2_0d5' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d5' , 'of1j_cp2_0d5' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.5' } ,
+  'of_cp2_0d4' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d4' , 'of1j_cp2_0d4' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.4' } ,
+  'of_cp2_0d3' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d3' , 'of1j_cp2_0d3' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.3' } ,
+  'of_cp2_0d2' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d2' , 'of1j_cp2_0d2' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.2' } ,
+  'of_cp2_0d1' : { 'energies' : [ '8TeV' ] , 'channels' : [ 'of0j_cp2_0d1' , 'of1j_cp2_0d1' ] , 'purposes' : [ 'ewksinglet' ] , 'legend'   : 'C\'^{2}=0.1' } ,
+
+
+#
+# VBFBB
+#
+   'vbfbb' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbb' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+   'vbfbbsplit' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbsplit' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+   'vbfbbkostas' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbkostas' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+
 
 }
 
 physmodels = {
+  'SMValid'  : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:strictSMLikeHiggs' , 'cardtype' : 'smhiggs' } ,
   'NoModel'  : { 'cardtype' : 'couplings' } ,
+  'EWKSinglet':{ 'cardtype' : 'ewksinglet' } ,
   '125dot6'  : { 'cardtype' : 'couplings' } ,
   '125dot7'  : { 'cardtype' : 'couplings2' } ,
   'SMHiggs'  : { 'cardtype' : 'smhiggs'   } ,
@@ -662,10 +1190,57 @@ physmodels = {
 # Couplings
 #
   'rVrFXSH'  : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs' , 'cardtype' : 'couplings' , 
-                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF,VH}','#mu_{ggH}'] , 'Min' : [-2.,-2.] , 'Max' : [4.,4.] ,  'MinPlt' : [0.,0.] , 'MaxPlt' : [2.5,2.5]  } } ,
+                 'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF,VH}','#mu_{ggH}'] , 
+                               #'Min' : [-2.,-2.] , 'Max' : [4.,4.] ,  'MinPlt' : [0.,0.] , 'MaxPlt' : [2.5,2.5]  } } ,
+                               'Min' : [-2.,-2.] , 'Max' : [4.,4.] ,  'MinPlt' : [-2.,-2.] , 'MaxPlt' : [4.,4.]  } } ,
   'cVcF'     : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF'      , 'cardtype' : 'couplings' , 
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{f}'] , 'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,2.]  }  } ,
                  #'MDFTree' : { 'NDim' : 2 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{f}'] , 'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.66,1.52] , 'MaxPlt' : [.68,1.56]  }  } ,
+#
+# mu(ggH,VBF,VH) 
+#
+  'Fit3Mu'   : { 'model' : "HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO verbose --PO 'modes=ggH,qqH,VH' --PO 'ttH=ggH'  --PO 'ggHRange=0:2' --PO 'qqHRange=0:5' --PO 'VHRange=0:5'" , 
+                 'cardtype' : 'couplings',
+                 'MDFTree' : { 'TargetBase' : 'Fit3Mu' , 'POISetKeys'  : [ 'ggH','qqH','VH' ] , 
+                               #'ParNames' : [ '#mu_{ggH}' , '#mu_{VBF}' , '#mu_{VH}' ] , 
+                               'ggH'   : { 'NDim' : 1 , 'Keys' : ['r_ggH'] , 'Ext' : '_ggH' , 'AxisTitle' : ['#mu_{ggH}'] , 'Min' : [0.] , 'Max' : [2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [2.,8.]  } , 
+                               'qqH'   : { 'NDim' : 1 , 'Keys' : ['r_qqH'] , 'Ext' : '_qqH' , 'AxisTitle' : ['#mu_{VBF}'] , 'Min' : [0.] , 'Max' : [5.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [4.,8.]  } , 
+                               'VH'    : { 'NDim' : 1 , 'Keys' : ['r_VH']  , 'Ext' : '_VH'  , 'AxisTitle' : ['#mu_{VH}']  , 'Min' : [0.] , 'Max' : [5.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [6.,8.]  } , 
+                             }
+               },
+#
+# mu(ggH,VBF)
+#
+  'Fit2Mu'   : { 'model' : "HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO verbose --PO 'modes=ggH,qqH' --PO 'ttH=ggH'  --PO 'ggHRange=0:2' --PO 'qqHRange=0:5'" , 
+                 'cardtype' : 'couplings',
+                 'MDFTree' : { 'TargetBase' : 'Fit2Mu' , 'POISetKeys'  : [ 'ggH','qqH', ] , 
+                               #'ParNames' : [ '#mu_{ggH}' , '#mu_{VBF}' , '#mu_{VH}' ] , 
+                               'ggH'   : { 'NDim' : 1 , 'Keys' : ['r_ggH'] , 'Ext' : '_ggH' , 'AxisTitle' : ['#mu_{ggH}'] , 'Min' : [0.] , 'Max' : [2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [2.,8.]  } , 
+                               'qqH'   : { 'NDim' : 1 , 'Keys' : ['r_qqH'] , 'Ext' : '_qqH' , 'AxisTitle' : ['#mu_{VBF}'] , 'Min' : [0.] , 'Max' : [5.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [4.,8.]  } , 
+                             }
+               },
+
+#
+# BR(Invisible)
+#
+  'BRInv'  : { 'model' : "HiggsAnalysis.CombinedLimit.HiggsCouplings:c7 --PO verbose" , 'cardtype' : 'couplings' ,
+                 'MDFTree' : { 'TargetBase' : 'BRInv' , 'POISetKeys'  : ['BRInv'] ,   
+                               'BRInv' :  { 'NDim' : 1 , 'Keys' : ['BRInvUndet'] , 'AxisTitle' : ['BR_{BSM}'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,8.]  } ,
+                             } 
+               }, 
+
+# 'cVcFBRInv': { 'model' : "HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcFBRInv --PO verbose" , 'cardtype' : 'couplings' ,
+#                'MDFTree' : { 'TargetBase' : 'BRInv' , 'POISetKeys'  : ['BRInv'] ,   
+#                              'BRInv' :  { 'NDim' : 1 , 'Keys' : ['BRInvUndet'] , 'AxisTitle' : ['BR_{BSM}'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,8.]  } ,
+#                            } 
+#              }, 
+
+  'HWWInv'   : { 'model' : "HiggsAnalysis.CombinedLimit.HWWModels:HWWInv  --PO verbose" , 'cardtype' : 'couplings' ,
+                 'MDFTree' : { 'TargetBase' : 'BRInv' , 'POISetKeys'  : ['BRInv'] ,   
+                               'BRInv' :  { 'NDim' : 1 , 'Keys' : ['BRInvUndet'] , 'AxisTitle' : ['BR_{BSM}'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,8.]  } ,
+                             } 
+               }, 
+
 #
 # Mass/mu scan from Histo cards
 #
@@ -716,8 +1291,9 @@ targets = {
   #
   'ACLsObs'      : { 'notblind' : False , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'treeKeys' : ['Val'] } ,
   'ACLsExp'      : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run expected' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
-  'ACLsInjPre'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1' },
-  'ACLsInjPost'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1 --toysFreq' },
+  'ACLsExpPost'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run expected -t -1 --expectSignal=0 --toysFreq' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
+  'ACLsInjPre'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1' , 'treeKeys' : ['Val']  },
+  'ACLsInjPost'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1 --toysFreq' , 'treeKeys' : ['Val']  },
   #
   # ACLs SM Higgs Injection
   # 
@@ -739,9 +1315,10 @@ targets = {
 #  'BestFitT'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --plot --signalPdfNames=\'*ZH*,*WH*,*qqH*,*ggH*\' --backgroundPdfNames=\'*qqWW*,*ggWW*,*VV*,*Top*,*Zjets*,*Wjets*,*Wgamma*,*Wg3l*,*Ztt*\' --saveNorm --rMin=-5 --rMax=20 --robustFit=1 ' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   'BestFitT'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --robustFit=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   #'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-2 --rMax=4 --robustFit=1 --X-rtd FITTER_DYN_STEP -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
-  'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2  --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
+  'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2  --plot --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 ' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   'BestFitX'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
-  'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit --rMin=-2 --rMax=4 -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
+  'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
+  'BestFitExpT'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-10 -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   #
   # Toys
   # 
@@ -798,7 +1375,55 @@ targets = {
                       'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } },
                       #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
 
-                                    
+  #
+  # Fit 3 Mu: ggH, VBH, VH
+  #                     
+  # --> Expected Fixing Others 
+  'Fit3MuExpFix_ggH' : { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_ggH --floatOtherPOI=0 -t -1 --expectSignal=1' , 
+                         'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit3MuExpFix_qqH' : { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_qqH --floatOtherPOI=0 -t -1 --expectSignal=1' , 
+                         'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit3MuExpFix_VH' :  { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_VH  --floatOtherPOI=0 -t -1 --expectSignal=1' , 
+                         'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  # --> Expected Floating Others  
+  'Fit3MuExp_ggH' : { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_ggH --floatOtherPOI=1 -t -1 --expectSignal=1' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit3MuExp_qqH' : { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_qqH --floatOtherPOI=1 -t -1 --expectSignal=1' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit3MuExp_VH' :  { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_VH  --floatOtherPOI=1 -t -1 --expectSignal=1' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  # --> Observed Floating Others  
+  'Fit3MuObs_ggH' : { 'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_ggH --floatOtherPOI=1 ' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit3MuObs_qqH' : { 'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_qqH --floatOtherPOI=1 ' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit3MuObs_VH' :  { 'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_VH  --floatOtherPOI=1 ' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  #
+  # Fit 2 Mu: ggH, VBH
+  #    
+  # --> Expected Floating Others  
+  'Fit2MuExp_ggH' : { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_ggH --floatOtherPOI=1 -t -1 --expectSignal=1' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit2MuExp_qqH' : { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_qqH --floatOtherPOI=1 -t -1 --expectSignal=1' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  # --> Observed Floating Others  
+  'Fit2MuObs_ggH' : { 'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_ggH --floatOtherPOI=1 ' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  'Fit2MuObs_qqH' : { 'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P r_qqH --floatOtherPOI=1 ' , 
+                      'NJobs' : 4 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  #
+  # BR(Invisible)
+  #
+  # --> Expected Fixing Others 
+  'BRInvExpFix' :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P BRInvUndet --floatOtherPOI=0 -t -1 --expectSignal=1' , 
+                      'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+  # --> Expectes Floating Others  
+  'BRInvExp'    :   { 'notblind' : True , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P BRInvUndet --floatOtherPOI=1 -t -1 --expectSignal=1' , 
+                      'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+           
 }
 
 toys = {
@@ -828,16 +1453,23 @@ plotStyle = {
        'zh3l2j_shape'   : { 'linY' : [0.0 ,150.] , 'logY' : [0.5,700.] } ,
        'hww012j_vh3l_vh2j_shape'        : { 'linY' : [0.0 , 5.] , 'logY' : [0.02,50.] } ,
        'hww012j_vh3l_vh2j_zh3l2j_shape' : { 'linY' : [0.0 , 5.] , 'logY' : [0.02,50.] } ,
+       'vbfbb'          : { 'linY' : [0.0 ,15.] , 'logY' : [0.05,100.] } ,
+       'vbfbbsplit'          : { 'linY' : [0.0 ,15.] , 'logY' : [0.05,100.] } ,
      },
 
   'LimitExp' : 
      { 
        'Default'        : { 'linY' : [0.0 ,70.] , 'logY' : [0.05,200.] } ,
+       'of_cp2_1d0'     : { 'linY' : [0.0 ,70.] , 'logY' : [0.5,300.] } ,
+       'hww01jof_shape'     : { 'linY' : [0.0 ,70.] , 'logY' : [0.3,10.] } ,
+       'of_oldcps'     : { 'linY' : [0.0 ,70.] , 'logY' : [0.3,10.] } ,
      },
 
   'Sign'  :
      { 
        'Default'        : { 'linY' : [0.0 ,25.] , 'logY' : [0.1,200.] } ,
+       'vbfbb'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
+       'vbfbbsplit'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
      }
 
 }

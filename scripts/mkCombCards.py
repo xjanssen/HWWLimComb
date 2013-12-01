@@ -270,12 +270,14 @@ for iComb in combList:
        isValidEnergy=True
      if (options.energy == 8 or options.energy == 0) and iEnergy == '8TeV' : 
        isValidEnergy=True
+     if (options.energy == 13) and iEnergy == '13TeV' : 
+       isValidEnergy=True
    # Validate Combination Purpose
    isValidPurpose=False
    for purpose in combinations[iComb]['purposes']:
      if options.purpose == purpose :
        isValidPurpose=True
-   # Process if valid
+   # Process if valid 
    if isValidEnergy and isValidPurpose :
      massList   = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,options.purpose,options.masses,iComb,energyList).get()
      print '---------------------- Building cards for combination: '+iComb

@@ -181,8 +181,9 @@ class card():
 	def addCol(self,bin,process,processId,rate,observation):
 		'''Method addCol() takes as input all the information in a column in block1 (bin/observation) and block2 (bin/process/rate), as well as adds the extra column to the systematics blocks where needed.'''
 		#block1
-		self.content['block1']['bin'].append(str(bin))
-		self.content['block1']['observation'].append(str(observation))
+                if not str(bin) in self.content['block1']['bin']:
+		  self.content['block1']['bin'].append(str(bin))
+		  self.content['block1']['observation'].append(str(observation))
 		#block2
 		self.content['block2']['bin'].append(str(bin))
 		self.content['block2']['process'].append(str(process))
