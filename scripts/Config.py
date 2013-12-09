@@ -298,14 +298,131 @@ channels = {
              '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
              'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'vbfbb_8TeV.txt'  } ,              
            } ,
+  #'vbfbbsplit' :{
+  #           '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+  #           'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'vbfbb_8TeV_pdfsplit.txt'  } ,              
+  #         } ,
+  #'vbfbbkostas' : { 
+  #            '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+  #           'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'datacard_split_mbbParton_m125_CATMIN1_Binned.txt'  } ,              
+  #         } ,
+
   'vbfbbsplit' :{
              '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
-             'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'vbfbb_8TeV_pdfsplit.txt'  } ,              
+                        'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'vbfbb_8TeV_split.txt' ,  
+                        'altmodel' : {
+                                      'expPow'     : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'modG'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'tanh'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'CexpPow'     : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'CmodG'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'Ctanh'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
+                                      'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,    
+
+                                     #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
+                                     #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
+                                     #'Bernstein6' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein6_Hsel_$CHANNEL']} , 
+                                     }           
+                      },
            } ,
-  'vbfbbkostas' : { 
-              '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
-             'dir' : 'summer2013' , 'subdir' : 'vbfbb/$MASS' , 'card' : 'datacard_split_mbbParton_m125_CATMIN1_Binned.txt'  } ,              
+
+  'vbfbbsplit_CAT1' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+                        'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'vbfbb_8TeV_split_CAT1.txt' ,
+                        'altmodel' : {
+                                      'expPow'     : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'modG'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'tanh'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'CexpPow'     : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'CmodG'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'Ctanh'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
+                                      'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,   
+
+                                     #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
+                                     #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
+                                     #'Bernstein6' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein6_Hsel_$CHANNEL']} , 
+                                     }           
+                      } ,              
            } ,
+
+  'vbfbbsplit_CAT2' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+                        'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'vbfbb_8TeV_split_CAT2.txt' ,
+                        'altmodel' : {
+                                      'expPow'     : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'modG'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'tanh'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'CexpPow'     : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'CmodG'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'Ctanh'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
+                                      'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,   
+
+                                     #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
+                                     #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
+                                     #'Bernstein6' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein6_Hsel_$CHANNEL']} , 
+                                     }           
+                      } ,              
+           } ,
+
+  'vbfbbsplit_CAT3' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+                        'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'vbfbb_8TeV_split_CAT3.txt' ,
+                        'altmodel' : {
+                                      'expPow'     : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'modG'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'tanh'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'CexpPow'     : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'CmodG'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'Ctanh'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
+                                      'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,   
+
+                                     #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
+                                     #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
+                                     #'Bernstein6' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein6_Hsel_$CHANNEL']} , 
+                                     }           
+                      } ,              
+           } ,
+
+  'vbfbbsplit_CAT4' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+                        'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'vbfbb_8TeV_split_CAT4.txt' ,
+                        'altmodel' : {
+                                      'expPow'     : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'modG'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'tanh'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'CexpPow'     : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'CmodG'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'Ctanh'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
+                                      'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,   
+
+                                     #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
+                                     #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
+                                     #'Bernstein6' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein6_Hsel_$CHANNEL']} , 
+                                     }           
+                      } ,              
+           } ,
+
+
 
 },
 
@@ -1168,6 +1285,41 @@ combinations = {
                           'legend'   : 'vbf H #rightarrow b#bar{b}'
                         } ,
 
+   'vbfbbsplit_CAT1' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbsplit_CAT1' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+   'vbfbbsplit_CAT2' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbsplit_CAT2' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+
+   'vbfbbsplit_CAT3' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbsplit_CAT3' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+
+   'vbfbbsplit_CAT4' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbsplit_CAT4' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+
+
 
 
 }
@@ -1317,7 +1469,7 @@ targets = {
   #'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-2 --rMax=4 --robustFit=1 --X-rtd FITTER_DYN_STEP -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2  --plot --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 ' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   'BestFitX'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
-  'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
+  'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --plot --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001  -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] , 'AltModel' : 'Gen' },
   'BestFitExpT'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-10 -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
   #
   # Toys
@@ -1338,6 +1490,43 @@ targets = {
   #'MLToys'        : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --saveNormalizations --noErrors --minos none --verbose 1 -t 100 --saveToys' } ,
   #'MLToysB'       : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--saveNormalizations --noErrors --minos none --verbose 1 -t 100 --saveToys' } ,
   #
+
+  ## VBF BB Toys
+
+  'ToysBB'       : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t 250  --saveToys -s -1 --expectSignal=1' ,
+                     'NJobs' : 4  ,
+                     'AltModel' : 'Gen' , 
+                     'FreezeNuis' : {1:['lnU','*']} 
+                   },
+  'MLToysBB'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-20 --rMax=20' , 
+                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBB' , 'NToysJob' : 250  } ,
+                     'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
+                     'AltModel' : 'Use' 
+                   },
+  'MLToysBB1Step': { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-t 250  -s -1 --expectSignal=1 --noErrors --minos none --rMin=-20 --rMax=20' ,
+                     'NJobs' : 4 ,
+                     'AltModel' : 'Gen' 
+                     },
+
+  'ToysBBA'      : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t -1 --saveToys --expectSignal=1 --rMin=-20 --rMax=20' ,
+                     'NJobs' : 2  ,
+                     'AltModel' : 'Gen' ,
+                     'FreezeNuis' : {1:['lnU','*']} 
+                   },
+
+  'MLToysBBA'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-20 --rMax=20 --plot' , 
+                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBBA' , 'NToysJob' : -1  } ,
+                     'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
+                     'AltModel' : 'Use' 
+                    },
+
+  'MLToysBBA1Step': { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-t -1  --expectSignal=1 --noErrors --minos none --rMin=-20 --rMax=20' ,
+                     'NJobs' : 1 ,
+                     'AltModel' : 'Gen' 
+                    },
+
+
+
   # MultiDim Fit
   #
   'MDF1DObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 --rMin=0 --rMax=3' , 'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 1000 }},

@@ -9,7 +9,7 @@ import os.path
 from optparse import OptionParser
 
 class batchJobs :
-   def __init__ (self,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version):
+   def __init__ (self,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version,AltModel=['NONE']):
       self.jobsDic={}
       self.jobsList=[]
       self.prefix=prefix
@@ -57,16 +57,21 @@ class batchJobs :
                   for iJobParam in targets[iTarget]['JobsParam']:
                     NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
                   NJobs=NJobs*NParam
-                # Toys ?
-                ToysList = []
-                if iTarget in targets:
-                  if 'Toys' in targets[iTarget]: 
-                    ToysList = combTools.getToys(iComb,iTarget,iMass,workspace,Version,cardtypes,physmodels,targets)
-                    NJobs=len(ToysList)
-                for iJob in xrange(1,NJobs+1):        
-                  jName = self.prefix+kComb+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(iJob)
-                  self.jobsDic[iComb][iModel][iMass][iTarget][iJob] = jName
-                  if not jName in self.jobsList: self.jobsList.append(jName)
+                for iAltModel in AltModel:
+                  self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel] = {}
+                  # Toys ?
+                  ToysList = []
+                  if iTarget in targets:
+                    if 'Toys' in targets[iTarget]: 
+                      if   len( energyList ) > 1 : iEnergy = 0 
+                      elif '7TeV' in energyList : iEnergy = 7
+                      elif '8TeV' in energyList : iEnergy = 8
+                      ToysList = combTools.getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,targets,iAltModel)
+                      NJobs=len(ToysList)
+                  for iJob in xrange(1,NJobs+1):        
+                    jName = self.prefix+kComb+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(iJob)
+                    self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob] = jName
+                    if not jName in self.jobsList: self.jobsList.append(jName)
 
       #print self.jobsDic
       #print self.jobsList
@@ -86,8 +91,8 @@ class batchJobs :
         jFile.close()
         os.system('chmod +x '+jobdir+'/'+jName+'.sh')
 
-   def Add (self,iComb,iModel,iMass,iTarget,iJob,command) :
-     jName= self.jobsDic[iComb][iModel][iMass][iTarget][iJob]
+   def Add (self,iComb,iModel,iMass,iTarget,iJob,command,iAltModel) :
+     jName= self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]
      jFile = open(jobdir+'/'+jName+'.sh','a')
      jFile.write(command+'\n')
      jFile.close()

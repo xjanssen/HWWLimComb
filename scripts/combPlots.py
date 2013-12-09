@@ -1557,6 +1557,146 @@ class combPlot :
        self.Save('LimitCC_'+self.EnergyName(iEnergy)+'_'+iModel+'_'+str(massFilter[0]).replace('.','d'))
        self.Wait()
 
+   def MLToysBB(self,CombList=['vbfbbsplit'],iEnergy=8,iModel='SMHiggs',massFilter=[125],AltModels=['NONE']):
+       self.squareCanvas(False,False)
+       self.c1.cd()
+       self.resetPlot()
+       self.c1.SetGridx(1)
+       gStyle.SetOptTitle(1)
+       gStyle.SetOptStat(1)
+
+       hPull={}
+       hBias={}
+       hPullSum={}
+       hBiasSum={}
+       hPullSumErr={}
+       hBiasSumErr={}
+
+
+       for iComb in CombList:
+         hPull[iComb] = {}
+         hBias[iComb] = {}
+         hPullSum[iComb] = {}
+         hBiasSum[iComb] = {}
+         hPullSumErr[iComb] = {}
+         hBiasSumErr[iComb] = {}
+         cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
+         energyList= combTools.EnergyList_Filter(iEnergy).get()
+         if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+           TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+         else:
+           TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+         print iComb, cardDir, energyList,TargetDir
+         for iEnergy in energyList:     
+           hPull[iComb][iEnergy] = {}
+           hBias[iComb][iEnergy] = {}
+           hPullSum[iComb][iEnergy] = {}
+           hBiasSum[iComb][iEnergy] = {}
+           hPullSumErr[iComb][iEnergy] = {}
+           hBiasSumErr[iComb][iEnergy] = {}
+
+           nMass= len(massFilter)
+           mMin = massFilter[0]-2.5
+           mMax = massFilter[-1]+2.5   
+           for iAltModel in AltModels:
+             AMFix=''
+             if iAltModel != 'NONE' : AMFix= '_Use-'+iAltModel
+             pullName='PullSummary_'+iComb+'_'+iEnergy+AMFix+'_'+iModel
+             biasName='BiasSummary_'+iComb+'_'+iEnergy+AMFix+'_'+iModel
+             hPullSum[iComb][iEnergy][iAltModel] = TH1F(pullName,pullName,nMass,mMin,mMax)
+             hBiasSum[iComb][iEnergy][iAltModel] = TH1F(biasName,biasName,nMass,mMin,mMax)
+             hPullSumErr[iComb][iEnergy][iAltModel] = TH1F(pullName+'_Err',pullName+'_Err',nMass+2,mMin,mMax)
+             hBiasSumErr[iComb][iEnergy][iAltModel] = TH1F(biasName+'_Err',biasName+'_Err',nMass+2,mMin,mMax)
+
+           for iMass in massFilter:
+             self.c1.SetGridx(1)
+             hPull[iComb][iEnergy][iMass] = {}
+             hBias[iComb][iEnergy][iMass] = {}
+             for iAltModel in AltModels:
+               AMFix=''
+               if iAltModel != 'NONE' : AMFix= '_Use-'+iAltModel
+               pullName = 'Pull_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
+               biasName = 'Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
+               hPull[iComb][iEnergy][iMass][iAltModel] = TH1F(pullName,pullName,100,-10,10)
+               hBias[iComb][iEnergy][iMass][iAltModel] = TH1F(biasName,biasName,100,-20,20)
+               fileCmd = 'ls '+TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb+'_'+iEnergy+'_'+iModel+AMFix+'_MLToysBB.job*.MaxLikelihoodFit.mH'+str(iMass)+'.*.root'
+               
+               proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+               out, err = proc.communicate()
+               FileList=string.split(out)
+               print FileList
+               for iFile in FileList:
+                 #try:
+                   fTree = TFile(iFile,'READ')
+                   tTree = fTree.Get("limit")
+                   for iEv in tTree:
+                     hBias[iComb][iEnergy][iMass][iAltModel].Fill(iEv.limit-1.) 
+                     if (iEv.limitErr>0) : hPull[iComb][iEnergy][iMass][iAltModel].Fill((iEv.limit-1.)/iEv.limitErr)
+                   fTree.Close()
+                 #except:
+                 # print 'Could not read ', iFile
+
+               hBias[iComb][iEnergy][iMass][iAltModel].Draw()
+               self.Save('Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass))
+               hPull[iComb][iEnergy][iMass][iAltModel].Draw()
+               self.Save('Pull_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass))
+
+               # Bias Results
+               mean      = hBias[iComb][iEnergy][iMass][iAltModel].GetMean();
+               errorMean = hBias[iComb][iEnergy][iMass][iAltModel].GetMeanError(); 
+               meanRMS   = hBias[iComb][iEnergy][iMass][iAltModel].GetRMS(); 
+               iBin = hPullSum[iComb][iEnergy][iAltModel].FindBin(iMass)
+               hBiasSum[iComb][iEnergy][iAltModel].SetBinContent(iBin,mean)
+               hBiasSum[iComb][iEnergy][iAltModel].SetBinError(iBin,errorMean)
+               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin,0.)
+               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin,meanRMS)
+               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin+1,0.)
+               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin+2,0.)
+               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin+1,meanRMS)
+               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin+2,meanRMS)
+               # Pull Results
+               mean      = hPull[iComb][iEnergy][iMass][iAltModel].GetMean();
+               errorMean = hPull[iComb][iEnergy][iMass][iAltModel].GetMeanError(); 
+               meanRMS   = hPull[iComb][iEnergy][iMass][iAltModel].GetRMS(); 
+               iBin = hPullSum[iComb][iEnergy][iAltModel].FindBin(iMass)
+               hPullSum[iComb][iEnergy][iAltModel].SetBinContent(iBin,mean)
+               hPullSum[iComb][iEnergy][iAltModel].SetBinError(iBin,errorMean)
+               hPullSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin,0.)
+               hPullSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin,meanRMS)
+
+ 
+           # Bias Summary plot
+           Cols=[kBlack,kRed,kBlue,kMagenta]
+           self.c1.SetGridy(1)
+           First=True
+           iPos=0
+           leg = TLegend(0.20,0.65,0.40,0.89);
+           leg.SetLineColor(0);
+           leg.SetFillColor(0);
+           leg.SetTextSize(0.033)
+           leg.SetFillStyle(0)
+           leg.SetBorderSize(0)
+           leg.SetTextFont (42)
+
+
+           for iPlot in hPullSum[iComb][iEnergy]:
+             if First :
+               hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-5,5)
+               hBiasSumErr[iComb][iEnergy][iPlot].SetLineColor(kYellow)
+               hBiasSumErr[iComb][iEnergy][iPlot].SetFillColor(kYellow)
+               hBiasSumErr[iComb][iEnergy][iPlot].SetMarkerSize(0)
+               hBiasSumErr[iComb][iEnergy][iPlot].Draw("e3")
+               leg.AddEntry(hBiasSumErr[iComb][iEnergy][iPlot],"RMS","f"); 
+               First=False
+             #hBiasSum[iComb][iEnergy][iPlot].SetLineColor(Cols[iPos])
+             hBiasSum[iComb][iEnergy][iPlot].SetMarkerColor(Cols[iPos])
+             hBiasSum[iComb][iEnergy][iPlot].SetMarkerStyle(20+iPos)
+             hBiasSum[iComb][iEnergy][iPlot].Draw("psame")
+             leg.AddEntry(hBiasSum[iComb][iEnergy][iPlot],iPlot,"p")
+             iPos+=1
+
+           leg.Draw("same")
+           self.Save('BiasSummary_'+iComb+'_'+iEnergy+'_'+iModel)
 
 
    def MDF2DSum(self,iComb,iEnergy,iModel,massFilter,bFast=False):

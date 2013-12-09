@@ -34,6 +34,8 @@ parser.add_option("-x", "--logx"   ,    dest="logx",        help="logX",        
 parser.add_option("-y", "--logy"   ,    dest="logy",        help="logY",                   default=False, action="store_true")
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version"     , default=DefaultVersion ,  type='string' )
 parser.add_option("-P", "--printList",  dest="printList",   help="What to print "        , default=['ACLsObs','ACLsExp','SObs','SExpPre'], type='string' , action='callback' , callback=combTools.list_maker('printList',','))
+parser.add_option("-a", "--AltModel" ,  dest="AltModel",    help="Alternative models", default=['NONE'], type='string' , action='callback' , callback=combTools.list_maker('AltModel',','))
+
 
 (options, args) = parser.parse_args()
 
@@ -172,6 +174,18 @@ for iPlot in options.plots:
          if iPlot == 'MUMHSum'   : plot.MUMHSum(iComb,options.energy,iModel,massList)
          muVal = 1.0 
          if iPlot == 'MHFit'     : plot.MHFit(iComb,options.energy,iModel,muVal)  
+
+   #
+   # Mu-mH Scan: Sum disjunct mH 1D mu scan
+   #
+   elif iPlot in ['MLToysBB']:
+     for iModel in PhysModelList:
+       print '---------------------------> Model = '+iModel
+       for iComb in combList:
+         print '------------------------------> Comb = '+iComb
+         massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get()        
+         plot=combPlots.combPlot(options.Version,options.unblind,postFix)
+         plot.MLToysBB(combList,options.energy,iModel,massList,options.AltModel)
 
    else:
      print 'ERROR: Unknown plot !'

@@ -5,6 +5,8 @@ from optparse import OptionParser
 import combTools
 from Config import *
 import batchTools
+from manipDataCard import card as cardTools
+
 
 parser = OptionParser(usage="usage: %prog [options] comb")
 
@@ -19,6 +21,7 @@ parser.add_option("-u", "--unblind",    dest="unblind",     help="Unblind result
 parser.add_option("-b", "--batch"  ,    dest="runBatch",    help="Run in batch",                   default=False, action="store_true")
 parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode for batch jobs" , default=[], type='string' , action='callback' , callback=combTools.list_maker('batchSplit',','))
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
+parser.add_option("-a", "--AltModel" ,  dest="AltModel",    help="Alternative models", default=['NONE'], type='string' , action='callback' , callback=combTools.list_maker('AltModel',','))
 
 
 (options, args) = parser.parse_args()
@@ -30,7 +33,9 @@ energyList    = combTools.EnergyList_Filter(options.energy).get()
 PhysModelList = combTools.PhysModelList_Filter(physmodels,options.models).get()
 TargetList    = combTools.TargetList_Filter(targets,options.targets).get()
 
-if options.runBatch: jobs = batchTools.batchJobs("results",combList,energyList,PhysModelList,TargetList,options.batchSplit,options.masses,options.unblind,options.Version)
+if options.runBatch: 
+  print 'Call BATV Tools Init'  
+  jobs = batchTools.batchJobs("results",combList,energyList,PhysModelList,TargetList,options.batchSplit,options.masses,options.unblind,options.Version,options.AltModel)
 
 #Run Combine
 for iComb in combList:
@@ -47,84 +52,110 @@ for iComb in combList:
       print 'Masses List: '+str(massList)
       for iMass in massList:
         print '------------------------------> Mass = '+str(iMass)        
-        wspace=iComb
-        if options.energy != 0: wspace += '_' + str(options.energy) + 'TeV'
-        #else                  : wspace += '_78TeV' 
-        wspace += '_'+iModel
-        outname = '_'+wspace
-        logbase = wspace
-        wspace += '.root' 
-        if os.path.exists(TargetDir+'/'+str(iMass)+'/'+wspace):
-          
+        for iAltModel in options.AltModel:
+          print '------------------------------> AltModel = '+iAltModel
           for iTarget in TargetList:
-            if options.unblind or targets[iTarget]['notblind'] : 
-              print '---------------------------------> Target = '+iTarget        
-              # Many Jobs ?
-              if 'NJobs' in targets[iTarget]:
-                NJobs = targets[iTarget]['NJobs']
-              else:
-                NJobs = 1
-              # Job Multiple parameter ?
-              JobParamName=[]
-              JobParamSize=[]
-              if 'JobsParam' in targets[iTarget]:
-                NParam=1
-                for iJobParam in targets[iTarget]['JobsParam']:
-                  JobParamName.append(iJobParam)
-                  JobParamSize.append(len(targets[iTarget]['JobsParam'][iJobParam])) 
-                  NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
-                NJobs=NJobs*NParam
-                print NJobs, JobParamName , JobParamSize
-              # Toys ?
-              ToysList = []
-              if 'Toys' in targets[iTarget]: 
-                ToysList = combTools.getToys(iComb,iTarget,iMass,workspace,options.Version,cardtypes,physmodels,targets)
-                NJobs=len(ToysList)
-              
-              for iJob in xrange(1,NJobs+1):
-                PF=''
-                if NJobs == 1 : logfile  = logbase+'_'+iTarget+'.mH'+str(iMass)+'.log' 
-                else          : logfile  = logbase+'_'+iTarget+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
-                command  = 'cd '+TargetDir+'/'+str(iMass)+' && '
-                command += 'combine '+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
-                # toys
-                if len(ToysList) > 0:
-                  command += ' -t '+str(targets[iTarget]['Toys']['NToysJob'])+' --toysFile='+ToysList[iJob-1]+' -s '+os.path.splitext(os.path.splitext(ToysList[iJob-1])[0])[1].replace('.','')
-                # MultiDim Grid
-                if 'MDFGridParam' in targets[iTarget] :
-                  NPJobs=int(targets[iTarget]['MDFGridParam']['NPOINTS']/NJobs)
-                  FPoint=(iJob-1)*NPJobs
-                  LPoint=(iJob)*NPJobs-1
-                  command += ' --points='+str(targets[iTarget]['MDFGridParam']['NPOINTS'])
-                  command += ' --firstPoint '+str(FPoint)+' --lastPoint '+str(LPoint)
-                  #command += ' --rMin '+str(targets[iTarget]['MDFGridParam']['RMIN'])+' --rMax '+str(targets[iTarget]['MDFGridParam']['RMAX'])
-                  PF='_Points'+str(FPoint)+'-'+str(LPoint)
-                # Job Multiple parameter
+            wspace=iComb
+            if options.energy != 0: wspace += '_' + str(options.energy) + 'TeV'
+            if iAltModel != 'NONE' and 'AltModel' in targets[iTarget]  and targets[iTarget]['AltModel'] == 'Gen' : wspace += '_' + iAltModel 
+            #else                  : wspace += '_78TeV' 
+            wspace += '_'+iModel
+            outname = '_'+wspace
+            if iAltModel != 'NONE' and 'AltModel' in targets[iTarget]  and targets[iTarget]['AltModel'] == 'Use' : outname += '_Use-' + iAltModel 
+            logbase = wspace
+            wspace += '.root'   
+            if os.path.exists(TargetDir+'/'+str(iMass)+'/'+wspace):
+              if options.unblind or targets[iTarget]['notblind'] : 
+                print '---------------------------------> Target = '+iTarget        
+                # Many Jobs ?
+                if 'NJobs' in targets[iTarget]:
+                  NJobs = targets[iTarget]['NJobs']
+                else:
+                  NJobs = 1
+                # Job Multiple parameter ?
+                JobParamName=[]
+                JobParamSize=[]
                 if 'JobsParam' in targets[iTarget]:
-                  if len(JobParamSize) == 2:  
-                    iPar1=((iJob-1)/JobParamSize[0])%JobParamSize[0]
-                    iPar2=(iJob-1)/(JobParamSize[0]*targets[iTarget]['NJobs'])
-                    command=command.replace('$'+JobParamName[0],str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar1]))
-                    command=command.replace('$'+JobParamName[1],str(targets[iTarget]['JobsParam'][JobParamName[1]][iPar2]))
-                    PF=PF+'_'+JobParamName[0]+str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar1]).replace('.','d')
-                    PF=PF+'_'+JobParamName[1]+str(targets[iTarget]['JobsParam'][JobParamName[1]][iPar2]).replace('.','d')
-                  else : sys.exit() 
-                #  for iParam in range(0,len(JobsParam)):
-                    
- 
-                # outfile
-                command +=' -n '+outname+'_'+iTarget+PF
-                # logfile 
-                command += ' 2>&1 | tee '+logfile
-                if options.pretend: 
-                  print command
-                else: 
-                  if not options.runBatch:
-                    os.system(command)
+                  NParam=1
+                  for iJobParam in targets[iTarget]['JobsParam']:
+                    JobParamName.append(iJobParam)
+                    JobParamSize.append(len(targets[iTarget]['JobsParam'][iJobParam])) 
+                    NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
+                  NJobs=NJobs*NParam
+                  print NJobs, JobParamName , JobParamSize
+                # Toys ?
+                ToysList = []
+                if 'Toys' in targets[iTarget]: 
+                  if iAltModel != 'NONE' and 'AltModel' in targets[iTarget] and targets[iTarget]['AltModel'] == 'Use' :
+                    ToysList = combTools.getToys(iComb,iTarget,options.energy,iMass,workspace,options.Version,cardtypes,physmodels,targets,iAltModel)
                   else:
-                    jobs.Add(iComb,iModel,iMass,iTarget,iJob,command) 
-        else:
-          print 'WARNING: Workspace does not exist : '+TargetDir+'/'+str(iMass)+'/'+wspace
+                    ToysList = combTools.getToys(iComb,iTarget,options.energy,iMass,workspace,options.Version,cardtypes,physmodels,targets)
+                  NJobs=len(ToysList)
+                  print   ToysList            
+                for iJob in xrange(1,NJobs+1):
+                  PF=''
+                  if NJobs == 1 : logfile  = logbase+'_'+iTarget+'.mH'+str(iMass)+'.log' 
+                  else          : logfile  = logbase+'_'+iTarget+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
+                  command  = 'cd '+TargetDir+'/'+str(iMass)+' && '
+                  command += 'combine '+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
+                  # toys
+                  if len(ToysList) > 0:
+                    command += ' -t '+str(targets[iTarget]['Toys']['NToysJob'])+' --toysFile='+ToysList[iJob-1]+' -s '+os.path.splitext(os.path.splitext(ToysList[iJob-1])[0])[1].replace('.','')
+                  # MultiDim Grid
+                  if 'MDFGridParam' in targets[iTarget] :
+                    NPJobs=int(targets[iTarget]['MDFGridParam']['NPOINTS']/NJobs)
+                    FPoint=(iJob-1)*NPJobs
+                    LPoint=(iJob)*NPJobs-1
+                    command += ' --points='+str(targets[iTarget]['MDFGridParam']['NPOINTS'])
+                    command += ' --firstPoint '+str(FPoint)+' --lastPoint '+str(LPoint)
+                    #command += ' --rMin '+str(targets[iTarget]['MDFGridParam']['RMIN'])+' --rMax '+str(targets[iTarget]['MDFGridParam']['RMAX'])
+                    PF='_Points'+str(FPoint)+'-'+str(LPoint)
+                  # Job Multiple parameter
+                  if 'JobsParam' in targets[iTarget]:
+                    if len(JobParamSize) == 2:  
+                      iPar1=((iJob-1)/JobParamSize[0])%JobParamSize[0]
+                      iPar2=(iJob-1)/(JobParamSize[0]*targets[iTarget]['NJobs'])
+                      command=command.replace('$'+JobParamName[0],str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar1]))
+                      command=command.replace('$'+JobParamName[1],str(targets[iTarget]['JobsParam'][JobParamName[1]][iPar2]))
+                      PF=PF+'_'+JobParamName[0]+str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar1]).replace('.','d')
+                      PF=PF+'_'+JobParamName[1]+str(targets[iTarget]['JobsParam'][JobParamName[1]][iPar2]).replace('.','d')
+                    else : sys.exit() 
+                  #  for iParam in range(0,len(JobsParam)):
+                      
+                  # Nuissance Freezing
+                  if 'FreezeNuis' in targets[iTarget]:
+                    toFreeze=[]
+                    card=TargetDir+'/'+str(iMass)+'/'+iComb
+                    if options.energy != 0: card += '_' + str(options.energy) + 'TeV'
+                    if iAltModel != 'NONE' and 'AltModel' in targets[iTarget]  and targets[iTarget]['AltModel'] == 'Gen' : card += '_' + iAltModel 
+                    card += ".txt"
+                    dc = cardTools(card)  
+                    #print dc.content['systs']
+                    for iTF in targets[iTarget]['FreezeNuis']:
+                      for iSystType in  dc.content['systs']: 
+                        if targets[iTarget]['FreezeNuis'][iTF][0] ==  iSystType or  targets[iTarget]['FreezeNuis'][iTF][0] == '*' :
+                          for iSyst in dc.content['systs'][iSystType]:
+                            if targets[iTarget]['FreezeNuis'][iTF][1] == iSyst or  targets[iTarget]['FreezeNuis'][iTF][1]  == '*' :
+                              toFreeze.append(iSyst)
+                    if len(toFreeze) > 0 : command += ' --freezeNuisances '+toFreeze[0]
+                    if len(toFreeze) > 1 : 
+                      for iF in xrange(1,len(toFreeze) ): command += ','+toFreeze[iF]
+
+                  # outfile
+                  outname=outname
+                  JobN = ''
+                  if (NJobs) > 1 : JobN += '.job'+str(iJob)
+                  command +=' -n '+outname+'_'+iTarget+PF+JobN
+                  # logfile 
+                  command += ' 2>&1 | tee '+logfile
+                  if options.pretend : print command
+                  else :
+                    if not options.runBatch:
+                      os.system(command)
+                    else:
+                      jobs.Add(iComb,iModel,iMass,iTarget,iJob,command,iAltModel) 
+            else:
+              print 'WARNING: Workspace does not exist : '+TargetDir+'/'+str(iMass)+'/'+wspace
 
 
-if options.runBatch: jobs.Sub()
+if options.runBatch and not options.pretend: jobs.Sub()

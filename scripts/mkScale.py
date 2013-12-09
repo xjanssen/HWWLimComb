@@ -215,10 +215,11 @@ def CATSplit(card):
           for iSysType in dcIn.content['systs']:
             for iSyst in dcIn.content['systs'][iSysType]:
                if jBin in iSyst : 
-                 dcOut.remSystLine(systtype=iSysType,tag=iSyst)
+                 if iSyst in dcOut.content['systs'][iSysType]:
+                   dcOut.remSystLine(systtype=iSysType,tag=iSyst)
 
       dcOut.content['header1']['jmax'] = '*'
-      dcOut.content['header1']['imax'] = '*'
+      dcOut.content['header1']['imax'] = '1'
       os.system('rm '+TargetCard)
       dcOut.write(TargetCard)
 

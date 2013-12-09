@@ -156,7 +156,8 @@ class card():
 				if not parsed:
 						sys.exit('No algorithm to process line: %s with key %s'%(line, fields[1]))
 			# other
-			else: sys.exit('Problem parsing line: %s'%line)
+			else: #sys.exit('Problem parsing line: %s'%line)
+                          print 'Warning: Problem parsing line: ' , line
 
 			prevTag = currTag
 		
