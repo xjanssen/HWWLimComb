@@ -222,7 +222,7 @@ class TargetList_Filter:
           return self.TargetList
 
 # ---- Toys List
-def getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,targets,AltMod='NONE'):
+def getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,targets,AltMod='NONE',TPF=''):
     ToysList=[]
     if not 'Toys' in targets[iTarget]: return ToysList
 
@@ -236,8 +236,8 @@ def getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,t
     Energy=''
     if iEnergy == 7 : Energy = '_7TeV'
     if iEnergy == 8 : Energy = '_8TeV'
-    if AltMod == 'NONE' : toyname='_'+iComb+Energy+'_'+iModel+'_'+targets[iTarget]['Toys']['Target']+'.job*.'+targets[targets[iTarget]['Toys']['Target']]['method']+'.mH'+str(iMass)+'.*.root'
-    else                : toyname='_'+iComb+Energy+'_'+AltMod+'_'+iModel+'_'+targets[iTarget]['Toys']['Target']+'.job*.'+targets[targets[iTarget]['Toys']['Target']]['method']+'.mH'+str(iMass)+'.*.root'
+    if AltMod == 'NONE' : toyname='_'+iComb+Energy+'_'+iModel+'_'+targets[iTarget]['Toys']['Target']+TPF+'.job*.'+targets[targets[iTarget]['Toys']['Target']]['method']+'.mH'+str(iMass)+'.*.root'
+    else                : toyname='_'+iComb+Energy+'_'+AltMod+'_'+iModel+'_'+targets[iTarget]['Toys']['Target']+TPF+'.job*.'+targets[targets[iTarget]['Toys']['Target']]['method']+'.mH'+str(iMass)+'.*.root'
  
     command='ls '+toysDir+'/higgsCombine'+toyname
     print command

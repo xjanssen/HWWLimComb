@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-homedir     = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/' 
+homedir     = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/'
 #homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW13TeV/HWWLimComb/'
 #homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
 #homedir     = '/Users/xjanssen/cms/HWW2012/HWWLimComb/'
@@ -321,7 +321,8 @@ channels = {
 
                                       'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
                                       'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
-                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} , 
+                                      'Bern5'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_bernstein5_$CHANNEL'    ]} , 
 
                                      #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
                                      #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
@@ -352,6 +353,32 @@ channels = {
                                      }           
                       } ,              
            } ,
+
+
+
+  'vbfbbsplit_CAT1_brn5' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+                        'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'vbfbb_8TeV_split_CAT1_Brn5.txt' ,
+                        'altmodel' : {
+                                      'expPow'     : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'modG'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'tanh'       : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'CexpPow'     : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_expPow_Hsel_$CHANNEL'    ]} ,
+                                      'CmodG'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_modG_Hsel_$CHANNEL'      ]} ,
+                                      'Ctanh'       : { 'qcd': ['*','CERN_mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_tanh_Hsel_$CHANNEL'      ]} ,
+
+                                      'Kalt1'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate1_$CHANNEL'    ]} ,    
+                                      'Kalt2'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate2_$CHANNEL'    ]} ,    
+                                      'Kalt3'       : { 'qcd': ['*','qcd_shapes_mbbParton_data_hard_workspace.root','w:qcd_model_alternate3_$CHANNEL'    ]} ,   
+
+                                     #'Bernstein4' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein4_Hsel_$CHANNEL']} , 
+                                     #'Bernstein5' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein5_Hsel_$CHANNEL']} , 
+                                     #'Bernstein6' : { 'qcd': ['*','mbbShapes_Hsel_$MASS_tight.root','workspace:QCD_Bernstein6_Hsel_$CHANNEL']} , 
+                                     }           
+                      } ,              
+           } ,
+           
 
   'vbfbbsplit_CAT2' :{
              '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
@@ -1292,6 +1319,16 @@ combinations = {
                           'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
                           'legend'   : 'vbf H #rightarrow b#bar{b}'
                         } ,
+                        
+                        
+   'vbfbbsplit_CAT1_brn5' :
+                        {
+                          'energies' : [ '8TeV' ] , 
+                          'channels' : [ 'vbfbbsplit_CAT1_brn5' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
+                          'legend'   : 'vbf H #rightarrow b#bar{b}'
+                        } ,
+                                
 
    'vbfbbsplit_CAT2' :
                         {
@@ -1493,17 +1530,18 @@ targets = {
 
   ## VBF BB Toys
 
-  'ToysBB'       : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t 250  --saveToys -s -1 --expectSignal=1' ,
+  'ToysBB'       : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t 250  --saveToys -s -1 --expectSignal=$MUEXP' ,
                      'NJobs' : 4  ,
                      'AltModel' : 'Gen' , 
-                     'FreezeNuis' : {1:['lnU','*']} 
+                     'FreezeNuis' : {1:['lnU','*']} ,
+                     'JobsParam' : { 'MUEXP' : [0,1] }
                    },
-  'MLToysBB'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-20 --rMax=20' , 
+  'MLToysBB'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-40 --rMax=40' , 
                      'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBB' , 'NToysJob' : 250  } ,
                      'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
                      'AltModel' : 'Use' 
                    },
-  'MLToysBB1Step': { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-t 250  -s -1 --expectSignal=1 --noErrors --minos none --rMin=-20 --rMax=20' ,
+  'MLToysBB1Step': { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-t 250  -s -1 --expectSignal=1 --toysFrequentist --noErrors --minos none --rMin=-40 --rMax=40' ,
                      'NJobs' : 4 ,
                      'AltModel' : 'Gen' 
                      },
