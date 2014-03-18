@@ -21,12 +21,12 @@ gROOT.ProcessLine('.L '+combscripts+'contours.cxx')
 gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 
-CMSText=["CMS Preliminary","#bf{CMS}","#bf{CMS} Projection"] 
-LumText=["4.9 fb^{-1} (7 TeV) + 19.4 fb^{-1} (8 TeV)","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 13 TeV, L = 30 fb^{-1}","#sqrt{s} = 13 TeV, L = 120 fb^{-1}"]
+CMSText=["#bf{CMS Preliminary}","#bf{CMS}"] 
+LumText=["4.9 fb^{-1} (7 TeV) + 19.4 fb^{-1} (8 TeV)","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 #LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 
 class combPlot :
-   def __init__(self,Version,blind=True,postFix='',logX=False,logY=False,iTitle=0,iLumi=0):
+   def __init__(self,Version,blind=True,postFix='',logX=False,logY=False):
        self.Version = Version
        self.blind   = blind
        self.postFix = postFix
@@ -42,8 +42,6 @@ class combPlot :
        os.system('mkdir -p '+self.plotsdir)
        gStyle.SetPalette(1) 
        #rootlogonTDR.set_palette("gray")
-       self.iLumi  = iLumi
-       self.iTitle = iTitle
 
    def SetBatch():
        gROOT.SetBatch()
@@ -83,7 +81,7 @@ class combPlot :
        self.h.Draw()
 
    
-   def addTitle(self,iCMS=1,iLumi=0):
+   def addTitle(self,iCMS=0,iLumi=0):
        self.c1.cd()
    
        x1=0.10
@@ -132,6 +130,7 @@ class combPlot :
        if len(self.postFix) > 0 and self.postFix[0] != '_' : pF = '_'+self.postFix
        else                     : pF = self.postFix
        self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.pdf')
+       self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.C')
        os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.png') 
        os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.gif') 
 
@@ -156,74 +155,7 @@ class combPlot :
         else:
           return _lm, _mh
 
-#double findCrossingOfScan1D(TGraph *graph, double threshold, bool leftSide, double xmin=-9e99, double xmax=9e99) {
-#    double *x = graph->GetX();
-#    double *y = graph->GetY();
-#    int imin = 0, n = graph->GetN();
-#    for (int i = 1; i < n; ++i) {
-#        if (x[i] < xmin || x[i] > xmax) continue;
-#        if (y[i] < y[imin]) imin = i;
-#    }
-#    int imatch = -1;
-#    if (leftSide) {
-#        for (int i = imin; i >= 0; --i) {
-#            if (x[i] < xmin || x[i] > xmax) continue;
-#            if (y[i] > threshold && y[i+1] < threshold) {
-#                imatch = i; break;
-#            }
-#        }
-#        if (imatch == -1) return x[0];
-#    } else {
-#        for (int i = imin; i < n; ++i) {
-#            if (x[i] < xmin || x[i] > xmax) continue;
-#            if (y[i-1] < threshold && y[i] > threshold) {
-#                imatch = i-1; break;
-#            }
-#        }
-#        if (imatch == -1) return x[n-1];
-#    }
-#    double d1 = fabs(y[imatch] - threshold), d2 = fabs(y[imatch+1] - threshold);
-#    return (x[imatch]*d2 + x[imatch+1]*d1)/(d1+d2);
-#}
-
-   def findCrossingOfScan1D(self,graph,threshold,leftSide,xmin=-9e99,xmax=9e99):
-       x = graph.GetX();
-       y = graph.GetY();
-       imin = 0
-
-       n = graph.GetN()
-       for i in range(1,n):
-         if (x[i] >= xmin and x[i] <= xmax): 
-           if (y[i] < y[imin]):imin = i
-
-       print leftSide,imin,n
-       imatch = -1 
-       if (leftSide) :
-         for i in range(imin , 0 , -1):
-           if (x[i] >= xmin and x[i] <= xmax): 
-             if (y[i] > threshold and y[i+1] < threshold):
-               imatch = i
-               break
-       else:
-         if imin==0:imin=1
-         for i in range(imin , n ):
-           if (x[i] >= xmin and x[i] <= xmax): 
-             if (y[i-1] < threshold and y[i] > threshold):
-               imatch = i-1 
-               break
-
-
-       if imatch >= 0 :
-         print imatch,x[imatch]
-         d1 = fabs(y[imatch] - threshold)
-         d2 = fabs(y[imatch+1] - threshold) 
-         return (x[imatch]*d2 + x[imatch+1]*d1)/(d1+d2) 
-       else :
-         return -999.
-
    def readResults(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],iTarget='BestFit'):
-
-       #print 'reading ',iComb,' ',iEnergy,' ',iModel,' ',iTarget
 
        # Get info from comfig
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
@@ -333,70 +265,6 @@ class combPlot :
            if iDicKey == iModel : isNewKey = False
        if isNewKey : self.Results[iComb][iEnergy][iModel] = {}    
        self.Results[iComb][iEnergy][iModel][iTarget] = Result
-
-       #print self.Results
-
-   def readMDF1D(self,iComb='hww01jet_shape',iEnergy=0,iModel='rVrFXSH',massFilter=[],iTarget='MDFGridObs',iDic={}):
-       # Get info from comfig
-       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
-       energyList= combTools.EnergyList_Filter(iEnergy).get()
-       massList  = combTools.MassList_Filter(cardtypes,channels[self.Version],combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
-       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
-         TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
-       else:
-         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
-
-       for iMass in massList :
-         fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-         fileName += '_'+iModel+'_'+iTarget+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
-         print  fileName   
-       
-         if iDic['NDim'] == 1 :
-           try:
-             gROOT.ProcessLine('TFile* fTree = TFile::Open("'+fileName+'")')
-             gROOT.ProcessLine('TTree*  tree = (TTree*)  fTree->Get("limit")')
-             keyX=iDic['Keys'][0]
-             minX=str(iDic['Min'][0])
-             maxX=str(iDic['Max'][0])
-             minXP=str(iDic['MinPlt'][0])
-             maxXP=str(iDic['MaxPlt'][0])
-
-             print minX,maxX,minXP,maxXP
-
-             objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+iTarget
-             print objName
-
-             # Scan
-             gROOT.ProcessLine('gROOT->cd()')
-             gROOT.ProcessLine('int n = tree->Draw("2*deltaNLL:'+keyX+'", TCut("abs(deltaNLL) > 0. && abs(deltaNLL) < 999") );')
-             gROOT.ProcessLine('TGraph *gr = (TGraph*) gROOT->FindObject("Graph")->Clone("gr");')
-             ROOT.gr.SetName('gr_'+objName);
-             ROOT.gr.Sort();
-             self.Obj2Plot['gr__'+objName] = { 'Obj' : ROOT.gr.Clone('gr_'+objName) , 'Type' : 'Curve' , 'Legend' : ''}
-             gROOT.ProcessLine('delete gr')
-
-             # Best Fit
-             gROOT.ProcessLine('int n = tree->Draw("2*deltaNLL:'+keyX+'", TCut("abs(deltaNLL) == 0.") );')
-             gROOT.ProcessLine('TGraph *gr0 = (TGraph*) gROOT->FindObject("Graph")->Clone("gr0");')
-             ROOT.gr0.SetName('gr0_'+objName);
-             ROOT.gr0.Sort();
-             ROOT.gr0.Print()
-             self.Obj2Plot['gr0__'+objName] = { 'Obj' : ROOT.gr0.Clone('gr0_'+objName) , 'Type' : 'Point' , 'Legend' : ''}
-             gROOT.ProcessLine('delete gr0')
-
-             # Set some Default Style and Legend
-             self.Obj2Plot['gr__'+objName]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
-             #self.Obj2Plot['gr__'+objName]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
-             self.Obj2Plot['gr__'+objName]['Obj'].GetYaxis().SetTitle("-2 #Delta ln L")
-             #self.Obj2Plot['gr__'+objName]['Obj'].GetYaxis().SetRangeUser(0.00001,20.)
-             #self.Obj2Plot['gr0__'+objName]['Obj'].SetMarkerColor(kRed) 
-
-             gROOT.ProcessLine('fTree->Close()') 
-
-
-           except:
-             print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
- 
 
    def readMDFGrid(self,iComb='hww01jet_shape',iEnergy=0,iModel='rVrFXSH',massFilter=[],iTarget='MDFGridObs'):
        # Get info from comfig
@@ -538,11 +406,11 @@ class combPlot :
                print '1D:', VarName[0] , Result[VarName[0]][0] , '+' ,  Result[VarName[0]+'_Up'][0]-Result[VarName[0]][0] , '-' , Result[VarName[0]][0]-Result[VarName[0]+'_Do'][0]
                print '1D:', VarName[1] , Result[VarName[1]][0] , '+' ,  Result[VarName[1]+'_Up'][0]-Result[VarName[1]][0] , '-' , Result[VarName[1]][0]-Result[VarName[1]+'_Do'][0]
              elif algo == 'Cross' :
-               print '2D:', VarName[0] , Result[VarName[0]][0] , '+' ,  Result[VarName[0]+'_Left'][0]-Result[VarName[0]][0] , '-' , Result[VarName[0]][0]-Result[VarName[0]+'_Right'][0]
+               print '2D:', VarName[0] , Result[VarName[0]][0] , '+' ,  Result[VarName[0]+'_Right'][0]-Result[VarName[0]][0] , '-' , Result[VarName[0]][0]-Result[VarName[0]+'_Left'][0]
                print '2D:', VarName[1] , Result[VarName[1]][0] , '+' ,  Result[VarName[1]+'_Top'][0]-Result[VarName[1]][0] , '-' , Result[VarName[1]][0]-Result[VarName[1]+'_Floor'][0]
 
            except:
-             print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
+             print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO',fileName
              if  algo == 'Single' : 
                Result[VarName[0]].append(0)        
                Result[VarName[1]].append(0)  
@@ -701,18 +569,17 @@ class combPlot :
            elif self.Obj2Plot[X]['Type'] == 'Curve':
              if iFirst: 
                iFirst=False
-               self.Obj2Plot[X]['Obj'].Draw("ALP")
+               self.Obj2Plot[X]['Obj'].Draw("AL")
              else: 
-               self.Obj2Plot[X]['Obj'].Draw("LP") 
+               self.Obj2Plot[X]['Obj'].Draw("L") 
 
        self.c1.Update() 
 
-   def plotObjLeg(self,Order=[],Title='',Position='TopRight',Ncol=1):
+   def plotObjLeg(self,Order=[],Title='',Position='TopRight'):
        if len( self.Obj2Plot ) == 0 : return
        self.c1.cd()
        iFirst=True
        if len( Order ) == 0 : Order = [X for X in self.Obj2Plot] 
-       NLeg = len( Order ) / Ncol
        if   'Right' in Position :
          x1 = 0.47
          x2 = 0.8  
@@ -720,14 +587,13 @@ class combPlot :
          x1 = 0.17
          x2 = 0.47  
        if   'Top'   in Position :
-         y1 = 0.87-(NLeg+1)*.040
+         y1 = 0.87-(len(Order)+1)*.040
          y2 = 0.87 
        elif 'Bottom' in Position : 
-         y1 = 0.50-(NLeg+1)*.040
+         y1 = 0.50-(len(Order)+1)*.040
          y2 = 0.50 
        #self.Legend = TLegend(0.50,0.65,0.85,0.85)   
        self.Legend = TLegend(x1,y1,x2,y2)
-       if ( Ncol > 1 ) : self.Legend.SetNColumns(Ncol); 
        self.Legend.SetTextSize(0.033)
        self.Legend.SetFillColor(0)
        self.Legend.SetFillStyle(0)
@@ -779,13 +645,6 @@ class combPlot :
        if   iEnergy == 0 : return '7and8TeV'
        elif iEnergy == 7 : return '7TeV'
        elif iEnergy == 8 : return '8TeV'
-       elif iEnergy == 13 : 
-         if self.iLumi==3:
-           return '13TeV_30ifb'
-         if self.iLumi==4:
-           return '13TeV_120ifb'
-         else: 
-           return '13TeV'
        else              : return 'UndefE'
 
    def plotLogXAxis(self,mhMin,mhMax,PlotType,iComb):
@@ -846,15 +705,11 @@ class combPlot :
            self.AXLabel[-1].SetTextSize (0.045);
            self.AXLabel[-1].Draw("same");
 
-   def plotOneLimit(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],bInject=True,bAsimov=True):
+   def plotOneLimit(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],bInject=True):
 
        self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp')
        if not self.blind : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsObs')
-       if bInject        : 
-         if bAsimov:
-           self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsInjPre')
-         else:
-           self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsSMToysNoSyst')
+       if bInject        : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsSMToysNoSyst')
        #plot.readResults(comb,0,'SMInject',[],'ACLsObs')
 
        self.squareCanvas(False,False)
@@ -880,14 +735,11 @@ class combPlot :
        aExpLimit95U  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['95U']
 
        if bInject :        
-         if bAsimov:
-           aMedInjLimit  = self.Results[iComb][iEnergy][iModel]['ACLsInjPre']['Val']
-         else:
-           aMedInjLimit  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['Val']
-           aInjLimit68D  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['68D']
-           aInjLimit68U  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['68U'] 
-           aInjLimit95D  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['95D']
-           aInjLimit95U  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['95U']
+         aMedInjLimit  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['Val']
+         aInjLimit68D  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['68D']
+         aInjLimit68U  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['68U'] 
+         aInjLimit95D  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['95D']
+         aInjLimit95U  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['95U']
          #aMedInjFast   = self.Results[iComb][iEnergy]['SMInject']['ACLsObs']['Val']
 
        if (not self.blind ) :  aObsLimit = self.Results[iComb][iEnergy][iModel]['ACLsObs']['Val']
@@ -899,12 +751,9 @@ class combPlot :
        if (not self.blind ) : self.plotHorizCurve('Obs', aMass , aObsLimit , kBlack , 1  , 3 , 'Observed')
 
        if  bInject :  
-         if bAsimov:
-           self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H} Injected')
-         else:
-           self.plotHorizBand('95CLInj', aMass , aMedInjLimit , aInjLimit95U , aInjLimit95D , kBlue , 3356 , 'Injected #pm 2#sigma_{stat}')
-           self.plotHorizBand('68CLInj', aMass , aMedInjLimit , aInjLimit68U , aInjLimit68D , kRed  , 3356 , 'Injected #pm 1#sigma_{stat}')
-           self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H}=125 GeV Injected')
+         self.plotHorizBand('95CLInj', aMass , aMedInjLimit , aInjLimit95U , aInjLimit95D , kBlue , 3356 , 'Injected #pm 2#sigma_{stat}')
+         self.plotHorizBand('68CLInj', aMass , aMedInjLimit , aInjLimit68U , aInjLimit68D , kRed  , 3356 , 'Injected #pm 1#sigma_{stat}')
+         self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H}=125 GeV Injected')
          #self.plotHorizCurve('InjFast', aMass , aMedInjLimit , kRed , 1                        , 'CL_{S} Injected')
          #self.plotHorizCurve('Inj68D'   , aMass , aInjLimit68D , kBlue , 2                        , 'CL_{S} Injected')
          #self.plotHorizCurve('Inj95D'   , aMass , aInjLimit95D , kBlue , 3                        , 'CL_{S} Injected')
@@ -916,13 +765,7 @@ class combPlot :
        lMass.append(aMass[-1]+1)
        self.plotHorizLine('Line', lMass , 1. , kBlack , 1    , 'CL=1')
 
-       self.Obj2Plot['Exp']['Obj'].SetMarkerStyle(20)
-       self.Obj2Plot['Exp']['Obj'].SetMarkerSize(.8)
-       if (not self.blind ) :
-         self.Obj2Plot['Obs']['Obj'].SetMarkerStyle(20)
-         self.Obj2Plot['Obs']['Obj'].SetMarkerSize(.8)
 
-   
        self.SetRange('Limit',iComb)
        self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(aMass[0],aMass[-1])
        self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Obs','Line'])
@@ -968,14 +811,29 @@ class combPlot :
 
        lMass=[]
        lMass.append(100.)
-       lMass.append(aMass[-1]+1)  
+       lMass.append(aMass[-1]+15)  
        self.plotHorizLine('Line', lMass , 1. , kBlack , 1    , '#mu=1')
-
-       self.Obj2Plot['Obs']['Obj'].SetMarkerStyle(20)
-       self.Obj2Plot['Obs']['Obj'].SetMarkerSize(.8)
- 
+       
        self.SetRange('BestFit',iComb)
        self.plotAllObj(['68CL','Obs','Line'])
+
+       dummyBox= TH1F("dummyBox","dummyBox",1,0.,1.); 
+       dummyBox.SetFillColor(211); 
+       dummyBox.SetLineColor(211);
+       x1 = 0.47
+       x2 = 0.8  
+       y1 = 0.87-(2)*.040
+       y2 = 0.87 
+       Legend = TLegend(x1,y1,x2,y2)
+       Legend.SetHeader(" ")
+       Legend.SetTextSize(0.033)
+       Legend.SetFillColor(0)
+       Legend.SetFillStyle(0)
+       Legend.SetBorderSize(0)
+       Legend.SetTextFont (42)
+       Legend.AddEntry(dummyBox," ", "F");
+       Legend.Draw("same")
+
        self.plotObjLeg(['Obs'],combinations[iComb]['legend']) 
        if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'BestFit',iComb)
 
@@ -1033,8 +891,8 @@ class combPlot :
        if (self.logX) : self.postFix += '_logX'
        if (self.logY) : self.postFix += '_logY'
 
-       LCol = [ kBlack , kBlack , kBlack , kBlue , kBlue , kBlue , kRed , kRed , kMagenta , kMagenta , kMagenta ]
-       LTyp = [    1   ,    2   ,   3    ,   1   ,   2   ,   3   ,   2  ,   3  ,  1  ,  2  ,  3 ]      
+       LCol = [ kBlack , kBlack , kBlack , kBlue , kBlue , kBlue , kRed , kRed ]
+       LTyp = [    1   ,    2   ,   3    ,   1   ,   2   ,   3   ,   2  ,   3  ]      
 
        iLC=0 
        for iComb in CombList:
@@ -1044,7 +902,7 @@ class combPlot :
           self.plotHorizCurve(iComb, aMass , aMedExpLimit , LCol[iLC] , LTyp[iLC]  , 2  , combinations[iComb]['legend'] )
           iLC+=1
       
-       aMass = [110,1000] 
+       aMass = [110,600] 
        self.plotHorizLine('Line', aMass , 1. , kRed , 1    , 'CL=1')
   
        #self.c1.SetLogy()
@@ -1054,20 +912,11 @@ class combPlot :
        toPlot = dc(CombList)
        toPlot.append('Line')
        self.plotAllObj(toPlot)
-       LT=''
-       LP='TopRight'
-       Ncol=1
-       if ( CombList[0] == 'of_cp2_1d0' ) : 
-         LT   = 'H #rightarrow WW (DF 0/1-jet), BR_{Inv} = 0' 
-         LP   = 'TopLeft'
-         Ncol = 2
-         self.addTitle(0,2) 
-       else:
-         self.addTitle() 
-       self.plotObjLeg(CombList,LT,LP,Ncol)
+       self.plotObjLeg(CombList)
        if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'LimitExp',CombList[0])
 
 
+       self.addTitle() 
        self.c1.Update() 
        self.Save('ExpLimits_'+self.EnergyName(iEnergy)+'_'+iModel)
   
@@ -1123,10 +972,7 @@ class combPlot :
        self.c1.SetLeftMargin(0.4) 
        self.c1.SetGridx(1)
 
-       if False:
-         BestFit='BestFit'
-       else:
-         BestFit='BestFitExp'
+       BestFit='BestFit'
 
        if len(massFilter) != 1 : return
        nChann=len(CombList)-1
@@ -1134,7 +980,6 @@ class combPlot :
 
        for iComb in CombList:
          self.readResults(iComb,iEnergy,iModel,massFilter,BestFit)
-
 
        MuMin=-1.
        MuMax=3.
@@ -1238,466 +1083,10 @@ class combPlot :
        invpts.SetMarkerStyle(0);
        invpts.Draw("PSAME");
  
-       self.addTitle(self.iTitle,self.iLumi) 
+       self.addTitle() 
        self.c1.Update() 
        self.Save('MuCC_'+self.EnergyName(iEnergy)+'_'+iModel+'_'+str(massFilter[0]).replace('.','d'))
        self.Wait()
-
-
-   def plotSignChannel(self,CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape'],iEnergy=0,iModel='SMHiggs',massFilter=[125]):
-       self.squareCanvas(False,False)
-       self.c1.cd()
-       self.resetPlot()
-       self.c1.SetLeftMargin(0.4) 
-       self.c1.SetGridx(1)
-
-       if len(massFilter) != 1 : return
-       nChann=len(CombList)-1
-       if nChann == 0 : return
-
-       SignExp='SExpPre'
-       SignObs='SObs'
-       for iComb in CombList:
-         self.readResults(iComb,iEnergy,iModel,massFilter,SignExp)
-         if (not self.blind ) : self.readResults(iComb,iEnergy,iModel,massFilter,SignObs)
-
-
-       MuMin=0.
-       MuMax=16.
-       frame = TH2F("frame",";Significance;",1,MuMin,MuMax,nChann+1,0,nChann+1);
-       #frame.GetXaxis().SetTitleSize(0.05);
-       #frame.GetXaxis().SetLabelSize(0.04);
-       #frame.GetYaxis().SetLabelSize(0.06);
-       #frame.GetXaxis().SetNdivisions(505)
-       frame.GetXaxis().SetLabelFont (   42)
-       frame.GetYaxis().SetLabelFont (   42)
-       frame.GetXaxis().SetTitleFont (   42)
-       frame.GetYaxis().SetTitleFont (   42)
-       frame.GetXaxis().SetTitleOffset( 1.2)
-       frame.GetYaxis().SetTitleOffset( 1.2)
-       frame.GetXaxis().SetTitleSize (0.050)
-       frame.GetYaxis().SetTitleSize (0.050)
-       frame.GetXaxis().SetLabelSize (0.045)
-       frame.GetYaxis().SetLabelSize (0.055)
-       frame.GetXaxis().SetNdivisions(505)
-
-
-       frame.Draw()
-
-       points = TGraphAsymmErrors (nChann+1)
-       invpts = TGraphAsymmErrors (nChann)
-       opoints = TGraphAsymmErrors (nChann+1)
-       oinvpts = TGraphAsymmErrors (nChann)
-       TlMu=TLatex()
-       TlMu.SetTextAlign(23);
-       TlMu.SetTextSize(0.03);
-
-
-
-       asymTolerance = 0.15
-       for iChann in xrange(1,nChann+1):
-         Val = self.Results[CombList[iChann]][iEnergy][iModel][SignExp]['Val'][0]
-         eDo = Val
-         eUp = 0.
-         if Val <= MuMax : 
-           points.SetPoint(iChann-1,      Val , iChann-0.5);
-           points.SetPointError(iChann-1, eDo, eUp , 0.15,0.15);
-           invpts.SetPoint(iChann-1,      MuMax+1.  , iChann-0.15);
-         else:
-           invVal=MuMax
-           inveDo=MuMax
-           inveUp=0.
-           invpts.SetPoint(iChann-1,      invVal , iChann-0.5);
-           invpts.SetPointError(iChann-1, inveDo, inveUp , 0.15,0.15);
-           points.SetPoint(iChann-1,      MuMax+1.  , iChann-0.15);
-     
-         #muTxt = '#mu = '+str(round(Val,2))+'^{ +'+str(round(eUp,2))+'}_{ -'+str(round(eDo,2))+'}'
-         muTxt = 'S_{exp} = %.1f'%(Val)
-         if (not self.blind ) :
-           Val = self.Results[CombList[iChann]][iEnergy][iModel][SignObs]['Val'][0]
-           eDo = 0.
-           eUp = 0.
-           if Val <= MuMax : 
-             opoints.SetPoint(iChann-1,      Val , iChann-0.5);
-             opoints.SetPointError(iChann-1, eDo, eUp , 0.,0.);
-             oinvpts.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-           else:
-             invVal=MuMax
-             inveDo=0.
-             inveUp=0.
-             oinvpts.SetPoint(iChann-1,      invVal , iChann-0.5);
-             oinvpts.SetPointError(iChann-1, inveDo, inveUp , 0.,0.);
-             points.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-           muTxt += ' ; S_{obs} = %.1f'%(Val)
-         
-
-         if (self.blind) : label = '#splitline{   '+combinations[CombList[iChann]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
-         else            : label = '#splitline{   '+combinations[CombList[iChann]]['legend']+'}{           #scale[0.8]{'+muTxt+'}  }'
-         frame.GetYaxis().SetBinLabel(iChann, label  );
-
-       frame.GetYaxis().LabelsOption("v")
-       # ... Combined result 
-       Val = self.Results[CombList[0]][iEnergy][iModel][SignExp]['Val'][0]
-       eDo = Val
-       eUp = 0.
-       points.SetPoint(nChann,      Val , nChann+0.5);
-       points.SetPointError(iChann, eDo, eUp , 0.15,0.15);
-       muTxt = 'S_{exp} = %.1f'%(Val) 
-       if (not self.blind ) :
-         Val = self.Results[CombList[0]][iEnergy][iModel][SignObs]['Val'][0]
-         eDo = 0.
-         eUp = 0.
-         opoints.SetPoint(nChann,      Val , nChann+0.5);
-         opoints.SetPointError(iChann, eDo, eUp , 0.,0.);
-         muTxt += ' ; S_{obs} = %.1f'%(Val)
-
-       if (self.blind) : label = '#splitline{   '+combinations[CombList[0]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
-       else            : label = '#splitline{   '+combinations[CombList[0]]['legend']+'}{           #scale[0.8]{'+muTxt+'}  }'
-       frame.GetYaxis().SetBinLabel(nChann+1, label  );
-       sepLine = TLine (MuMin, nChann, MuMax, nChann);
-       sepLine.SetLineWidth(2);
-       sepLine.SetLineStyle(2);
-       sepLine.Draw("same")
-
-
-       TlMH=TLatex()
-       TlMH.SetTextSize(0.03);
-       TlMH.SetNDC()
-       TlMH.DrawLatex(0.72,0.89,'m_{H} = '+str(massFilter[0])+' GeV')
-
-       points.SetFillColor(38);
-       points.Draw("2SAME");
-       invpts.SetFillColor(38);
-       invpts.Draw("2SAME");
-
-       if (not self.blind ) :
-         opoints.SetMarkerColor(kRed);
-         opoints.Draw("PSAME");
-         oinvpts.SetMarkerColor(kRed);
-         oinvpts.Draw("PSAME");
-
- 
-       self.addTitle(self.iTitle,self.iLumi) 
-       self.c1.Update() 
-       self.Save('SignCC_'+self.EnergyName(iEnergy)+'_'+iModel+'_'+str(massFilter[0]).replace('.','d'))
-       self.Wait()
-
-
-   def plotLimitChannel(self,CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape'],iEnergy=0,iModel='SMHiggs',massFilter=[125]):
-       self.squareCanvas(False,False)
-       self.c1.cd()
-       self.resetPlot()
-       self.c1.SetLeftMargin(0.4) 
-       self.c1.SetGridx(1)
-
-       if (self.logX) : self.postFix += '_logX'
-
-       if len(massFilter) != 1 : return
-       nChann=len(CombList)-1
-       if nChann == 0 : return
-
-       LimExp='ACLsExp'
-       LimObs='ACLsObs'
-
-       for iComb in CombList:
-         self.readResults(iComb,iEnergy,iModel,massFilter,LimExp)
-         if (not self.blind ) : self.readResults(iComb,iEnergy,iModel,massFilter,LimObs)
-
-
-       if (not self.logX) :  
-         MuMin=0.
-         MuMax=3.
-       else:
-         MuMin=0.01
-         MuMax=20.
-
-       frame = TH2F("frame",";95% limit on #sigma/#sigma_{SM};",1,MuMin,MuMax,nChann+1,0,nChann+1);
-       #frame.GetXaxis().SetTitleSize(0.05);
-       #frame.GetXaxis().SetLabelSize(0.04);
-       #frame.GetYaxis().SetLabelSize(0.06);
-       #frame.GetXaxis().SetNdivisions(505)
-       frame.GetXaxis().SetLabelFont (   42)
-       frame.GetYaxis().SetLabelFont (   42)
-       frame.GetXaxis().SetTitleFont (   42)
-       frame.GetYaxis().SetTitleFont (   42)
-       frame.GetXaxis().SetTitleOffset( 1.2)
-       frame.GetYaxis().SetTitleOffset( 1.2)
-       frame.GetXaxis().SetTitleSize (0.050)
-       frame.GetYaxis().SetTitleSize (0.050)
-       frame.GetXaxis().SetLabelSize (0.045)
-       frame.GetYaxis().SetLabelSize (0.055)
-       frame.GetXaxis().SetNdivisions(505)
-
-       frame.Draw()
-       if (self.logX) : gPad.SetLogx()
-
-       points   = TGraphAsymmErrors (nChann+1)
-       points95 = TGraphAsymmErrors (nChann+1)
-       pexp     = TGraphAsymmErrors (nChann+1)
-       invpts   = TGraphAsymmErrors (nChann)
-       invpts95 = TGraphAsymmErrors (nChann)
-       pobs     = TGraphAsymmErrors (nChann+1)
-       TlMu=TLatex()
-       TlMu.SetTextAlign(23);
-       TlMu.SetTextSize(0.03);
-
-       asymTolerance = 0.15
-       for iChann in xrange(1,nChann+1):
-         Val   = self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['Val'][0]
-         eDo   = self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['Val'][0] - self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['68D'][0]
-         eUp   = self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['68U'][0] - self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['Val'][0]
-         eDo95 = self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['Val'][0] - self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['95D'][0]
-         eUp95 = self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['95U'][0] - self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['Val'][0]
-
-         if eUp   > 100 : eUp=100
-         if eUp95 > 100 : eUp95=100
-         print Val, eDo, eUp
-         if Val <= MuMax : 
-           pexp  .SetPoint(iChann-1,      Val , iChann-0.5);
-           pexp  .SetPointError(iChann-1, 0. , 0.  , 0.4, 0.4);
-           points.SetPoint(iChann-1,      Val , iChann-0.5);
-           points.SetPointError(iChann-1, eDo, eUp , 0.4, 0.4);
-           points95.SetPoint(iChann-1,      Val , iChann-0.5);
-           points95.SetPointError(iChann-1, eDo95, eUp95 , 0.4, 0.4);
-           invpts.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-           invpts95.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-         else:
-           invVal=MuMax
-           inveDo=MuMax - self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['68D'][0]
-           inveUp=0.
-           inveDo95=MuMax - self.Results[CombList[iChann]][iEnergy][iModel][LimExp]['68D'][0]
-           inveUp95=0.
-           invpts.SetPoint(iChann-1,      invVal , iChann-0.5);
-           invpts.SetPointError(iChann-1, inveDo, inveUp , 0.4, 0.4);
-           invpts95.SetPoint(iChann-1,      invVal , iChann-0.5);
-           invpts95.SetPointError(iChann-1, inveDo95, inveUp95 , 0.4, 0.4);
-           pexp  .SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-           points.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-           points95.SetPoint(iChann-1,      MuMax+1.  , iChann-0.5);
-         if (not self.blind ) :
-           Val   = self.Results[CombList[iChann]][iEnergy][iModel][LimObs]['Val'][0]
-           if Val <= MuMax : 
-             pobs.SetPoint(iChann-1,      Val , iChann-0.5);
-             pobs.SetPointError(iChann-1, 0. , 0.  , 0.4, 0.4);
- 
-         #muTxt = '#mu = '+str(round(Val,2))+'^{ +'+str(round(eUp,2))+'}_{ -'+str(round(eDo,2))+'}'
-         muTxt = '#sigma/#sigma_{SM} < %.2f^{ + %.2f}_{  - %.2f}'%(Val,eUp,eDo)
-         label = '#splitline{   '+combinations[CombList[iChann]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
-         frame.GetYaxis().SetBinLabel(iChann, label  );
-         #frame.GetYaxis().SetBinLabel(iChann,  combinations[CombList[iChann]]['legend'] );
-         #frame.GetYaxis().SetBinLabel(iChann-.5,'#mu = 0.76^{+0.19}_{-0.19}')
-         #TlMu.DrawLatex(0.2,0.95,'#mu = 0.76^{+0.19}_{-0.19}')
-       frame.GetYaxis().LabelsOption("v")
-       # ... Combined result 
-       Val = self.Results[CombList[0]][iEnergy][iModel][LimExp]['Val'][0]
-       eDo = self.Results[CombList[0]][iEnergy][iModel][LimExp]['Val'][0] - self.Results[CombList[0]][iEnergy][iModel][LimExp]['68D'][0]
-       eUp = self.Results[CombList[0]][iEnergy][iModel][LimExp]['68U'][0] - self.Results[CombList[0]][iEnergy][iModel][LimExp]['Val'][0]
-       eDo95 = self.Results[CombList[0]][iEnergy][iModel][LimExp]['Val'][0] - self.Results[CombList[0]][iEnergy][iModel][LimExp]['95D'][0]
-       eUp95 = self.Results[CombList[0]][iEnergy][iModel][LimExp]['95U'][0] - self.Results[CombList[0]][iEnergy][iModel][LimExp]['Val'][0]
-       pexp  .SetPoint(nChann,      Val , nChann+0.5);
-       pexp  .SetPointError(iChann, 0. , 0.  , 0.4, 0.4);
-       points.SetPoint(nChann,      Val , nChann+0.5);
-       points.SetPointError(iChann, eDo, eUp , 0.4, 0.4);
-       points95.SetPoint(nChann,      Val , nChann+0.5);
-       points95.SetPointError(iChann, eDo95, eUp95 , 0.4, 0.4);
-       if (not self.blind ) :
-           Val   = self.Results[CombList[0]][iEnergy][iModel][LimObs]['Val'][0]
-           if Val <= MuMax : 
-             pobs.SetPoint(nChann,      Val , nChann+0.5);
-             pobs.SetPointError(nChann, 0. , 0.  , 0.4, 0.4);
- 
-
-       muTxt = '#sigma/#sigma_{SM} < %.2f^{ + %.2f}_{  - %.2f}'%(Val,eUp,eDo) 
-       #label = '#splitline{   Combined}{                    #scale[0.8]{'+muTxt+'}  }'
-       label = '#splitline{   '+combinations[CombList[0]]['legend']+'}{                    #scale[0.8]{'+muTxt+'}  }'
-       frame.GetYaxis().SetBinLabel(nChann+1, label  );
-       sepLine = TLine (MuMin, nChann, MuMax, nChann);
-       sepLine.SetLineWidth(2);
-       sepLine.SetLineStyle(2);
-       sepLine.Draw("same")
-
-       #frame.GetYaxis().SetTickLength(0);
-
-
-       TlMH=TLatex()
-       TlMH.SetTextSize(0.03);
-       TlMH.SetNDC()
-       TlMH.DrawLatex(0.72,0.89,'m_{H} = '+str(massFilter[0])+' GeV')
-
-       points95.SetFillColor(kYellow);
-       points95.Draw("2SAME");
-       invpts95.SetFillColor(kYellow);
-       invpts95.Draw("2SAME");
-
-
-       points.SetFillColor(kGreen);
-       points.Draw("2SAME");
-       invpts.SetFillColor(kGreen);
-       invpts.Draw("2SAME");
- 
-       pexp.SetLineWidth(2) 
-       pexp.SetLineStyle(2) 
-       pexp.SetMarkerStyle(0) 
-       pexp.Draw("PSAME");
-
-       if (not self.blind ) :
-         pobs.SetLineWidth(2) 
-         pobs.SetLineStyle(1) 
-         #pobs.SetMarkerStyle(0) 
-         pobs.Draw("PSAME");
-
-       
-
-       #self.plotVertLine('One', 1. , [0,nChann+1] , kRed , 1    , 'One')
-       #self.plotAllObj('One')
-
- 
-       self.addTitle(self.iTitle,self.iLumi) 
-       self.c1.Update() 
-       self.Save('LimitCC_'+self.EnergyName(iEnergy)+'_'+iModel+'_'+str(massFilter[0]).replace('.','d'))
-       self.Wait()
-
-   def MLToysBB(self,CombList=['vbfbbsplit'],iEnergy=8,iModel='SMHiggs',massFilter=[125],AltModels=['NONE']):
-       self.squareCanvas(False,False)
-       self.c1.cd()
-       self.resetPlot()
-       self.c1.SetGridx(1)
-       gStyle.SetOptTitle(1)
-       gStyle.SetOptStat(1)
-
-       hPull={}
-       hBias={}
-       hPullSum={}
-       hBiasSum={}
-       hPullSumErr={}
-       hBiasSumErr={}
-
-
-       for iComb in CombList:
-         hPull[iComb] = {}
-         hBias[iComb] = {}
-         hPullSum[iComb] = {}
-         hBiasSum[iComb] = {}
-         hPullSumErr[iComb] = {}
-         hBiasSumErr[iComb] = {}
-         cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
-         energyList= combTools.EnergyList_Filter(iEnergy).get()
-         if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
-           TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
-         else:
-           TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
-         print iComb, cardDir, energyList,TargetDir
-         for iEnergy in energyList:     
-           hPull[iComb][iEnergy] = {}
-           hBias[iComb][iEnergy] = {}
-           hPullSum[iComb][iEnergy] = {}
-           hBiasSum[iComb][iEnergy] = {}
-           hPullSumErr[iComb][iEnergy] = {}
-           hBiasSumErr[iComb][iEnergy] = {}
-
-           nMass= len(massFilter)
-           mMin = massFilter[0]-2.5
-           mMax = massFilter[-1]+2.5   
-           for iAltModel in AltModels:
-             AMFix=''
-             if iAltModel != 'NONE' : AMFix= '_Use-'+iAltModel
-             pullName='PullSummary_'+iComb+'_'+iEnergy+AMFix+'_'+iModel
-             biasName='BiasSummary_'+iComb+'_'+iEnergy+AMFix+'_'+iModel
-             hPullSum[iComb][iEnergy][iAltModel] = TH1F(pullName,pullName,nMass,mMin,mMax)
-             hBiasSum[iComb][iEnergy][iAltModel] = TH1F(biasName,biasName,nMass,mMin,mMax)
-             hPullSumErr[iComb][iEnergy][iAltModel] = TH1F(pullName+'_Err',pullName+'_Err',nMass+2,mMin,mMax)
-             hBiasSumErr[iComb][iEnergy][iAltModel] = TH1F(biasName+'_Err',biasName+'_Err',nMass+2,mMin,mMax)
-
-           for iMass in massFilter:
-             self.c1.SetGridx(1)
-             hPull[iComb][iEnergy][iMass] = {}
-             hBias[iComb][iEnergy][iMass] = {}
-             for iAltModel in AltModels:
-               AMFix=''
-               if iAltModel != 'NONE' : AMFix= '_Use-'+iAltModel
-               pullName = 'Pull_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
-               biasName = 'Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
-               hPull[iComb][iEnergy][iMass][iAltModel] = TH1F(pullName,pullName,100,-10,10)
-               hBias[iComb][iEnergy][iMass][iAltModel] = TH1F(biasName,biasName,100,-20,20)
-               fileCmd = 'ls '+TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb+'_'+iEnergy+'_'+iModel+AMFix+'_MLToysBB.job*.MaxLikelihoodFit.mH'+str(iMass)+'.*.root'
-               
-               proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
-               out, err = proc.communicate()
-               FileList=string.split(out)
-               print FileList
-               for iFile in FileList:
-                 #try:
-                   fTree = TFile(iFile,'READ')
-                   tTree = fTree.Get("limit")
-                   for iEv in tTree:
-                     hBias[iComb][iEnergy][iMass][iAltModel].Fill(iEv.limit-1.) 
-                     if (iEv.limitErr>0) : hPull[iComb][iEnergy][iMass][iAltModel].Fill((iEv.limit-1.)/iEv.limitErr)
-                   fTree.Close()
-                 #except:
-                 # print 'Could not read ', iFile
-
-               hBias[iComb][iEnergy][iMass][iAltModel].Draw()
-               self.Save('Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass))
-               hPull[iComb][iEnergy][iMass][iAltModel].Draw()
-               self.Save('Pull_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass))
-
-               # Bias Results
-               mean      = hBias[iComb][iEnergy][iMass][iAltModel].GetMean();
-               errorMean = hBias[iComb][iEnergy][iMass][iAltModel].GetMeanError(); 
-               meanRMS   = hBias[iComb][iEnergy][iMass][iAltModel].GetRMS(); 
-               iBin = hPullSum[iComb][iEnergy][iAltModel].FindBin(iMass)
-               hBiasSum[iComb][iEnergy][iAltModel].SetBinContent(iBin,mean)
-               hBiasSum[iComb][iEnergy][iAltModel].SetBinError(iBin,errorMean)
-               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin,0.)
-               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin,meanRMS)
-               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin+1,0.)
-               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin+2,0.)
-               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin+1,meanRMS)
-               hBiasSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin+2,meanRMS)
-               # Pull Results
-               mean      = hPull[iComb][iEnergy][iMass][iAltModel].GetMean();
-               errorMean = hPull[iComb][iEnergy][iMass][iAltModel].GetMeanError(); 
-               meanRMS   = hPull[iComb][iEnergy][iMass][iAltModel].GetRMS(); 
-               iBin = hPullSum[iComb][iEnergy][iAltModel].FindBin(iMass)
-               hPullSum[iComb][iEnergy][iAltModel].SetBinContent(iBin,mean)
-               hPullSum[iComb][iEnergy][iAltModel].SetBinError(iBin,errorMean)
-               hPullSumErr[iComb][iEnergy][iAltModel].SetBinContent(iBin,0.)
-               hPullSumErr[iComb][iEnergy][iAltModel].SetBinError(iBin,meanRMS)
-
- 
-           # Bias Summary plot
-           Cols=[kBlack,kRed,kBlue,kMagenta]
-           self.c1.SetGridy(1)
-           First=True
-           iPos=0
-           leg = TLegend(0.20,0.65,0.40,0.89);
-           leg.SetLineColor(0);
-           leg.SetFillColor(0);
-           leg.SetTextSize(0.033)
-           leg.SetFillStyle(0)
-           leg.SetBorderSize(0)
-           leg.SetTextFont (42)
-
-
-           for iPlot in hPullSum[iComb][iEnergy]:
-             if First :
-               hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-5,5)
-               hBiasSumErr[iComb][iEnergy][iPlot].SetLineColor(kYellow)
-               hBiasSumErr[iComb][iEnergy][iPlot].SetFillColor(kYellow)
-               hBiasSumErr[iComb][iEnergy][iPlot].SetMarkerSize(0)
-               hBiasSumErr[iComb][iEnergy][iPlot].Draw("e3")
-               leg.AddEntry(hBiasSumErr[iComb][iEnergy][iPlot],"RMS","f"); 
-               First=False
-             #hBiasSum[iComb][iEnergy][iPlot].SetLineColor(Cols[iPos])
-             hBiasSum[iComb][iEnergy][iPlot].SetMarkerColor(Cols[iPos])
-             hBiasSum[iComb][iEnergy][iPlot].SetMarkerStyle(20+iPos)
-             hBiasSum[iComb][iEnergy][iPlot].Draw("psame")
-             leg.AddEntry(hBiasSum[iComb][iEnergy][iPlot],iPlot,"p")
-             iPos+=1
-
-           leg.Draw("same")
-           self.Save('BiasSummary_'+iComb+'_'+iEnergy+'_'+iModel)
-
 
    def MDF2DSum(self,iComb,iEnergy,iModel,massFilter,bFast=False):
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
@@ -1710,32 +1099,18 @@ class combPlot :
 
        Fast=''
        if bFast  : Fast='Fast'
-       TargetBase = 'MDFGrid'
-       if 'TargetBase' in physmodels[iModel]['MDFTree'] : TargetBase=physmodels[iModel]['MDFTree']['TargetBase']
-       if 'POISetKeys' in physmodels[iModel]['MDFTree'] :  
-         TargetList=[]
-         for iPOISetKey in physmodels[iModel]['MDFTree']['POISetKeys']: 
-           Ext             = ''
-           if 'Ext' in physmodels[iModel]['MDFTree'][iPOISetKey] : Ext=physmodels[iModel]['MDFTree'][iPOISetKey]['Ext']
-           TargetList.append (TargetBase+Fast+'Exp'+Ext+self.postFix)
-           if (not self.blind ) : TargetList.append(TargetBase+Fast+'Obs'+Ext+self.postFix)
-       else:
-         TargetList= [TargetBase+Fast+'Exp'+self.postFix]
-         if (not self.blind ) : TargetList.append(TargetBase+Fast+'Obs'+self.postFix)     
-
-       print TargetList
+       TargetList= ['MDFGrid'+Fast+'Exp'+self.postFix]
+       if (not self.blind ) : TargetList.append('MDFGrid'+Fast+'Obs'+self.postFix)     
 
        for iTarget in TargetList:
          for iMass in massList:
            fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-           if iEnergy != 0: fileName += '_' + str(iEnergy) + 'TeV'
            fileName += '_'+iModel+'_'+iTarget+'_Points*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
            fileCmd = 'ls '+fileName 
-           print fileCmd
            proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
            out, err = proc.communicate()
            FileList=string.split(out)
-           print FileList
+           #print FileList
            os.system('cd /tmp/xjanssen/ ; rm MDFGrid.tmp.root')
            isFileFirst=True
            for iFile in FileList:
@@ -1754,104 +1129,7 @@ class combPlot :
            print fileTarget
            os.system('cd /tmp/xjanssen/ ; mv MDFGrid.root '+fileTarget) 
 
-   def MDF1D(self,iComb,iEnergy,iModel,massFilter,bFast=False):
-       print 'MDF2D',iComb,iEnergy,iModel,massFilter
-       Fast=''
-       if bFast : Fast='Fast'
-       TargetBase = 'MDFGrid'
-       if 'TargetBase' in physmodels[iModel]['MDFTree'] : TargetBase=physmodels[iModel]['MDFTree']['TargetBase']
-       PlotDic={}
-       if 'POISetKeys' in physmodels[iModel]['MDFTree'] :  
-         for iPOISetKey in physmodels[iModel]['MDFTree']['POISetKeys']:
-           if physmodels[iModel]['MDFTree'][iPOISetKey]['NDim'] == 1 : PlotDic[iPOISetKey] = physmodels[iModel]['MDFTree'][iPOISetKey]
-       elif physmodels[iModel]['MDFTree']['NDim'] == 1 : PlotDic['NONE'] = physmodels[iModel]['MDFTree'] 
-
-       for iPlot in PlotDic: 
-         print iPlot,' : ',PlotDic[iPlot]
-         self.squareCanvas(False,False)
-         self.c1.cd()
-         self.resetPlot()
-         self.xAxisTitle = PlotDic[iPlot]['AxisTitle'][0]
-         self.yAxisTitle = '-2 #Delta ln L'
-         minXP           = PlotDic[iPlot]['MinPlt'][0]
-         maxXP           = PlotDic[iPlot]['MaxPlt'][0]
-         minYP           = PlotDic[iPlot]['MinPlt'][1]
-         maxYP           = PlotDic[iPlot]['MaxPlt'][1]
-
-
-         Ext             = ''
-         if 'Ext' in PlotDic[iPlot] : Ext= PlotDic[iPlot]['Ext']
-
-         # Expected         
-         self.readMDF1D(iComb,iEnergy,iModel,massFilter,TargetBase+Fast+'Exp'+Ext+self.postFix,PlotDic[iPlot])
-         objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+'Exp'+Ext+self.postFix
-
-         # Observed
-         #if (not self.blind ) : 
-         if (False) : 
-           self.readMDF1D(iComb,iEnergy,iModel,massFilter,TargetBase+Fast+'ExpFix'+Ext+self.postFix,PlotDic[iPlot])
-           objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+'ExpFix'+Ext+self.postFix
-
-         # Plot 
-         frame = TH1F("Frame","Frame",5,float(minXP),float(maxXP))
-         frame.GetXaxis().SetTitle(self.xAxisTitle) 
-         frame.GetYaxis().SetTitle(self.yAxisTitle) 
-         frame.GetYaxis().SetRangeUser(float(minYP),float(maxYP))
-         frame.GetXaxis().SetNdivisions(505)
-         frame.GetYaxis().SetNdivisions(505)
-         frame.Draw()
-
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineWidth(2)
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineStyle(2)
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineColor(kBlack)
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].Draw("samel")
-         self.Obj2Plot['gr__'+objNameExp]['Legend']= 'Exp. for SM H'
-         LegList=['gr__'+objNameExp]
-
-         #if (not self.blind ) : 
-         if (False) :
-           self.Obj2Plot['gr__'+objNameObs]['Obj'].SetLineWidth(2)
-           self.Obj2Plot['gr__'+objNameObs]['Obj'].SetLineStyle(1)
-           self.Obj2Plot['gr__'+objNameObs]['Obj'].SetLineColor(kBlack)
-           self.Obj2Plot['gr__'+objNameObs]['Obj'].Draw("samel") 
-           self.Obj2Plot['gr__'+objNameObs]['Legend']= 'Exp. for SM H (Fix)'
-           LegList.append('gr__'+objNameObs)
-
-         Lines=['One','Four']
-         self.plotHorizLine('One' , [float(minXP),float(maxXP)] , 1 , kRed , 1    , '1sigma')
-         self.plotHorizLine('Four', [float(minXP),float(maxXP)] , 4 , kRed , 1    , '2sigma')
-
-         # Fing 1/2 Sigma X-ing
-         if self.blind : gr = self.Obj2Plot['gr__'+objNameExp]['Obj']
-         else          : gr = self.Obj2Plot['gr__'+objNameObs]['Obj']
-         hi68 = self.findCrossingOfScan1D(gr, 1.00, False, minXP, maxXP);
-         lo68 = self.findCrossingOfScan1D(gr, 1.00, True,  minXP, maxXP);
-         hi95 = self.findCrossingOfScan1D(gr, 4.00, False, minXP, maxXP);
-         lo95 = self.findCrossingOfScan1D(gr, 4.00, True,  minXP, maxXP);
-
-         if hi68 >= minXP and hi68 <= maxXP:
-            self.plotVertLine('X1R', hi68 , [0,1] , kRed , 1    , '1sigmaR')
-            Lines.append('X1R')
-         if lo68 >= minXP and lo68 <= maxXP:
-            self.plotVertLine('X1L', lo68 , [0,1] , kRed , 1    , '1sigmaL')
-            Lines.append('X1L')
-         if hi95 >= minXP and hi95 <= maxXP:
-            self.plotVertLine('X2R', hi95 , [0,4] , kRed , 1    , '2sigmaR')
-            Lines.append('X2R')
-         if lo95 >= minXP and lo95 <= maxXP:
-            self.plotVertLine('X2L', lo95 , [0,4] , kRed , 1    , '2sigmaL')
-            Lines.append('X2L')
-
-
-         self.plotAllObj(Lines,True)
-         self.plotObjLeg(LegList,combinations[iComb]['legend'],'TopLeft')
-         self.addTitle(self.iTitle,self.iLumi) 
-         self.c1.Update() 
-         self.Save(iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext)
-
-         self.Wait()
-
-   def MDF2D(self,iComb,iEnergy,iModel,massFilter,bFast=False):
+   def MDF2D(self,iComb,iEnergy,iModel,massFilter,bSimple=True,bFast=False):
        print 'MDF2D',iComb,iEnergy,iModel,massFilter
        Fast=''
        if bFast : Fast='Fast'
@@ -1873,8 +1151,9 @@ class combPlot :
        maxYP=physmodels[iModel]['MDFTree']['MaxPlt'][1]
             
        # Expected
-       #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglExp68',algo='Single')
-       #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossExp68',algo='Cross')
+       if bSimple:
+         self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglExp68',algo='Single')
+         self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossExp68',algo='Cross')
        self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Exp'+self.postFix)
        objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Exp'+self.postFix
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
@@ -1887,19 +1166,21 @@ class combPlot :
        self.Obj2Plot['c68__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['c95__'+objNameExp]['Obj'].Draw("same")  
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].Draw("samep")  
-       #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglExp68_Single'
-       #self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
-       #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossExp68_Cross'
-       #self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
-       self.addTitle(self.iTitle,self.iLumi) 
+       if bSimple:
+         objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglExp68_Single'
+         self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
+         objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossExp68_Cross'
+         self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
+       self.addTitle() 
        self.c1.Update() 
        self.Save(objNameExp)
        #self.Wait()
 
        # Observed 
        if (not self.blind ) : 
-         #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglObs68',algo='Single')
-         #self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossObs68',algo='Cross')
+         if bSimple:
+           self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFSnglObs68',algo='Single')
+           self.readMDFVal(iComb,iEnergy,iModel,massFilter,iTarget='MDFCrossObs68',algo='Cross')
          self.readMDFGrid(iComb,iEnergy,iModel,massFilter,iTarget='MDFGrid'+Fast+'Obs'+self.postFix) 
          objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast+'Obs'+self.postFix
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
@@ -1912,11 +1193,12 @@ class combPlot :
          self.Obj2Plot['c68__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['c95__'+objNameObs]['Obj'].Draw("same")  
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")  
-         #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglObs68_Single'
-         #self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
-         #objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossObs68_Cross'
-         #self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
-         self.addTitle(self.iTitle,self.iLumi) 
+         if bSimple:
+           objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFSnglObs68_Single'
+           self.Obj2Plot['c1d__'+objName]['Obj'].Draw("lp")
+           objName=iComb+'_'+str(iEnergy)+'_'+iModel+'_MDFCrossObs68_Cross'
+           self.Obj2Plot['c2d__'+objName]['Obj'].Draw("p")
+         self.addTitle() 
          self.c1.Update() 
          self.Save(objNameObs)
          #self.Wait()
@@ -1944,7 +1226,7 @@ class combPlot :
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].SetMarkerStyle(22)
        self.Obj2Plot['gr0__'+objNameExp]['Obj'].Draw("samep")  
        self.Obj2Plot['gr0__'+objNameExp]['Legend']= 'Exp. for SM H'
-       LegList = ['gr0__'+objNameExp,'c68__'+objNameExp,'c95__'+objNameExp]
+       LegList = ['c68__'+objNameExp,'c68__'+objNameExp,'c95__'+objNameExp]
     
        if (not self.blind ) :
          self.Obj2Plot['c68__'+objNameObs]['Legend'] = '68% CL Observed'
@@ -1960,7 +1242,6 @@ class combPlot :
          self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")  
          self.Obj2Plot['gr0__'+objNameObs]['Legend']= 'Observed'
          LegList = ['gr0__'+objNameObs,'c68__'+objNameObs,'c95__'+objNameObs,'gr0__'+objNameExp,'c68__'+objNameExp,'c95__'+objNameExp]
-       
 
        if iModel == "rVrFXSH" :
          self.plotObjLeg(LegList,combinations[iComb]['legend'],'TopRight')
@@ -1968,7 +1249,7 @@ class combPlot :
          self.plotObjLeg(LegList,combinations[iComb]['legend'],'TopLeft')
        
 
-       self.addTitle(self.iTitle,self.iLumi) 
+       self.addTitle() 
        self.c1.Update() 
        self.Save(iComb+'_'+str(iEnergy)+'_'+iModel+'_'+'MDFGrid'+Fast)
  
@@ -2069,6 +1350,16 @@ class combPlot :
        if '0m'  in iComb : 
          jcp='0m'
          targets[iTarget]['JobsParam']['FQQ'] = [0.]
+       if '1mix'  in iComb :
+         jcp='1mix'
+         mText='1^{mix}'
+       elif '1m' in  iComb :
+         jcp='1m'
+         mText='1^{-}'
+       elif '1p' in  iComb :
+         jcp='1p'
+         mText='1^{+}'
+
 
        for iMass in massList:
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
@@ -2080,7 +1371,8 @@ class combPlot :
            subfile.write('#Fqq     sObsSM   sExpSM  sObsALT  sExpALT CLsRatio     qObs   MeanSM medianSM   qSM68m   qSM68p   qSM95m   qSM95p  MeanALTmedianALT  qALT68m  qALT68p  qALT95m  qALT95p \n')
 
            for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
-             unblind=1
+             unblind=0
+             funblind=str(unblind)
              workDir   = TargetDir+'/'+str(iMass) 
              print workDir
              fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
@@ -2108,9 +1400,9 @@ class combPlot :
                if iFQQ == 1.   : mText = '2^{+}_{min}(f_{q#bar{q}}=100%)'
 
              if iFITNUIS == -1 :
-               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" ')
+               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"('+funblind+',\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" ')
              else :
-               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(true,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" > /dev/null')
+               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"('+funblind+',\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" > /dev/null')
              for line in open(logName):
                if "RESULTS_SUMMARY" in line:
                  print "%-4s %s"%(str(iFQQ),line.replace('RESULTS_SUMMARY',''))
@@ -2872,22 +2164,16 @@ class combPlot :
 
 
    def printResults(self,iComb='hww012j_vh3l_vh2j_zh3l2j_shape',iEnergy=0,iModel='SMHiggs',massFilter=[125],printList=[]):
-     
-      self.squareCanvas(False,False)  
+      
       self.Results = {}
 
-      if 'ACLsExp'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp') 
-      if 'ACLsExpPost'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExpPost') 
-      if 'ACLsInjPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsInjPre') 
-      if 'SExpPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SExpPre') 
-      if 'PVExpPre' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'PVExpPre') 
-      if 'BestFitExp' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitExp')
+      if 'ACLsExp' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp') 
+      if 'SExpPre' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SExpPre') 
 
       if (not self.blind ) :
         if 'ACLsObs' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsObs') 
         if 'SObs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SObs') 
-        if 'PVObs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'PVObs') 
-        if 'BestFit'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
+        if 'BestFit' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
         if 'BestFitG' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitG')
         if 'BestFitT' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitT')
 
@@ -2904,28 +2190,18 @@ class combPlot :
       texPrint=''
       if 'ACLsObs' in printList : 
          txtPrint+='| CLsObs '
-      if 'ACLsInjPre'  in printList :
-         txtPrint+='| CLsInj '
       if 'ACLsExp' in printList : 
-         txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
-      if 'ACLsExpPost' in printList : 
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
       if 'SObs'    in printList : 
          txtPrint+='| SObs '
       if 'SExpPre' in printList : 
          txtPrint+='| SExp '
-      if 'PVObs'    in printList : 
-         txtPrint+='| pVal Obs '
-      if 'PVExpPre' in printList : 
-         txtPrint+='| pVal Exp '
       if 'BestFit' in printList : 
          txtPrint+='| BestFit '
       if 'BestFitG' in printList : 
          txtPrint+='| BestFitG '
       if 'BestFitT' in printList : 
          txtPrint+='| BestFitT '
-      if 'BestFitExp' in printList : 
-         txtPrint+='| BestFitExp '
 
 
       print txtPrint
@@ -2939,22 +2215,12 @@ class combPlot :
             txtPrint+='| '+str(round(Val,2))+' '  
           else:
             txtPrint+='|  X  ' 
-        if 'ACLsInjPre' in printList :
-          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsInjPre','Val')
-          txtPrint+='| '+str(round(Val,2))+' '  
         if 'ACLsExp' in printList :
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','Val')
             d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','95D')
             d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','68D')
             u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','68U')
             u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','95U')
-            txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2)) 
-        if 'ACLsExpPost' in printList :
-            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','Val')
-            d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','95D')
-            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','68D')
-            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','68U')
-            u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','95U')
             txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2)) 
         if 'SObs'     in printList :
           if (not self.blind ) : 
@@ -2963,17 +2229,8 @@ class combPlot :
           else:
             txtPrint+='|  X  ' 
         if 'SExpPre' in printList :
-          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVExpPre','Val')
+          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'SExpPre','Val')
           txtPrint+='| '+str(round(Val,2))+' '  
-        if 'PVObs'     in printList :
-          if (not self.blind ) : 
-            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVObs','Val')
-            txtPrint+='| '+str(round(Val,2))+' '  
-          else:
-            txtPrint+='|  X  ' 
-        if 'PVExpPre' in printList :
-          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVExpPre','Val')
-          txtPrint+='| '+str(round(Val,2))+' ' 
         if 'BestFit' in printList : 
           if (not self.blind ) : 
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFit','Val')
@@ -3001,22 +2258,13 @@ class combPlot :
             eu=u68-Val 
             #print Val, u68, d68
             txtPrint+='| '+str(round(Val,3))+' - '+str(round(ed,2))+' + '+str(round(eu,2))+' '
-        if 'BestFitExp' in printList : 
-            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitExp','Val')
-            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitExp','68D')
-            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFitExp','68U')
-            ed=Val-d68
-            eu=u68-Val 
-            #print Val, u68, d68
-            txtPrint+='| '+str(round(Val,3))+' - '+str(round(ed,2))+' + '+str(round(eu,2))+' '
 
   
         print txtPrint 
 
       #print self.Results
 
-      self.c1.Close()
- 
+      
 
 def Test():
 

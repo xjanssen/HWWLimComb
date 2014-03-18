@@ -240,28 +240,6 @@ def SMInject(cardIn,rmSMProc=True):
     dcOut.write(cardOut) 
     return cardOut
 
-
-# ------------------------------------------------------- ALTMODEL ----------------------------------------
-
-def ChangeModel(iChannel,iEnergy,iMass,card,iAltModel):
-
-    if 'altmodel' in channels[options.Version][iChannel][iEnergy] and iAltModel in channels[options.Version][iChannel][iEnergy]['altmodel']:
-      dcIn  = cardTools(card)
-      dcOut = cardTools(card)
-      cardOut=card.replace('.txt','_'+iAltModel+'.txt')
-      
-      for iProc in channels[options.Version][iChannel][iEnergy]['altmodel'][iAltModel]:
-        Val=channels[options.Version][iChannel][iEnergy]['altmodel'][iAltModel][iProc]
-        dcOut.remShape(iProc,Val[0])
-        dcOut.addShape(iProc,Val[0].replace('$MASS',str(iMass)) ,Val[1].replace('$MASS',str(iMass)) ,Val[2].replace('$MASS',str(iMass)) )
-
-  
-      os.system('rm '+cardOut)
-      dcOut.write(cardOut) 
-      return cardOut
-
-
-
 # ------------------------------------------------------- MAIN --------------------------------------------
 
 parser = OptionParser(usage="usage: %prog [options]")
@@ -273,7 +251,6 @@ parser.add_option("-P", "--purpose",    dest="purpose",     help="purpose of the
 parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default="0", metavar="SQRT(S)")
 parser.add_option("-m", "--masses",     dest="masses",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('masses',',',float))
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
-parser.add_option("-a", "--AltModel" ,  dest="AltModel",    help="Alternative models", default=['NONE'], type='string' , action='callback' , callback=combTools.list_maker('AltModel',','))
 
 
 (options, args) = parser.parse_args()
@@ -282,7 +259,7 @@ print '==== Data Cards Version : ',options.Version
 combList   = combTools.CombList_Filter(combinations,options.combs).get()
 cardDir    = combTools.CardDir_Filter(cardtypes,options.purpose).get()
 energyList = combTools.EnergyList_Filter(options.energy).get()
-#if
+
 
 # Build combinations
 for iComb in combList:
@@ -293,14 +270,12 @@ for iComb in combList:
        isValidEnergy=True
      if (options.energy == 8 or options.energy == 0) and iEnergy == '8TeV' : 
        isValidEnergy=True
-     if (options.energy == 13) and iEnergy == '13TeV' : 
-       isValidEnergy=True
    # Validate Combination Purpose
    isValidPurpose=False
    for purpose in combinations[iComb]['purposes']:
      if options.purpose == purpose :
        isValidPurpose=True
-   # Process if valid 
+   # Process if valid
    if isValidEnergy and isValidPurpose :
      massList   = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,options.purpose,options.masses,iComb,energyList).get()
      print '---------------------- Building cards for combination: '+iComb
@@ -311,61 +286,54 @@ for iComb in combList:
      print 'Target Dir : '+TargetDir
      print 'Masses List: '+str(massList)
      for iMass in massList:
-       for iAltModel in options.AltModel:
-         toCombine = []  
-         #toMove = [] 
-         for iChannel in  combinations[iComb]['channels']:
-           for iEnergy in energyList :
-             if (iEnergy in channels[options.Version][iChannel]) :
-               if (iMass >= channels[options.Version][iChannel][iEnergy]['mrange'][0]) and (iMass <= channels[options.Version][iChannel][iEnergy]['mrange'][1]) : 
-                 if 'hcp2012' in channels[options.Version][iChannel][iEnergy]['dir'] :
-                   card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
-                 else:
-                   card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
-                 tag= "%s%s_%dTeV_%s" % (channels[options.Version][iChannel][iEnergy]['branch'],channels[options.Version][iChannel][iEnergy]['decay'],channels[options.Version][iChannel][iEnergy]['energy'],channels[options.Version][iChannel][iEnergy]['tag'])
-                 # Fix ZH card name for _hsm !!!
-                 if cardtypes[options.purpose]['dir'] == 'searches' and 'zh3l2j' in iChannel : card=card.replace('zh3l2j_','zh3l2j_hsm_')
-                 # Here we can manipulate cards
-                 print '  ' , tag, ' --> ', card
-                 if 'preProc' in cardtypes[options.purpose] :
-                   for iPreProc in cardtypes[options.purpose]['preProc'] :
-                     cardOri = card
-                     print 'preProc : ' , iPreProc
-                     if iPreProc == 'WJetFix'  : card = WJetFix(card)
-                     if iPreProc == 'SMInject' : 
-                       card = SMInject(card)
-                       card = WJetFix(card,cardOri)
-                     if iPreProc == 'SMToys'   : 
-                       card = SMInject(card,False)
-                       card = SMToys(card)
-                       card = WJetFix(card,cardOri)
-                 if iAltModel != 'NONE' :
-                    if 'altmodel' in channels[options.Version][iChannel][iEnergy] and iAltModel in channels[options.Version][iChannel][iEnergy]['altmodel']:
-                       card = ChangeModel(iChannel,iEnergy,iMass,card,iAltModel)        
-                    else: 
-                      print 'WARNING:  ' , iAltModel , ' not defined for card: ',card  
-  
-                 if os.path.exists(card): toCombine.append((tag,card))
-                 else                   : print "WARNING: "+card+" does not exist !!!" 
-                 
-         # And now the real combination
-         if len(toCombine):
-           print  iMass , "-->" , [Tag[0] for Tag in toCombine]
-           outname = iComb 
-           if options.energy != 0: outname += '_' + str(options.energy) + 'TeV'
-           #else                  : outname += '_CombTeV' 
-           if iAltModel != 'NONE' : outname += '_' + iAltModel
-           outname += ".txt"
-           pipe = ""
-           if options.zip:
-             pipe = " | gzip"; outname += ".gz"
-           command =  'cd '+TargetDir+'/'+str(iMass)+' && '
-           command += "combineCards.py -S "
-           command += " ".join(["%s=%s" %(C,D) for (C,D) in toCombine])
-           command += pipe
-           command += " > "+outname
-           if options.pretend: 
-             print command
-           else: 
-             os.system('mkdir -p '+TargetDir+'/'+str(iMass)) 
-             os.system(command)
+       toCombine = []  
+       #toMove = [] 
+       for iChannel in  combinations[iComb]['channels']:
+         for iEnergy in energyList :
+           if (iEnergy in channels[options.Version][iChannel]) :
+             if (iMass >= channels[options.Version][iChannel][iEnergy]['mrange'][0]) and (iMass <= channels[options.Version][iChannel][iEnergy]['mrange'][1]) : 
+               if 'hcp2012' in channels[options.Version][iChannel][iEnergy]['dir'] :
+                 card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
+               else:
+                 card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))   
+               tag= "%s%s_%dTeV_%s" % (channels[options.Version][iChannel][iEnergy]['branch'],channels[options.Version][iChannel][iEnergy]['decay'],channels[options.Version][iChannel][iEnergy]['energy'],channels[options.Version][iChannel][iEnergy]['tag'])
+               # Fix ZH card name for _hsm !!!
+               if cardtypes[options.purpose]['dir'] == 'searches' and 'zh3l2j' in iChannel : card=card.replace('zh3l2j_','zh3l2j_hsm_')
+               # Here we can manipulate cards
+               print '  ' , tag, ' --> ', card
+               if 'preProc' in cardtypes[options.purpose] :
+                 for iPreProc in cardtypes[options.purpose]['preProc'] :
+                   cardOri = card
+                   print 'preProc : ' , iPreProc
+                   if iPreProc == 'WJetFix'  : card = WJetFix(card)
+                   if iPreProc == 'SMInject' : 
+                     card = SMInject(card)
+                     card = WJetFix(card,cardOri)
+                   if iPreProc == 'SMToys'   : 
+                     card = SMInject(card,False)
+                     card = SMToys(card)
+                     card = WJetFix(card,cardOri)
+
+               if os.path.exists(card): toCombine.append((tag,card))
+               else                   : print "WARNING: "+card+" does not exist !!!" 
+               
+       # And now the real combination
+       if len(toCombine):
+         print  iMass , "-->" , [Tag[0] for Tag in toCombine]
+         outname = iComb 
+         if options.energy != 0: outname += '_' + str(options.energy) + 'TeV'
+         #else                  : outname += '_CombTeV' 
+         outname += ".txt"
+         pipe = ""
+         if options.zip:
+           pipe = " | gzip"; outname += ".gz"
+         command =  'cd '+TargetDir+'/'+str(iMass)+' && '
+         command += "combineCards.py -S "
+         command += " ".join(["%s=%s" %(C,D) for (C,D) in toCombine])
+         command += pipe
+         command += " > "+outname
+         if options.pretend: 
+           print command
+         else: 
+           os.system('mkdir -p '+TargetDir+'/'+str(iMass)) 
+           os.system(command)
