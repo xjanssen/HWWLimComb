@@ -9,7 +9,7 @@ import os.path
 from optparse import OptionParser
 
 class batchJobs :
-   def __init__ (self,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version,AltModel=['NONE']):
+   def __init__ (self,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version):
       self.jobsDic={}
       self.jobsList=[]
       self.prefix=prefix
@@ -52,43 +52,23 @@ class batchJobs :
                 else:
                   NJobs = 1 
                 # Job Multiple parameter ?
-                NParam=1
-                JobParamName=[]
-                JobParamSize=[]
-                if iTarget in targets :
-                  pTarget=iTarget
-                  if 'Toys' in targets[iTarget]: pTarget=targets[iTarget]['Toys']['Target']
-                  if 'JobsParam' in targets[pTarget]:
-                    for iJobParam in targets[pTarget]['JobsParam']:
-                      JobParamName.append(iJobParam)
-                      JobParamSize.append(len(targets[pTarget]['JobsParam'][iJobParam])) 
-                      NParam*=len(targets[pTarget]['JobsParam'][iJobParam]) 
-                    #NJobs=NJobs*NParam
-                for iAltModel in AltModel:
-                  jJob=0 
-                  self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel] = {}
-                  for iParam in xrange(1,NParam+1): 
-                    # Toys ?
-                    ToysList = []
-                    if 'Toys' in targets[iTarget]:
-                      TPF=''
-                      if 'JobsParam' in targets[pTarget] :
-                        if len(JobParamSize) == 1:
-                          iPar=iParam-1
-                          TPF=TPF+'_'+JobParamName[0]+str(targets[pTarget]['JobsParam'][JobParamName[0]][iPar]).replace('.','d')
-                          print TPF
-                      if   len( energyList ) > 1 : iEnergy = 0 
-                      elif '7TeV' in energyList : iEnergy = 7
-                      elif '8TeV' in energyList : iEnergy = 8
-                      ToysList = combTools.getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,targets,iAltModel,TPF)
-                      NJobs=len(ToysList)
-                    for iJob in xrange(1,NJobs+1):        
-                      jJob+=1
-                      jName = self.prefix+kComb+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(jJob)
-                      self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = jName
-                      if not jName in self.jobsList: self.jobsList.append(jName)
+                if iTarget in targets and 'JobsParam' in targets[iTarget]:
+                  NParam=1
+                  for iJobParam in targets[iTarget]['JobsParam']:
+                    NParam*=len(targets[iTarget]['JobsParam'][iJobParam]) 
+                  NJobs=NJobs*NParam
+                # Toys ?
+                ToysList = []
+                if iTarget in targets:
+                  if 'Toys' in targets[iTarget]: 
+                    ToysList = combTools.getToys(iComb,iTarget,iMass,workspace,Version,cardtypes,physmodels,targets)
+                    NJobs=len(ToysList)
+                for iJob in xrange(1,NJobs+1):        
+                  jName = self.prefix+kComb+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(iJob)
+                  self.jobsDic[iComb][iModel][iMass][iTarget][iJob] = jName
+                  if not jName in self.jobsList: self.jobsList.append(jName)
 
-      print self.jobsDic
+      #print self.jobsDic
       #print self.jobsList
       #print len(self.jobsList)
 
@@ -106,8 +86,8 @@ class batchJobs :
         jFile.close()
         os.system('chmod +x '+jobdir+'/'+jName+'.sh')
 
-   def Add (self,iComb,iModel,iMass,iTarget,iJob,command,iAltModel) :
-     jName= self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]
+   def Add (self,iComb,iModel,iMass,iTarget,iJob,command) :
+     jName= self.jobsDic[iComb][iModel][iMass][iTarget][iJob]
      jFile = open(jobdir+'/'+jName+'.sh','a')
      jFile.write(command+'\n')
      jFile.close()

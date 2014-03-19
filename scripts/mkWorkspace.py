@@ -17,7 +17,6 @@ parser.add_option("-m", "--masses",     dest="masses",      help="Run only these
 parser.add_option("-b", "--batch"  ,    dest="runBatch",    help="Run in batch",                   default=False, action="store_true")
 parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode for batch jobs" , default=[], type='string' , action='callback' , callback=combTools.list_maker('batchSplit',','))
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
-parser.add_option("-a", "--AltModel" ,  dest="AltModel",    help="Alternative models", default=['NONE'], type='string' , action='callback' , callback=combTools.list_maker('AltModel',','))
 
 
 (options, args) = parser.parse_args()
@@ -43,26 +42,24 @@ for iComb in combList:
       print 'Target Dir : '+TargetDir
       print 'Masses List: '+str(massList)
       for iMass in massList:
-        for iAltModel in options.AltModel:
-          card=iComb
-          if options.energy != 0: card += '_' + str(options.energy) + 'TeV'
-          if iAltModel != 'NONE' : card += '_' + iAltModel
-          outname  = card+'_'+iModel+'.root'
-          card += ".txt"
-          if options.zip: card += ".gz"
-          if os.path.exists(TargetDir+'/'+str(iMass)+'/'+card):
-            command  = 'cd '+TargetDir+'/'+str(iMass)+' && '
-            command += 'text2workspace.py '+card+' -m '+str(iMass)
-            if 'model' in physmodels[iModel] :  command += ' -P '+physmodels[iModel]['model']
-            command += ' -o '+outname
-            if options.pretend: 
-              print command
-            else: 
-              if not options.runBatch:
-                os.system(command)
-              else:
-                jobs.Add(iComb,iModel,iMass,'None',1,command) 
-          else:
-            print 'WARNING: Card does not exist : '+TargetDir+'/'+str(iMass)+'/'+card
+        card=iComb
+        if options.energy != 0: card += '_' + str(options.energy) + 'TeV'
+        outname  = card+'_'+iModel+'.root'
+        card += ".txt"
+        if options.zip: card += ".gz"
+        if os.path.exists(TargetDir+'/'+str(iMass)+'/'+card):
+          command  = 'cd '+TargetDir+'/'+str(iMass)+' && '
+          command += 'text2workspace.py '+card+' -m '+str(iMass)
+          if 'model' in physmodels[iModel] :  command += ' -P '+physmodels[iModel]['model']
+          command += ' -o '+outname
+          if options.pretend: 
+            print command
+          else: 
+            if not options.runBatch:
+              os.system(command)
+            else:
+              jobs.Add(iComb,iModel,iMass,'None',1,command) 
+        else:
+          print 'WARNING: Card does not exist : '+TargetDir+'/'+str(iMass)+'/'+card
 
 if options.runBatch: jobs.Sub('8nh')
