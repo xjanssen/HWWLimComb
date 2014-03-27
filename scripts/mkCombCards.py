@@ -251,10 +251,16 @@ parser.add_option("-P", "--purpose",    dest="purpose",     help="purpose of the
 parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default="0", metavar="SQRT(S)")
 parser.add_option("-m", "--masses",     dest="masses",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('masses',',',float))
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
-
+parser.add_option("-d", "--dictionary", dest="Dictionary",  help="Datacards Dictionary", default='Configs.HWW2012' , type='string' )
 
 (options, args) = parser.parse_args()
 
+# Read Combination python config
+exec('from %s import *'%(options.Dictionary)) 
+print DefaultVersion
+if options.Version == 'None' : options.Version=DefaultVersion
+
+# Parse arguments
 print '==== Data Cards Version : ',options.Version
 combList   = combTools.CombList_Filter(combinations,options.combs).get()
 cardDir    = combTools.CardDir_Filter(cardtypes,options.purpose).get()
