@@ -2,6 +2,7 @@
 import sys, re, os, os.path
 from optparse import OptionParser
 
+from array import array
 import ROOT
 from ROOT import *
 
@@ -25,6 +26,25 @@ def file2map(x):
                 fields = [ float(i) for i in cols ]
                 ret[fields[0]] = dict(zip(headers,fields[1:]))
         return ret
+
+# ----------------------------------------------------- Add point if needed to YR ------------------------
+
+def GetYRVal(YRDic,iMass,Key):
+
+    if iMass in YRDic : 
+       #print iMass,YRDic[iMass][Key]
+       return YRDic[iMass][Key]
+    else:
+       n=len(YRDic.keys())
+       x=[]
+       y=[]
+       for jMass in sorted(YRDic.keys()):
+         x.append(jMass)
+         y.append(YRDic[jMass][Key])
+       gr = TGraph(n,array('f',x),array('f',y));
+       sp = TSpline3("YR",gr);
+       #print iMass,sp.Eval(iMass)
+       return sp.Eval(iMass)
 
 # ------------------------------------------------------- MASS Extrapolation ------------------------------
 
@@ -53,20 +73,22 @@ def ExtrapolateMass(iChannel,iEnergy,card,TargetCard,iMass,iMassExtra):
       iProc=dcIn.content['block2']['process'][iBin]
       # X-section
       xs_Scale = 1.
-      if dcIn.content['block2']['process'][iBin] == 'ggH' : xs_Scale = xs_ggH[iMassExtra]['XS_pb']/xs_ggH[iMass]['XS_pb']
-      if dcIn.content['block2']['process'][iBin] == 'qqH' : xs_Scale = xs_qqH[iMassExtra]['XS_pb']/xs_qqH[iMass]['XS_pb']
-      if dcIn.content['block2']['process'][iBin] == 'WH'  : xs_Scale = xs_WH[iMassExtra]['XS_pb']/xs_WH[iMass]['XS_pb']
-      if dcIn.content['block2']['process'][iBin] == 'ZH'  : xs_Scale = xs_ZH[iMassExtra]['XS_pb']/xs_ZH[iMass]['XS_pb']
-      if dcIn.content['block2']['process'][iBin] == 'ttH' : xs_Scale = xs_ttH[iMassExtra]['XS_pb']/xs_ttH[iMass]['XS_pb']
+      if dcIn.content['block2']['process'][iBin] == 'ggH' : xs_Scale = GetYRVal(xs_ggH,iMassExtra,'XS_pb')/GetYRVal(xs_ggH,iMass,'XS_pb')
+      if dcIn.content['block2']['process'][iBin] == 'qqH' : xs_Scale = GetYRVal(xs_qqH,iMassExtra,'XS_pb')/GetYRVal(xs_qqH,iMass,'XS_pb')
+      if dcIn.content['block2']['process'][iBin] == 'WH'  : xs_Scale = GetYRVal(xs_WH, iMassExtra,'XS_pb')/GetYRVal(xs_WH ,iMass,'XS_pb')
+      if dcIn.content['block2']['process'][iBin] == 'ZH'  : xs_Scale = GetYRVal(xs_ZH, iMassExtra,'XS_pb')/GetYRVal(xs_ZH ,iMass,'XS_pb')
+      if dcIn.content['block2']['process'][iBin] == 'ttH' : xs_Scale = GetYRVal(xs_ttH,iMassExtra,'XS_pb')/GetYRVal(xs_ttH,iMass,'XS_pb')
       # BR
       br_Scale = 1.
       if dcIn.content['block2']['process'][iBin] in ['ggH','qqH','WH','ZH','ttH']: 
-        if channels[options.Version][iChannel][iEnergy]['tag'] == 'vbfbb' : br_Scale = br_ff[iMassExtra]['H_bb']/br_ff[iMass]['H_bb']
+        if channels[options.Version][iChannel][iEnergy]['tag'] == 'vbfbb'  : br_Scale = GetYRVal(br_ffr,iMassExtra,'H_bb')/GetYRVal(br_ff,iMass,'H_bb')
+        if channels[options.Version][iChannel][iEnergy]['branch'] == 'hww' : br_Scale = GetYRVal(br_VV ,iMassExtra,'H_WW')/GetYRVal(br_VV,iMass,'H_WW')
         else :
-          print 'ERROR: Unknown BR for :', iChannel
+          print 'ERROR: Unknown BR for :', iChannel, channels[options.Version][iChannel][iEnergy]['tag']
           exit()
       YieldIn= float(dcIn.getRate(bin=jBin,process=iProc))
       YieldOut= float(dcIn.getRate(bin=jBin,process=iProc))*xs_Scale*br_Scale
+      #print xs_Scale , br_Scale
       print jBin,iProc,dcIn.getRate(bin=jBin,process=iProc) , '-->' , str(YieldIn*xs_Scale*br_Scale)
       dcOut.setRate(bin=jBin,process=iProc,value=YieldOut) 
 
@@ -123,9 +145,46 @@ def ExtrapolateMass(iChannel,iEnergy,card,TargetCard,iMass,iMassExtra):
         if dcOut.content['header2'][iEntry][1] in ['qqH','ggH']:
           dcOut.content['header2'][iEntry][3] = dcOut.content['header2'][iEntry][3].replace('.root','_m'+str(iMass)+'Extrapolated.root')
 
-
-
-
+    # Modify Histograms for HWW2l2v 
+    if channels[options.Version][iChannel][iEnergy]['branch'] == 'hww' and any(['shapes' in X for X in dcIn.content['header2'].itervalues()]) :  
+      shFiles = []
+      for iEntry in dcIn.content['header2'] : 
+        if dcIn.content['header2'][iEntry][0] == 'shapes' and dcIn.content['header2'][iEntry][1] != 'data_obs' and not ':' in dcIn.content['header2'][iEntry][3]: 
+          shFiles.append(dcIn.content['header2'][iEntry][3])
+      shFiles = list(set(shFiles))
+      print shFiles
+      for iFile in shFiles:
+        fileInName  = os.path.split(card)[0]+'/'+iFile 
+        fileOutName = os.path.split(TargetCard)[0]+'/'+iFile
+        print fileInName
+        print fileOutName
+        fIn   = TFile.Open(fileInName,'READ')
+        fOut  = TFile.Open(fileOutName,'RECREATE')
+        Hists = [X.GetName() for X in fIn.GetListOfKeys()]
+        for iHist in Hists : 
+          H = fIn.Get(iHist)
+          isHiggs = False
+          if   len(iHist.split('_')) == 2 : 
+            if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] : isHiggs = True
+          elif len(iHist.split('_')) > 2  :
+            if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] and iHist.split('_')[2] != 'SM' : isHiggs = True
+          if isHiggs : 
+            xs_Scale = 1.
+            if iHist.split('_')[1] == 'ggH' : xs_Scale = GetYRVal(xs_ggH,iMassExtra,'XS_pb')/GetYRVal(xs_ggH,iMass,'XS_pb')
+            if iHist.split('_')[1] == 'qqH' : xs_Scale = GetYRVal(xs_qqH,iMassExtra,'XS_pb')/GetYRVal(xs_qqH,iMass,'XS_pb')
+            if iHist.split('_')[1] == 'WH'  : xs_Scale = GetYRVal(xs_WH ,iMassExtra,'XS_pb')/GetYRVal(xs_WH ,iMass,'XS_pb')
+            if iHist.split('_')[1] == 'ZH'  : xs_Scale = GetYRVal(xs_ZH ,iMassExtra,'XS_pb')/GetYRVal(xs_ZH ,iMass,'XS_pb')
+            if iHist.split('_')[1] == 'ttH' : xs_Scale = GetYRVal(xs_ttH,iMassExtra,'XS_pb')/GetYRVal(xs_ttH,iMass,'XS_pb')
+            #if len(iHist.split('_')) == 2 : 
+            #  print H.Integral()
+            #  print xs_Scale , br_Scale
+            br_Scale = GetYRVal(br_VV,iMassExtra,'H_WW')/GetYRVal(br_VV,iMass,'H_WW')
+            H.Scale(xs_Scale*br_Scale) 
+            #if len(iHist.split('_')) == 2 : print H.Integral()
+          fOut.cd()
+          H.Write()
+        fIn.Close()
+        fOut.Close()
 
     os.system('rm '+TargetCard)
     dcOut.write(TargetCard) 
@@ -237,12 +296,18 @@ parser.add_option("-v", "--version",    dest="Version",     help="Datacards vers
 parser.add_option("-c", "--channel",    dest="channels",       help="channel set to scale", default=[], type='string' , action='callback' , callback=combTools.list_maker('channels',','))
 parser.add_option("-P", "--purpose",    dest="purpose",     help="purpose of the datacard (couplings, searches, mass, ...)", default="smhiggs", metavar="PATTERN")
 
-parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default="0", metavar="SQRT(S)")
+parser.add_option("-e", "--energy",     dest="energy",      help="energy (7,8,0=all)",             type="int", default=0, metavar="SQRT(S)")
 parser.add_option("-m", "--masses",     dest="masses",      help="Run only these mass points", default=[]      , type='string' , action='callback' , callback=combTools.list_maker('masses',',',float))
 parser.add_option("-T", "--Type"  ,     dest="Type"  ,      help="Extrapolation Type (Mass,13TeV)" , default="PDFSplit" , type='string' )
 
+parser.add_option("-d", "--dictionary", dest="Dictionary",  help="Datacards Dictionary", default='Configs.HWW2012' , type='string' )
 
 (options, args) = parser.parse_args()
+
+# Read Combination python config
+exec('from %s import *'%(options.Dictionary))
+if options.Version == 'None' : options.Version=DefaultVersion
+
 
 print '==== Data Cards Version : ',options.Version
 channelList = combTools.ChannelList_Filter(channels[options.Version],options.channels).get()
@@ -253,37 +318,52 @@ for iChannel in channelList:
   # Validate Energy 
   isValidEnergy=False
   for iEnergy in channels[options.Version][iChannel]:
-    if (options.energy == 7 or options.energy == 0) and iEnergy == '7TeV' : 
+    if (options.energy == 7) and iEnergy == '7TeV' : 
       isValidEnergy=True
-    if (options.energy == 8 or options.energy == 0) and iEnergy == '8TeV' : 
+      Energy=iEnergy
+    if (options.energy == 8) and iEnergy == '8TeV' : 
       isValidEnergy=True
+      Energy=iEnergy
     if (options.energy == 13) and iEnergy == '13TeV' : 
       isValidEnergy=True
+      Energy=iEnergy
   # Validate Combination Purpose
   isValidPurpose=False
-  purposeList = ['smhiggs']
+  purposeList = ['smhiggs','himass']
   for purpose in purposeList :
      if options.purpose == purpose :
        isValidPurpose=True
   # Process if valid 
   if isValidEnergy and isValidPurpose :
      massList   = combTools.MassList_Filter_Chann(cardtypes,channels[options.Version],options.purpose,options.masses,iChannel,energyList).get()
-     print '---------------------- Building extrapolation for cards: '+iChannel 
+     print '---------------------- Building extrapolation for cards: '+iChannel + ' @ ' + Energy
      print 'Masses List: '+str(massList)
      for iMass in massList:
-       card=cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMass))
+       card=cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMass))
        print '--------------------> Card: ',card
 
        # Mass extrapolation
-       if options.Type == 'Mass':
+       if options.Type == 'LoMass' :
         if iMass in extrapolations[options.Type]:
          for iMassExtra in extrapolations[options.Type][iMass] :
            print '------------------------> Extrapolating to: ',iMassExtra
-           TargetDir =cardbase+channels[options.Version][iChannel][iEnergy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][iEnergy]['subdir'].replace('$MASS',str(iMassExtra))
-           TargetCard=TargetDir+'/'+channels[options.Version][iChannel][iEnergy]['card'].replace('$MASS',str(iMassExtra))
+           TargetDir =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMassExtra))
+           TargetCard=TargetDir+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMassExtra))
            print 'TargetCard = ',TargetCard
            os.system('mkdir -p '+ TargetDir)
-           ExtrapolateMass(iChannel,iEnergy,card,TargetCard,iMass,iMassExtra)
+           print ExtrapolateMass(iChannel,Energy,card,TargetCard,iMass,iMassExtra)
+
+       # Mass extrapolation 
+       if options.Type == 'HiMass' :
+         if Energy in extrapolations[options.Type]:
+           if iMass in extrapolations[options.Type][Energy]:
+             for iMassExtra in extrapolations[options.Type][Energy][iMass] :
+               print '------------------------> Extrapolating to: ',iMassExtra 
+               TargetDir =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMassExtra))
+               TargetCard=TargetDir+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMassExtra))
+               print 'TargetCard = ',TargetCard
+               os.system('mkdir -p '+ TargetDir)
+               ExtrapolateMass(iChannel,Energy,card,TargetCard,iMass,iMassExtra)
 
        # Mass extrapolation
        if options.Type == 'PDFSplit':

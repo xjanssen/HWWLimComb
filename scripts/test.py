@@ -2,22 +2,37 @@ from ROOT import TFile, TH1D, TCanvas, TChain, THStack, TLegend, TGraph, TLine, 
 from array import array
 import rootlogonTDR
 
+
+def file2map(x):
+        ret = {}; headers = []
+        for x in open(x,"r"):
+            cols = x.split()
+            if len(cols) < 2: continue
+            if "mH" in x:
+                headers = [i.strip() for i in cols[1:]]
+            else:
+                fields = [ float(i) for i in cols ]
+                ret[fields[0]] = dict(zip(headers,fields[1:]))
+        return ret
+
 def test():
 
+    iEnergy='8TeV'
     cLimits = TCanvas('limits')
-    frame = TH1D('frame','',1000,114,601+1)
-    frame.SetMinimum(0)
-    frame.SetMaximum(7.5)
-    frame.SetDirectory(0)
-    frame.SetStats(0)
-    frame.SetFillColor(63)
-    frame.SetLineStyle(0)
-    frame.SetMarkerStyle(20)
-    frame.GetYaxis().SetLabelSize(0.05);
-    frame.GetYaxis().SetTitle('95% CL Limit on #sigma/#sigma_{SM}')
-    frame.GetXaxis().SetTitle('m_{H} (GeV)')
-    frame.Draw('  ')
+    cLimits.cd()
+    path   = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/CMSSW_6_1_1'+'/src/HiggsAnalysis/CombinedLimit/data/'
+    xs_ggH = file2map(path+'lhc-hxswg/sm/xs/'+iEnergy+'/'+iEnergy+'-ggH.txt')
 
-    raw_input('type whatever to quit')
+    #print xs_ggH
+    n=len(xs_ggH.keys())
+    x=[]
+    y=[]
+    for iMass in sorted(xs_ggH.keys()):
+      x.append(iMass)
+      y.append(xs_ggH[iMass]['XS_pb'])
+
+    gr = TGraph(n,array('f',x),array('f',y));
+    gr.Draw("AC*");
+    cLimits.WaitPrimitive()
 
 test()
