@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
-homedir     = '/afs/cern.ch/work/j/jlauwers/Toys/HWWLimComb/'
-#homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW13TeV/HWWLimComb/'
-#homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
-#homedir     = '/Users/xjanssen/cms/HWW2012/HWWLimComb/'
 
-workspace   = homedir+'workspace/'
-jobdir      = homedir+'jobs/'
-plotsdir    = homedir+'plots/'
-cardbase    = homedir+'cards/cmshcg/trunk/'
-combscripts = homedir+'cmshcg/trunk/summer2013/scripts/'
+cardbase    = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/'
+combscripts = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/highmass2014/scripts/'
+
+#homedir     = '/afs/cern.ch/work/j/jlauwers/Toys/HWWLimComb/'
+
+#workspace   = homedir+'workspace/'
+#jobdir      = homedir+'jobs/'
+#plotsdir    = homedir+'plots/'
+#cardbase    = homedir+'cards/cmshcg/trunk/'
+#combscripts = homedir+'cmshcg/trunk/summer2013/scripts/'
 
 DefaultVersion = 'VBFBB'
 channels = { 
@@ -32,7 +33,7 @@ channels = {
 # 5th order Bernstein polynomial
 
   'vbfbbsplit_Higgs_CAT0_brn5' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT0' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT0.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT0_75-205.root','w:QCD_expPow_CAT0'    ]} ,
@@ -44,7 +45,7 @@ channels = {
                       },
            } ,
   'vbfbbsplit_Higgs_CAT1_brn5' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT1' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT1.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT1_80-210.root','w:QCD_expPow_CAT1'    ]} ,
@@ -56,7 +57,7 @@ channels = {
                       },
            } ,
   'vbfbbsplit_Higgs_CAT2_brn5' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT2' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT2.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT2_90-220.root','w:QCD_expPow_CAT2'    ]} ,
@@ -68,7 +69,7 @@ channels = {
                       },
            } ,
   'vbfbbsplit_Higgs_CAT3_brn5' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT3' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT3.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT3_95-225.root','w:QCD_expPow_CAT3'    ]} ,
@@ -218,11 +219,26 @@ channels = {
                                      }           
                       },
            } ,   
-           
+          
+  'vbfbbsplit_Higgs_NOM' :{
+             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+                        'dir' : '.' , 'subdir' : '.' , 'card' : 'datacard_NOM_m$MASS.txt' ,
+                        'altmodel' : {
+                                      'expPow'     : { 'bkg_QCD': ['ch6','newAltModels_CAT6_80-210.root','w:QCD_expPow_CAT6'    ],
+                                                         'bkg_QCD': ['ch7','newAltModels_CAT5_75-205.root','w:QCD_expPow_CAT5'    ]} ,
+                                      'modG'     : { 'bkg_QCD': ['*','newAltModels_CAT6_80-210.root','w:QCD_modG_CAT6'    ]} ,
+                                      'tanh'     : { 'bkg_QCD': ['*','newAltModels_CAT6_80-210.root','w:QCD_tanh_CAT6'    ]} ,
+                                      'sine'     : { 'bkg_QCD': ['*','newAltModels_CAT6_80-210.root','w:QCD_sin_order1_CAT6'    ]} ,
+                                      'Bern6'     : { 'bkg_QCD': ['*','newAltModels_CAT6_80-210.root','w:QCD_Bernstein6_CAT6'    ]} ,
+                                     }
+                      },
+           } ,
+
+ 
 # 160 GeV Range
 
 'vbfbbsplit_Higgs_CAT0_brn5_160GeV' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT0' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT0_160GeV.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT0_75-235.root','w:QCD_expPow_CAT0'    ]} ,
@@ -233,7 +249,7 @@ channels = {
                       },
            } ,
   'vbfbbsplit_Higgs_CAT1_brn5_160GeV' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT1' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT1_160GeV.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT1_80-240.root','w:QCD_expPow_Paolo_CAT1'    ]} ,
@@ -244,7 +260,7 @@ channels = {
                       },
            } ,
   'vbfbbsplit_Higgs_CAT2_brn5_160GeV' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT2' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT2_160GeV.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT2_90-250.root','w:QCD_expPow_CAT2'    ]} ,
@@ -255,7 +271,7 @@ channels = {
                       },
            } ,
   'vbfbbsplit_Higgs_CAT3_brn5_160GeV' :{
-             '8TeV' : { 'tag' : 'vbfbb' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
+             '8TeV' : { 'tag' : 'vbfbb_CAT3' , 'prod' : 'qqH' , 'branch' : 'hbb' , 'decay' : 'bb' , 'energy' : 8 , 'method' : 'fit' , 'mrange' : [115,135] ,
                         'dir' : 'summer2013' , 'subdir' : 'vbfbbtoys/$MASS' , 'card' : 'datacard_m$MASS_Bernstein5_CAT3_160GeV.txt' ,  
                         'altmodel' : {
                                       'expPow'     : { 'bkg_QCD': ['*','newAltModels_CAT3_95-255.root','w:QCD_expPow_CAT3'    ]} ,
@@ -1711,7 +1727,24 @@ combinations = {
                           'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,  
                           'legend'   : 'vbf Z #rightarrow b#bar{b}'
                         } ,  
+
+ 'vbfbbsplit_Higgs_NOM' :
+                        {
+                          'energies' : [ '8TeV' ] ,
+                          'channels' : [ 'vbfbbsplit_Higgs_NOM' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,
+                          'legend'   : 'vbf Z #rightarrow b#bar{b}'
+                        } ,
                         
+ 'vbfbbsplit_Higgs_NOMX' :
+                       {
+                          'energies' : [ '8TeV' ] ,
+                          'channels' : [ 'vbfbbsplit_Higgs_CAT0_brn5' , 'vbfbbsplit_Higgs_CAT1_brn5', 'vbfbbsplit_Higgs_CAT2_brn5' , 'vbfbbsplit_Higgs_CAT3_brn5' ] ,
+                          'purposes' : [ 'searches' , 'couplings' , 'wjetfix' , 'sminject' , 'smtoys' , 'smhiggs' ] ,
+                          'legend'   : 'vbf Z #rightarrow b#bar{b}'
+                        } ,
+
+
 #  extended range (160 GeV)    
 
   'vbfbbsplit_Higgs_CAT0_brn5_160GeV' :

@@ -248,9 +248,12 @@ def ChangeModel(iChannel,iEnergy,iMass,card,iAltModel):
       dcIn  = cardTools(card)
       dcOut = cardTools(card)
       cardOut=card.replace('.txt','_'+iAltModel+'.txt')
-
+ 
+      print channels[options.Version][iChannel][iEnergy]['altmodel'][iAltModel]
       for iProc in channels[options.Version][iChannel][iEnergy]['altmodel'][iAltModel]:
+        print iProc
         Val=channels[options.Version][iChannel][iEnergy]['altmodel'][iAltModel][iProc]
+        print Val
         dcOut.remShape(iProc,Val[0])
         dcOut.addShape(iProc,Val[0].replace('$MASS',str(iMass)) ,Val[1].replace('$MASS',str(iMass)) ,Val[2].replace('$MASS',str(iMass)) )
 
