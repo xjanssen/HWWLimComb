@@ -34,6 +34,7 @@ PhysModelList = combTools.PhysModelList_Filter(physmodels,options.models).get()
 
 if options.runBatch: jobs = batchTools.batchJobs(channels,combinations,"workspace",combList,energyList,PhysModelList,['None'],options.batchSplit,options.masses,True,options.Version)
 
+
 # Build combinations
 for iComb in combList:
     print '---------------------- Building WorkSpace for combination: '+iComb
@@ -47,10 +48,17 @@ for iComb in combList:
         TargetDir=workspace+'/'+options.Version+'/'+cardDir+'/'+iComb
       print 'Target Dir : '+TargetDir
       print 'Masses List: '+str(massList)
-      for iMass in massList:
-        print '------------------------------> Mass = '+str(iMass)
+      paramSet   = combTools.ParamSet_Maker(cardtypes,channels[options.Version],physmodels[iModel]['cardtype'],options.masses,'NONE',energyList).get()
+      for iSet in range(0,len(paramSet['values'])) :
+        iMass = paramSet['values'][iSet][0]
+        print '------------------------------> Mass = '+str(iMass) + ' (Set: ' + str(paramSet['values'][iSet]) + ' )'
         for iAltModel in options.AltModel:
           card=iComb
+          for iPar in range(1,len(paramSet['names'])) :
+            parVal=str(paramSet['values'][iSet][iPar])
+            parVal = parVal.replace('.','d')
+            for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+            card += '_' + paramSet['names'][iPar] + '_' + parVal
           if options.energy != 0: card += '_' + str(options.energy) + 'TeV'
           if iAltModel != 'NONE' : card += '_' + iAltModel
           outname  = card+'_'+iModel+'.root'

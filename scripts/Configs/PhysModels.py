@@ -17,6 +17,8 @@ physmodels = {
   'MH125BG'  : { 'cardtype' : 'searches'  } ,
   'HiMass'   : { 'cardtype' : 'himass'    } ,
   'HiMassAll': { 'cardtype' : 'himassall' } ,
+  'EWKS'     : { 'cardtype' : 'ewks'      } ,  
+  'EWKSAll'  : { 'cardtype' : 'ewksall'   } ,  
 #
 # TwoHiggsModels
 #

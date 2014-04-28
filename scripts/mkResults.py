@@ -56,12 +56,19 @@ for iComb in combList:
         TargetDir=workspace+'/'+options.Version+'/'+cardDir+'/'+iComb
       print 'Target Dir : '+TargetDir
       print 'Masses List: '+str(massList)
-      for iMass in massList:
-        print '------------------------------> Mass = '+str(iMass)        
+      paramSet   = combTools.ParamSet_Maker(cardtypes,channels[options.Version],physmodels[iModel]['cardtype'],options.masses,'NONE',energyList).get()
+      for iSet in range(0,len(paramSet['values'])) :
+        iMass = paramSet['values'][iSet][0]
+        print '------------------------------> Mass = '+str(iMass) + ' (Set: ' + str(paramSet['values'][iSet]) + ' )'       
         for iAltModel in options.AltModel:
           print '------------------------------> AltModel = '+iAltModel
           for iTarget in TargetList:
             wspace=iComb
+            for iPar in range(1,len(paramSet['names'])) :
+              parVal=str(paramSet['values'][iSet][iPar])
+              parVal = parVal.replace('.','d')
+              for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+              wspace += '_' + paramSet['names'][iPar] + '_' + parVal
             if options.energy != 0: wspace += '_' + str(options.energy) + 'TeV'
             if iAltModel != 'NONE' and 'AltModel' in targets[iTarget]  and targets[iTarget]['AltModel'] == 'Gen' : wspace += '_' + iAltModel 
             #else                  : wspace += '_78TeV' 

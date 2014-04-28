@@ -224,6 +224,18 @@ class combPlot :
        else :
          return -999.
 
+   def ParamSet_Maker(self,iModel='OneHiggs'):
+       paramSet = {}
+       if 'params' in cardtypes[physmodels[iModel]['cardtype']] : 
+         #print cardtypes[physmodels[iModel]['cardtype']]['params']
+         for iEntry in cardtypes[physmodels[iModel]['cardtype']]['params']:
+           paramSet[iEntry] = cardtypes[physmodels[iModel]['cardtype']]['params'][iEntry]
+       else:
+         paramSet['values'] = [[]]
+         paramSet['names']  = []
+         paramSet['rules']  = {}
+       return paramSet  
+
    def readResults(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[],iTarget='BestFit'):
 
        #print 'reading ',iComb,' ',iEnergy,' ',iModel,' ',iTarget
@@ -236,106 +248,119 @@ class combPlot :
          TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
-       Result   = {}
-       Result['mass'] = massList
 
+       paramSet = self.ParamSet_Maker(iModel)
+       for iSet in range(0,len(paramSet['values'])) : 
+         extSet=''
+         for iPar in range(0,len(paramSet['names'])) :
+           #print paramSet['names'][iPar]
+           parVal=str(paramSet['values'][iSet][iPar])
+           parVal = parVal.replace('.','d')
+           for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+           #print parVal
+           extSet+='_' + paramSet['names'][iPar] + '_' + parVal
+         print extSet
 
-       # Create Keys
-       if   'treeKeys' in targets[iTarget]:
-         for iKey in targets[iTarget]['treeKeys']:
-           Result[iKey] = []
-       elif 'quantile' in targets[iTarget]:
-         #qProb=[]
-         for iKey in targets[iTarget]['quantile']:
-           Result[iKey] = []
-           #qProb.append(targets[iTarget]['quantile'][iKey]) 
-
-       
-       # Fetch results from trees (treeKeys)
-       if   'treeKeys' in targets[iTarget]:
-         for iMass in massList :
-           fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-           if iEnergy != 0: fileName += '_' + str(iEnergy) + 'TeV'           
-           fileName += '_'+iModel+'_'+iTarget+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
-           #print fileName
-           if not os.path.exists(fileName):
-             print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO :',fileName
-             for iKey in targets[iTarget]['treeKeys']:
-                Result[iKey].append(0.)
-           else:
-             try:
-               fTree = TFile.Open(fileName)
-               tree = fTree.Get('limit')
-               nentries = tree.GetEntries()         
-               lm, mh = self.treeAccess(tree)
-               for ientry in range(nentries):
-                 tree.GetEntry(ientry)
-                 if ientry < len(targets[iTarget]['treeKeys']) :
-                    Result[targets[iTarget]['treeKeys'][ientry]].append(dc(lm))
-               fTree.Close()  
-             except:
-               print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
+         Result   = {}
+         Result['mass'] = massList
+  
+         # Create Keys
+         if   'treeKeys' in targets[iTarget]:
+           for iKey in targets[iTarget]['treeKeys']:
+             Result[iKey] = []
+         elif 'quantile' in targets[iTarget]:
+           #qProb=[]
+           for iKey in targets[iTarget]['quantile']:
+             Result[iKey] = []
+             #qProb.append(targets[iTarget]['quantile'][iKey]) 
+  
+         
+         # Fetch results from trees (treeKeys)
+         if   'treeKeys' in targets[iTarget]:
+           for iMass in massList :
+             fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb+extSet
+             if iEnergy != 0: fileName += '_' + str(iEnergy) + 'TeV'           
+             fileName += '_'+iModel+'_'+iTarget+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
+             print fileName
+             if not os.path.exists(fileName):
+               print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO :',fileName
                for iKey in targets[iTarget]['treeKeys']:
                   Result[iKey].append(0.)
-
-       elif 'quantile' in targets[iTarget]:
-         for iMass in massList :
-           fileCmd  = 'ls '+TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-           if iEnergy != 0: fileCmd += '_' + str(iEnergy) + 'TeV'
-           fileCmd += '_'+iModel+'_'+iTarget+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'*.root'
-           proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
-           out, err = proc.communicate()
-           FileList=string.split(out)
-           vLim=[]
-           for iFile in FileList:
-             try:
-               fTree = TFile.Open(iFile)
-               tree = fTree.Get('limit')
-               nentries = tree.GetEntries()         
-               lm, mh = self.treeAccess(tree)
-               for ientry in range(nentries):
-                 tree.GetEntry(ientry)
-                 vLim.append(float(dc(lm)))
-               fTree.Close()  
-             except:
-               print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
-           # quantile
-           if len(vLim) > 0 : 
-             for iKey in targets[iTarget]['quantile']:
-               p=[]
-               p.append(targets[iTarget]['quantile'][iKey])
-               q = mquantiles(vLim,p) 
-               #print iKey, p, q
-               Result[iKey].append(q[0])
-           else:
-             print 'WARNING: No Limit vector --> Putting ZERO'+str(iMass)
-             for iKey in targets[iTarget]['quantile']:
-                Result[iKey].append(0.)
-
-
-           #print fileCmd
-           #print FileList
-
-       #print Result,massList
-       #return
-      
-       # Store in global dictionary 
-       isNewKey = True  
-       if len(self.Results) != 0 : 
-         for iDicKey in self.Results : 
-           if iDicKey == iComb : isNewKey = False
-       if isNewKey : self.Results[iComb] = {} 
-       isNewKey = True
-       if len(self.Results[iComb]) !=0 : 
-         for iDicKey in self.Results[iComb] : 
-           if iDicKey == iEnergy : isNewKey = False
-       if isNewKey : self.Results[iComb][iEnergy] = {} 
-       isNewKey = True
-       if len(self.Results[iComb][iEnergy]) != 0 :
-         for iDicKey in self.Results[iComb][iEnergy] :
-           if iDicKey == iModel : isNewKey = False
-       if isNewKey : self.Results[iComb][iEnergy][iModel] = {}    
-       self.Results[iComb][iEnergy][iModel][iTarget] = Result
+             else:
+               try:
+                 fTree = TFile.Open(fileName)
+                 tree = fTree.Get('limit')
+                 nentries = tree.GetEntries()         
+                 lm, mh = self.treeAccess(tree)
+                 for ientry in range(nentries):
+                   tree.GetEntry(ientry)
+                   if ientry < len(targets[iTarget]['treeKeys']) :
+                      Result[targets[iTarget]['treeKeys'][ientry]].append(dc(lm))
+                 fTree.Close()  
+               except:
+                 print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
+                 for iKey in targets[iTarget]['treeKeys']:
+                    Result[iKey].append(0.)
+  
+         elif 'quantile' in targets[iTarget]:
+           for iMass in massList :
+             fileCmd  = 'ls '+TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb+extSet
+             if iEnergy != 0: fileCmd += '_' + str(iEnergy) + 'TeV'
+             fileCmd += '_'+iModel+'_'+iTarget+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'*.root'
+             proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+             out, err = proc.communicate()
+             FileList=string.split(out)
+             vLim=[]
+             for iFile in FileList:
+               try:
+                 fTree = TFile.Open(iFile)
+                 tree = fTree.Get('limit')
+                 nentries = tree.GetEntries()         
+                 lm, mh = self.treeAccess(tree)
+                 for ientry in range(nentries):
+                   tree.GetEntry(ientry)
+                   vLim.append(float(dc(lm)))
+                 fTree.Close()  
+               except:
+                 print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
+             # quantile
+             if len(vLim) > 0 : 
+               for iKey in targets[iTarget]['quantile']:
+                 p=[]
+                 p.append(targets[iTarget]['quantile'][iKey])
+                 q = mquantiles(vLim,p) 
+                 #print iKey, p, q
+                 Result[iKey].append(q[0])
+             else:
+               print 'WARNING: No Limit vector --> Putting ZERO'+str(iMass)
+               for iKey in targets[iTarget]['quantile']:
+                  Result[iKey].append(0.)
+  
+  
+             #print fileCmd
+             #print FileList
+  
+         #print Result,massList
+         #return
+        
+         # Store in global dictionary 
+         CombKey  = iComb+extSet
+         isNewKey = True  
+         if len(self.Results) != 0 : 
+           for iDicKey in self.Results : 
+             if iDicKey == CombKey : isNewKey = False
+         if isNewKey : self.Results[CombKey] = {} 
+         isNewKey = True
+         if len(self.Results[CombKey]) !=0 : 
+           for iDicKey in self.Results[CombKey] : 
+             if iDicKey == iEnergy : isNewKey = False
+         if isNewKey : self.Results[CombKey][iEnergy] = {} 
+         isNewKey = True
+         if len(self.Results[CombKey][iEnergy]) != 0 :
+           for iDicKey in self.Results[CombKey][iEnergy] :
+             if iDicKey == iModel : isNewKey = False
+         if isNewKey : self.Results[CombKey][iEnergy][iModel] = {}    
+         self.Results[CombKey][iEnergy][iModel][iTarget] = Result
 
        #print self.Results
 
@@ -859,88 +884,101 @@ class combPlot :
            self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsInjPre')
          else:
            self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsSMToysNoSyst')
-       #plot.readResults(comb,0,'SMInject',[],'ACLsObs')
-
-       self.squareCanvas(False,False)
-       self.c1.cd()
-       self.resetPlot()
-
+      
        if (bInject) : self.postFix += '_inj125'
-       
-       if (self.logX) : gPad.SetLogx()
-       if (self.logY) : gPad.SetLogy()
        if (self.logX) : self.postFix += '_logX'
        if (self.logY) : self.postFix += '_logY'
  
-       self.xAxisTitle = "Higgs boson mass [GeV]"
-       self.yAxisTitle = "95% CL limit on #sigma/#sigma_{SM}"
-
+       paramSet = self.ParamSet_Maker(iModel) 
+       for iSet in range(0,len(paramSet['values'])) :
+         extSet=''
+         for iPar in range(0,len(paramSet['names'])) :
+           #print paramSet['names'][iPar]
+           parVal=str(paramSet['values'][iSet][iPar])
+           parVal = parVal.replace('.','d')
+           for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+           #print parVal
+           extSet+='_' + paramSet['names'][iPar] + '_' + parVal
+         CombKey = iComb+extSet
+         print CombKey      
  
-       aMass         = self.Results[iComb][iEnergy][iModel]['ACLsExp']['mass']
-       aMedExpLimit  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['Val']
-       aExpLimit68D  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['68D']
-       aExpLimit68U  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['68U'] 
-       aExpLimit95D  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['95D']
-       aExpLimit95U  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['95U']
-
-       if bInject :        
-         if bAsimov:
-           aMedInjLimit  = self.Results[iComb][iEnergy][iModel]['ACLsInjPre']['Val']
-         else:
-           aMedInjLimit  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['Val']
-           aInjLimit68D  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['68D']
-           aInjLimit68U  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['68U'] 
-           aInjLimit95D  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['95D']
-           aInjLimit95U  = self.Results[iComb][iEnergy][iModel]['ACLsSMToysNoSyst']['95U']
-         #aMedInjFast   = self.Results[iComb][iEnergy]['SMInject']['ACLsObs']['Val']
-
-       if (not self.blind ) :  aObsLimit = self.Results[iComb][iEnergy][iModel]['ACLsObs']['Val']
-
-       self.plotHorizBand('95CL', aMass , aMedExpLimit , aExpLimit95U , aExpLimit95D ,  90 , 1001 , 'Expected #pm 2#sigma')
-       self.plotHorizBand('68CL', aMass , aMedExpLimit , aExpLimit68U , aExpLimit68D , 211 , 1001 , 'Expected #pm 1#sigma')
-       self.plotHorizCurve('Exp', aMass , aMedExpLimit , kBlack , 2          ,  2          ,     'Median Expected')
-
-       if (not self.blind ) : self.plotHorizCurve('Obs', aMass , aObsLimit , kBlack , 1  , 3 , 'Observed')
-
-       if  bInject :  
-         if bAsimov:
-           self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H} Injected')
-         else:
-           self.plotHorizBand('95CLInj', aMass , aMedInjLimit , aInjLimit95U , aInjLimit95D , kBlue , 3356 , 'Injected #pm 2#sigma_{stat}')
-           self.plotHorizBand('68CLInj', aMass , aMedInjLimit , aInjLimit68U , aInjLimit68D , kRed  , 3356 , 'Injected #pm 1#sigma_{stat}')
-           self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H}=125 GeV Injected')
-         #self.plotHorizCurve('InjFast', aMass , aMedInjLimit , kRed , 1                        , 'CL_{S} Injected')
-         #self.plotHorizCurve('Inj68D'   , aMass , aInjLimit68D , kBlue , 2                        , 'CL_{S} Injected')
-         #self.plotHorizCurve('Inj95D'   , aMass , aInjLimit95D , kBlue , 3                        , 'CL_{S} Injected')
-         #self.plotHorizCurve('Inj68U'   , aMass , aInjLimit68U , kBlue , 2                        , 'CL_{S} Injected')
-         #self.plotHorizCurve('Inj95U'   , aMass , aInjLimit95U , kBlue , 3                        , 'CL_{S} Injected')
-
-       lMass=[]
-       lMass.append(100.)
-       lMass.append(aMass[-1]+1)
-       self.plotHorizLine('Line', lMass , 1. , kBlack , 1    , 'CL=1')
-
-       self.Obj2Plot['Exp']['Obj'].SetMarkerStyle(20)
-       self.Obj2Plot['Exp']['Obj'].SetMarkerSize(.8)
-       if (not self.blind ) :
-         self.Obj2Plot['Obs']['Obj'].SetMarkerStyle(20)
-         self.Obj2Plot['Obs']['Obj'].SetMarkerSize(.8)
-
+         self.squareCanvas(False,False)
+         self.c1.cd()
+         self.resetPlot()
+  
+         
+         if (self.logX) : gPad.SetLogx()
+         if (self.logY) : gPad.SetLogy()
    
-       self.SetRange('Limit',iComb)
-       self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(aMass[0],aMass[-1])
-       self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Obs','Line'])
-       self.plotObjLeg(['Obs','Exp','68CL','95CL','Inj','68CLInj','95CLInj'],self.combinations[iComb]['legend'])
-       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Limit',iComb)
-       self.addTitle() 
-       #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
-       #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.1,500.)
-       #self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(110.,200.)
-       self.c1.Update() 
-       self.Save('limit_'+iComb+'_'+self.EnergyName(iEnergy)+'_'+iModel)
-       #self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(110.,200.)
-       self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
-       #self.Save('limit_'+iComb+'_'+self.EnergyName(iEnergy)+'_'+iModel+'_zoom')
+         self.xAxisTitle = "Higgs boson mass [GeV]"
+         self.yAxisTitle = "95% CL limit on #sigma/#sigma_{SM}"
+  
+   
+         aMass         = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['mass']
+         aMedExpLimit  = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['Val']
+         aExpLimit68D  = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['68D']
+         aExpLimit68U  = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['68U'] 
+         aExpLimit95D  = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['95D']
+         aExpLimit95U  = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['95U']
+  
+         if bInject :        
+           if bAsimov:
+             aMedInjLimit  = self.Results[CombKey][iEnergy][iModel]['ACLsInjPre']['Val']
+           else:
+             aMedInjLimit  = self.Results[CombKey][iEnergy][iModel]['ACLsSMToysNoSyst']['Val']
+             aInjLimit68D  = self.Results[CombKey][iEnergy][iModel]['ACLsSMToysNoSyst']['68D']
+             aInjLimit68U  = self.Results[CombKey][iEnergy][iModel]['ACLsSMToysNoSyst']['68U'] 
+             aInjLimit95D  = self.Results[CombKey][iEnergy][iModel]['ACLsSMToysNoSyst']['95D']
+             aInjLimit95U  = self.Results[CombKey][iEnergy][iModel]['ACLsSMToysNoSyst']['95U']
+           #aMedInjFast   = self.Results[CombKey][iEnergy]['SMInject']['ACLsObs']['Val']
+  
+         if (not self.blind ) :  aObsLimit = self.Results[CombKey][iEnergy][iModel]['ACLsObs']['Val']
+  
+         self.plotHorizBand('95CL', aMass , aMedExpLimit , aExpLimit95U , aExpLimit95D ,  90 , 1001 , 'Expected #pm 2#sigma')
+         self.plotHorizBand('68CL', aMass , aMedExpLimit , aExpLimit68U , aExpLimit68D , 211 , 1001 , 'Expected #pm 1#sigma')
+         self.plotHorizCurve('Exp', aMass , aMedExpLimit , kBlack , 2          ,  2          ,     'Median Expected')
+  
+         if (not self.blind ) : self.plotHorizCurve('Obs', aMass , aObsLimit , kBlack , 1  , 3 , 'Observed')
+  
+         if  bInject :  
+           if bAsimov:
+             self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H} Injected')
+           else:
+             self.plotHorizBand('95CLInj', aMass , aMedInjLimit , aInjLimit95U , aInjLimit95D , kBlue , 3356 , 'Injected #pm 2#sigma_{stat}')
+             self.plotHorizBand('68CLInj', aMass , aMedInjLimit , aInjLimit68U , aInjLimit68D , kRed  , 3356 , 'Injected #pm 1#sigma_{stat}')
+             self.plotHorizCurve('Inj'   , aMass , aMedInjLimit , kRed  , 1            , 2            , 'm_{H}=125 GeV Injected')
+           #self.plotHorizCurve('InjFast', aMass , aMedInjLimit , kRed , 1                        , 'CL_{S} Injected')
+           #self.plotHorizCurve('Inj68D'   , aMass , aInjLimit68D , kBlue , 2                        , 'CL_{S} Injected')
+           #self.plotHorizCurve('Inj95D'   , aMass , aInjLimit95D , kBlue , 3                        , 'CL_{S} Injected')
+           #self.plotHorizCurve('Inj68U'   , aMass , aInjLimit68U , kBlue , 2                        , 'CL_{S} Injected')
+           #self.plotHorizCurve('Inj95U'   , aMass , aInjLimit95U , kBlue , 3                        , 'CL_{S} Injected')
+  
+         lMass=[]
+         lMass.append(100.)
+         lMass.append(aMass[-1]+1)
+         self.plotHorizLine('Line', lMass , 1. , kBlack , 1    , 'CL=1')
+  
+         self.Obj2Plot['Exp']['Obj'].SetMarkerStyle(20)
+         self.Obj2Plot['Exp']['Obj'].SetMarkerSize(.8)
+         if (not self.blind ) :
+           self.Obj2Plot['Obs']['Obj'].SetMarkerStyle(20)
+           self.Obj2Plot['Obs']['Obj'].SetMarkerSize(.8)
+  
+     
+         self.SetRange('Limit',CombKey)
+         self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(aMass[0],aMass[-1])
+         self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Obs','Line'])
+         self.plotObjLeg(['Obs','Exp','68CL','95CL','Inj','68CLInj','95CLInj'],self.combinations[iComb]['legend'])
+         if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Limit',CombKey)
+         self.addTitle() 
+         #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
+         #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.1,500.)
+         #self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(110.,200.)
+         self.c1.Update() 
+         self.Save('limit_'+CombKey+'_'+self.EnergyName(iEnergy)+'_'+iModel)
+         #self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(110.,200.)
+         self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
+         #self.Save('limit_'+CombKey+'_'+self.EnergyName(iEnergy)+'_'+iModel+'_zoom')
        
    def plotMuVsMh(self,iComb='hww01jet_shape',iEnergy=0,iModel='OneHiggs',massFilter=[]):
 
@@ -2917,6 +2955,7 @@ class combPlot :
       if 'ACLsExp'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp') 
       if 'ACLsExpPost'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExpPost') 
       if 'ACLsInjPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsInjPre') 
+      if 'ACLsBkgOnly' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsBkgOnly')
       if 'SExpPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SExpPre') 
       if 'PVExpPre' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'PVExpPre') 
       if 'BestFitExp' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitExp')
@@ -2944,6 +2983,8 @@ class combPlot :
          txtPrint+='| CLsObs '
       if 'ACLsInjPre'  in printList :
          txtPrint+='| CLsInj '
+      if 'ACLsBkgOnly'  in printList :
+         txtPrint+='| CLsInjBkg '
       if 'ACLsExp' in printList : 
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
       if 'ACLsExpPost' in printList : 
@@ -2980,6 +3021,9 @@ class combPlot :
         if 'ACLsInjPre' in printList :
           Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsInjPre','Val')
           txtPrint+='| '+str(round(Val,2))+' '  
+        if 'ACLsBkgOnly' in printList :
+          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBkgOnly','Val')
+          txtPrint+='| '+str(round(Val,2))+' '
         if 'ACLsExp' in printList :
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','Val')
             d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','95D')

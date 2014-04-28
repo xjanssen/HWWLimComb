@@ -190,6 +190,196 @@ def ExtrapolateMass(iChannel,iEnergy,card,TargetCard,iMass,iMassExtra):
     dcOut.write(TargetCard) 
 
 
+# ------------------------------------------------------- MASS Extrapolation + efficiency ------------------------------
+
+def ExtrapolateMassEff(iChannel,iEnergy,card,cardLow,cardHigh,TargetCard,vMass,iMassExtra,HistExtraPol=False,ExtraPolMeth='Mix'):
+    print 'ExtrapolateMassEff: ',iChannel,vMass,iMassExtra
+
+    dcIn   = cardTools(card)
+    dcLow  = cardTools(cardLow)
+    dcHigh = cardTools(cardHigh)
+    dcOut  = cardTools(card)
+     
+    #print channels[options.Version][iChannel][iEnergy]
+ 
+    # Load YR Data 
+    #path   = os.environ['CMSSW_BASE']+"/src/HiggsAnalysis/CombinedLimit/data/"
+    path   = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/CMSSW_6_1_1'+'/src/HiggsAnalysis/CombinedLimit/data/'
+    xs_ggH = file2map(path+'lhc-hxswg/sm/xs/'+iEnergy+'/'+iEnergy+'-ggH.txt')
+    xs_qqH = file2map(path+'lhc-hxswg/sm/xs/'+iEnergy+'/'+iEnergy+'-vbfH.txt')
+    xs_WH  = file2map(path+'lhc-hxswg/sm/xs/'+iEnergy+'/'+iEnergy+'-WH.txt')
+    xs_ZH  = file2map(path+'lhc-hxswg/sm/xs/'+iEnergy+'/'+iEnergy+'-ZH.txt')
+    xs_ttH = file2map(path+'lhc-hxswg/sm/xs/'+iEnergy+'/'+iEnergy+'-ttH.txt')
+    br_VV  = file2map(path+'lhc-hxswg/sm/br/BR.txt')
+    br_ff  = file2map(path+'lhc-hxswg/sm/br/BR1.txt')
+
+    # Scale Yields 
+    ScaleFactors = {}
+    for iBin in xrange(0 , len( dcIn.content['block2']['bin'] ) ):
+      jBin=dcIn.content['block2']['bin'][iBin]
+      iProc=dcIn.content['block2']['process'][iBin]
+      YieldIn= float(dcIn.getRate(bin=jBin,process=iProc))
+      wLow  = 1.
+      wHigh = 1.
+      # No Efficiency interpolation
+      if   vMass[0] == vMass[1] : 
+        # X-section
+        xs_Scale = 1.
+        if dcIn.content['block2']['process'][iBin] == 'ggH' : xs_Scale = GetYRVal(xs_ggH,iMassExtra,'XS_pb')/GetYRVal(xs_ggH,iMass,'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'qqH' : xs_Scale = GetYRVal(xs_qqH,iMassExtra,'XS_pb')/GetYRVal(xs_qqH,iMass,'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'WH'  : xs_Scale = GetYRVal(xs_WH, iMassExtra,'XS_pb')/GetYRVal(xs_WH ,iMass,'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'ZH'  : xs_Scale = GetYRVal(xs_ZH, iMassExtra,'XS_pb')/GetYRVal(xs_ZH ,iMass,'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'ttH' : xs_Scale = GetYRVal(xs_ttH,iMassExtra,'XS_pb')/GetYRVal(xs_ttH,iMass,'XS_pb')
+        # BR
+        br_Scale = 1.
+        if dcIn.content['block2']['process'][iBin] in ['ggH','qqH','WH','ZH','ttH']: 
+          if channels[options.Version][iChannel][iEnergy]['branch'] == 'hww' : br_Scale = GetYRVal(br_VV ,iMassExtra,'H_WW')/GetYRVal(br_VV,iMass,'H_WW')
+          else :
+            print 'ERROR: Unknown BR for :', iChannel, channels[options.Version][iChannel][iEnergy]['tag']
+            exit()
+        YieldOut= float(dcIn.getRate(bin=jBin,process=iProc))*xs_Scale*br_Scale
+        YieldLow =YieldOut
+        YieldHigh=YieldOut
+      elif vMass[0] < vMass[1] :
+        wLow  = float(iMassExtra-vMass[0])/float(vMass[1]-vMass[0])
+        wHigh = float(vMass[1]-iMassExtra)/float(vMass[1]-vMass[0])
+        # X-section
+        xs_Scale_Low =  1.
+        if dcIn.content['block2']['process'][iBin] == 'ggH' : xs_Scale_Low  = GetYRVal(xs_ggH,iMassExtra,'XS_pb')/GetYRVal(xs_ggH,vMass[0],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'qqH' : xs_Scale_Low  = GetYRVal(xs_qqH,iMassExtra,'XS_pb')/GetYRVal(xs_qqH,vMass[0],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'WH'  : xs_Scale_Low  = GetYRVal(xs_WH, iMassExtra,'XS_pb')/GetYRVal(xs_WH ,vMass[0],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'ZH'  : xs_Scale_Low  = GetYRVal(xs_ZH, iMassExtra,'XS_pb')/GetYRVal(xs_ZH ,vMass[0],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'ttH' : xs_Scale_Low  = GetYRVal(xs_ttH,iMassExtra,'XS_pb')/GetYRVal(xs_ttH,vMass[0],'XS_pb')
+        xs_Scale_High=  1.
+        if dcIn.content['block2']['process'][iBin] == 'ggH' : xs_Scale_High = GetYRVal(xs_ggH,iMassExtra,'XS_pb')/GetYRVal(xs_ggH,vMass[1],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'qqH' : xs_Scale_High = GetYRVal(xs_qqH,iMassExtra,'XS_pb')/GetYRVal(xs_qqH,vMass[1],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'WH'  : xs_Scale_High = GetYRVal(xs_WH, iMassExtra,'XS_pb')/GetYRVal(xs_WH ,vMass[1],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'ZH'  : xs_Scale_High = GetYRVal(xs_ZH, iMassExtra,'XS_pb')/GetYRVal(xs_ZH ,vMass[1],'XS_pb')
+        if dcIn.content['block2']['process'][iBin] == 'ttH' : xs_Scale_High = GetYRVal(xs_ttH,iMassExtra,'XS_pb')/GetYRVal(xs_ttH,vMass[1],'XS_pb')
+        # BR
+        br_Scale_Low  = 1.
+        br_Scale_High = 1.
+        if dcIn.content['block2']['process'][iBin] in ['ggH','qqH','WH','ZH','ttH']:
+          if channels[options.Version][iChannel][iEnergy]['branch'] == 'hww' : 
+            br_Scale_Low  = GetYRVal(br_VV ,iMassExtra,'H_WW')/GetYRVal(br_VV,vMass[0],'H_WW')
+            br_Scale_High = GetYRVal(br_VV ,iMassExtra,'H_WW')/GetYRVal(br_VV,vMass[1],'H_WW')
+          else :
+            print 'ERROR: Unknown BR for :', iChannel, channels[options.Version][iChannel][iEnergy]['tag']
+            exit() 
+        if dcIn.content['block2']['process'][iBin] in ['ggH','qqH','WH','ZH','ttH']:
+          ScaleLow  = wLow *xs_Scale_Low *br_Scale_Low
+          ScaleHigh = wHigh*xs_Scale_High*br_Scale_High
+          if vMass[1] >= 350 and dcIn.content['block2']['process'][iBin] in ['WH','ZH','ttH']:
+            YieldOut = xs_Scale_Low *br_Scale_Low*float(dcLow.getRate(bin=jBin,process=iProc))
+            YieldLow = YieldOut
+            YieldHigh= YieldOut
+          else:
+            YieldOut  = ScaleLow * float(dcLow.getRate(bin=jBin,process=iProc)) + ScaleHigh * float(dcHigh.getRate(bin=jBin,process=iProc))
+            YieldLow  = xs_Scale_Low *br_Scale_Low*float(dcLow.getRate(bin=jBin,process=iProc))
+            YieldHigh = xs_Scale_High*br_Scale_High*float(dcHigh.getRate(bin=jBin,process=iProc))
+        else :
+          YieldOut  = float(dcIn.getRate(bin=jBin,process=iProc)) 
+      else:
+        print 'ExtrapolateMassEff: ERROR in input masses',vMass,iMassExtra
+        return
+
+      #print xs_Scale , br_Scale
+      if dcIn.content['block2']['process'][iBin] in ['ggH','qqH','WH','ZH','ttH']:
+        print jBin,iProc,dcIn.getRate(bin=jBin,process=iProc) , '-->' , YieldOut , '(Low: ' , YieldLow , ' , High: ' , YieldHigh , ')' 
+        dcOut.setRate(bin=jBin,process=iProc,value=YieldOut) 
+        ScaleFactors[dcIn.content['block2']['process'][iBin]] = {} 
+        ScaleFactors[dcIn.content['block2']['process'][iBin]]['Avg']  = YieldOut/YieldIn
+        ScaleFactors[dcIn.content['block2']['process'][iBin]]['Low']  = wLow *(YieldLow /YieldIn)
+        ScaleFactors[dcIn.content['block2']['process'][iBin]]['High'] = wHigh*(YieldHigh/YieldIn)
+
+    # Modify Histograms for HWW2l2v 
+    if channels[options.Version][iChannel][iEnergy]['branch'] == 'hww' and any(['shapes' in X for X in dcIn.content['header2'].itervalues()]) :  
+      shFiles = []
+      for iEntry in dcIn.content['header2'] : 
+        if dcIn.content['header2'][iEntry][0] == 'shapes' and dcIn.content['header2'][iEntry][1] != 'data_obs' and not ':' in dcIn.content['header2'][iEntry][3]: 
+          shFiles.append(dcIn.content['header2'][iEntry][3])
+      shFiles = list(set(shFiles))
+      print shFiles
+      for iFile in shFiles:
+        if not HistExtraPol or vMass[0] == vMass[1]:
+          fileInName  = os.path.split(card)[0]+'/'+iFile 
+          fileOutName = os.path.split(TargetCard)[0]+'/'+iFile
+          print 'File IN : ',fileInName
+          print 'File OUT: ',fileOutName
+          fIn   = TFile.Open(fileInName,'READ')
+          fOut  = TFile.Open(fileOutName,'RECREATE')
+          Hists = [X.GetName() for X in fIn.GetListOfKeys()]
+          for iHist in Hists : 
+            H = fIn.Get(iHist)
+            isHiggs = False
+            if   len(iHist.split('_')) == 2 : 
+              if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] : isHiggs = True
+            elif len(iHist.split('_')) > 2  :
+              if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] and iHist.split('_')[2] != 'SM' : isHiggs = True
+            if isHiggs : 
+              Scale = 1.
+              if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] : Scale = ScaleFactors[iHist.split('_')[1]]['Avg']
+              H.Scale(Scale) 
+            fOut.cd()
+            H.Write()
+          fIn.Close()
+          fOut.Close()
+        elif ExtraPolMeth == 'Mix' :
+          fileInName  = os.path.split(card)[0]+'/'+iFile 
+          fileLowName  = os.path.split(cardLow)[0]+'/'+iFile
+          fileHighName = os.path.split(cardHigh)[0]+'/'+iFile
+          fileOutName  = os.path.split(TargetCard)[0]+'/'+iFile 
+          print 'File IN : ',fileInName
+          print 'File Low : ',fileLowName
+          print 'File High: ',fileHighName
+          print 'File OUT : ',fileOutName
+          fIn   = TFile.Open(fileInName,'READ')
+          fLow  = TFile.Open(fileLowName,'READ')
+          fHigh = TFile.Open(fileHighName,'READ')
+          fOut  = TFile.Open(fileOutName,'RECREATE')
+          Hists = [X.GetName() for X in fIn.GetListOfKeys()]
+          for iHist in Hists :
+            HIn   = fIn.Get(iHist)
+            HLow  = fLow.Get(iHist)
+            HHigh = fHigh.Get(iHist)
+            isHiggs = False 
+            if   len(iHist.split('_')) == 2 :
+              if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] : isHiggs = True
+            elif len(iHist.split('_')) > 2  :
+              if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] and iHist.split('_')[2] != 'SM' : isHiggs = True
+            if isHiggs :
+              if vMass[1] >= 350 and iHist.split('_')[1] in ['WH','ZH','ttH']:
+                Scale = 1.
+                if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] : Scale = ScaleFactors[iHist.split('_')[1]]['Avg']
+                H = HIn.Clone()
+                H.Scale(Scale)
+              else :
+                print HLow,HHigh
+                ScaleLow  = 1.
+                ScaleHigh = 1.
+                if iHist.split('_')[1] in ['ggH','qqH','ZH','WH','ttH'] :
+                  ScaleLow  = ScaleFactors[iHist.split('_')[1]]['Low']
+                  ScaleHigh = ScaleFactors[iHist.split('_')[1]]['High']
+                HLow.Scale(ScaleLow)
+                HHigh.Scale(ScaleHigh)
+                H = HLow.Clone()
+                H.Add(HHigh)
+            else :
+              H = HLow.Clone()
+            fOut.cd()
+            H.Write()
+          fIn.Close()
+          fLow.Close()
+          fHigh.Close()
+          fOut.Close()  
+        else:
+          print 'Hist ExtraPolMeth UNDEFINED !!!! --> ',ExtraPolMeth
+          exit()
+
+    os.system('rm '+TargetCard)
+    dcOut.write(TargetCard) 
+
+
 # ------------------------------------------------------- PDFSplit(iChannel,iEnergy,card,TargetCard,iMass)
 
 def PDFSplit(iChannel,iEnergy,card,TargetCard,iMass):
@@ -329,7 +519,7 @@ for iChannel in channelList:
       Energy=iEnergy
   # Validate Combination Purpose
   isValidPurpose=False
-  purposeList = ['smhiggs','himass']
+  purposeList = ['smhiggs','himass','ewks']
   for purpose in purposeList :
      if options.purpose == purpose :
        isValidPurpose=True
@@ -338,10 +528,23 @@ for iChannel in channelList:
      massList   = combTools.MassList_Filter_Chann(cardtypes,channels[options.Version],options.purpose,options.masses,iChannel,energyList).get()
      print '---------------------- Building extrapolation for cards: '+iChannel + ' @ ' + Energy
      print 'Masses List: '+str(massList)
-     for iMass in massList:
+     paramSet   = combTools.ParamSet_Maker(cardtypes,channels[options.Version],options.purpose,options.masses,iChannel,energyList).get()
+     print paramSet
+     for iSet in range(0,len(paramSet['values'])) : 
+       #print paramSet['values'][iSet]
+       iMass = paramSet['values'][iSet][0]
        card=cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMass))
+       for iPar in range(1,len(paramSet['names'])) : 
+         #print paramSet['names'][iPar]
+         parVal=str(paramSet['values'][iSet][iPar])
+         for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+         card=card.replace('$'+paramSet['names'][iPar],parVal)
        print '--------------------> Card: ',card
-
+#    exit()
+#    for iMass in massList:
+#      card=cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMass))+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMass))
+#      print '--------------------> Card: ',card
+      
        # Mass extrapolation
        if options.Type == 'LoMass' :
         if iMass in extrapolations[options.Type]:
@@ -349,9 +552,14 @@ for iChannel in channelList:
            print '------------------------> Extrapolating to: ',iMassExtra
            TargetDir =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMassExtra))
            TargetCard=TargetDir+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMassExtra))
+           for iPar in range(1,len(paramSet['names'])) :
+                 parVal=str(paramSet['values'][iSet][iPar])
+                 for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+                 TargetDir=TargetDir.replace('$'+paramSet['names'][iPar],parVal)
+                 TargetCard=TargetCard.replace('$'+paramSet['names'][iPar],parVal)
            print 'TargetCard = ',TargetCard
            os.system('mkdir -p '+ TargetDir)
-           print ExtrapolateMass(iChannel,Energy,card,TargetCard,iMass,iMassExtra)
+           ExtrapolateMass(iChannel,Energy,card,TargetCard,iMass,iMassExtra)
 
        # Mass extrapolation 
        if options.Type == 'HiMass' :
@@ -361,9 +569,36 @@ for iChannel in channelList:
                print '------------------------> Extrapolating to: ',iMassExtra 
                TargetDir =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMassExtra))
                TargetCard=TargetDir+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMassExtra))
+               for iPar in range(1,len(paramSet['names'])) :
+                 parVal=str(paramSet['values'][iSet][iPar])
+                 for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+                 TargetDir=TargetDir.replace('$'+paramSet['names'][iPar],parVal)
+                 TargetCard=TargetCard.replace('$'+paramSet['names'][iPar],parVal)
                print 'TargetCard = ',TargetCard
                os.system('mkdir -p '+ TargetDir)
                ExtrapolateMass(iChannel,Energy,card,TargetCard,iMass,iMassExtra)
+
+       # Mass extrapolation with Efficiency mixing
+       if options.Type == 'HiMassEff' :
+         if Energy in extrapolations[options.Type]:
+           if iMass in extrapolations[options.Type][Energy]:
+            for iEntry in extrapolations[options.Type][Energy][iMass]:
+              for iMassExtra in extrapolations[options.Type][Energy][iMass][iEntry]['To']:
+                print '------------------------> Extrapolating to: ',iMassExtra
+                cardLow   =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(extrapolations[options.Type][Energy][iMass][iEntry]['From'][0]))+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(extrapolations[options.Type][Energy][iMass][iEntry]['From'][0])) 
+                cardHigh  =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(extrapolations[options.Type][Energy][iMass][iEntry]['From'][1]))+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(extrapolations[options.Type][Energy][iMass][iEntry]['From'][1])) 
+                TargetDir =cardbase+channels[options.Version][iChannel][Energy]['dir']+'/'+cardDir+'/'+channels[options.Version][iChannel][Energy]['subdir'].replace('$MASS',str(iMassExtra))
+                TargetCard=TargetDir+'/'+channels[options.Version][iChannel][Energy]['card'].replace('$MASS',str(iMassExtra))
+                for iPar in range(1,len(paramSet['names'])) :
+                  parVal=str(paramSet['values'][iSet][iPar])
+                  for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+                  TargetDir=TargetDir.replace('$'+paramSet['names'][iPar],parVal)
+                  CardLow=CardLow.replace('$'+paramSet['names'][iPar],parVal)
+                  CardHigh=CardHigh.replace('$'+paramSet['names'][iPar],parVal)
+                  TargetCard=TargetCard.replace('$'+paramSet['names'][iPar],parVal)
+                print 'TargetCard = ',TargetCard
+                os.system('mkdir -p '+ TargetDir)
+                ExtrapolateMassEff(iChannel,Energy,card,cardLow,cardHigh,TargetCard,extrapolations[options.Type][Energy][iMass][iEntry]['From'],iMassExtra)
 
        # Mass extrapolation
        if options.Type == 'PDFSplit':

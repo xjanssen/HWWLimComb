@@ -153,6 +153,56 @@ class MassList_Filter_Chann:
         else:      
           return self.massList           
 
+#--- ParamSet_Maker
+class ParamSet_Maker:
+    def __init__(self, cardtypes , channels , purpose , massFilter, iChannel , energyList):
+        self.cardtypes  = cardtypes
+        self.purpose    = purpose
+        self.massFilter = massFilter
+        self.massList   = []
+        self.found      = False
+        self.paramSet   = {}
+        for iPurpose in self.cardtypes:
+           if iPurpose == self.purpose:
+             self.found = True
+             # Get Mass list 
+             if iChannel in channels:
+               massMin = 9999999
+               massMax = 0
+               for iEnergy in energyList :
+                 if iEnergy in channels[iChannel]:
+                      if channels[iChannel][iEnergy]['mrange'][0] < massMin : massMin = channels[iChannel][iEnergy]['mrange'][0]
+                      if channels[iChannel][iEnergy]['mrange'][1] > massMax : massMax = channels[iChannel][iEnergy]['mrange'][1]
+               if len(self.massFilter) == 0:
+                 self.massList=[X for X in self.cardtypes[iPurpose]['masses'] if ( X >= massMin and X<= massMax ) ]
+               else:
+                 self.massList=[X for X in self.cardtypes[iPurpose]['masses'] if ( (X >= massMin and X<= massMax) and (X in self.massFilter) )]
+             else:
+               if len(self.massFilter) == 0: self.massList=[X for X in self.cardtypes[iPurpose]['masses']] 
+               else:                         self.massList=[X for X in self.cardtypes[iPurpose]['masses'] if (X in self.massFilter)]  
+             # Creat ParamSet
+             iSet = 0
+             if 'params' in self.cardtypes[iPurpose]:
+               self.paramSet['names'] = ['mass'] + self.cardtypes[iPurpose]['params']['names']
+               self.paramSet['rules'] = self.cardtypes[iPurpose]['params']['rules']
+             else:
+               self.paramSet['names'] = ['mass']
+               self.paramSet['rules'] = {}
+             self.paramSet['values'] = [] 
+             for iMass in self.massList:
+               if 'params' in self.cardtypes[iPurpose]:
+                 for iSet in range(0,len(self.cardtypes[iPurpose]['params']['values'])):
+                   self.paramSet['values'].append([iMass]+self.cardtypes[iPurpose]['params']['values'][iSet])
+               else:
+                 self.paramSet['values'].append([iMass])
+
+    def get(self):
+        if not self.found:
+          print 'Unknown purpose : '+self.purpose
+          sys.exit(2)
+        else:
+          return self.paramSet
+
 #--- energy List
 class EnergyList_Filter:
     def __init__(self, iEnergy ):
