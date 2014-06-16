@@ -87,7 +87,8 @@ class combPlot :
    
    def addTitle(self,iCMS=1,iLumi=0):
        self.c1.cd()
-   
+       print 'addTitle ' , iCMS , iLumi  
+ 
        x1=0.10
        y1=0.92
        x2=0.99
@@ -224,12 +225,31 @@ class combPlot :
        else :
          return -999.
 
-   def ParamSet_Maker(self,iModel='OneHiggs'):
+   def ParamSet_Maker(self,iModel='OneHiggs',iTarget='NONE' ):
        paramSet = {}
        if 'params' in cardtypes[physmodels[iModel]['cardtype']] : 
          #print cardtypes[physmodels[iModel]['cardtype']]['params']
          for iEntry in cardtypes[physmodels[iModel]['cardtype']]['params']:
            paramSet[iEntry] = cardtypes[physmodels[iModel]['cardtype']]['params'][iEntry]
+       if iTarget in targets and 'JobsParam' in targets[iTarget] :
+         print targets[iTarget]['JobsParam'] 
+         paramSet['values'] = []
+         paramSet['names']  = []
+         paramSet['rules']  = {}
+         for iEntry in targets[iTarget]['JobsParam'] :
+           paramSet['names'].append(iEntry)
+         if len(paramSet['names']) == 1 :
+           for iPar in xrange(0,len(targets[iTarget]['JobsParam'][paramSet['names'][0]])) : 
+             arr=[]
+             arr.append(targets[iTarget]['JobsParam'][paramSet['names'][0]][iPar])
+             paramSet['values'].append(arr)
+         elif len(paramSet['names']) == 2 : 
+           for iPar1 in xrange(0,len(targets[iTarget]['JobsParam'][paramSet['names'][0]])) :
+             for iPar2 in xrange(0,len(targets[iTarget]['JobsParam'][paramSet['names'][1]])) :
+               arr=[]
+               arr.append(targets[iTarget]['JobsParam'][paramSet['names'][0]][iPar1])
+               arr.append(targets[iTarget]['JobsParam'][paramSet['names'][1]][iPar2])
+               paramSet['values'].append(arr)
        else:
          paramSet['values'] = [[]]
          paramSet['names']  = []
@@ -970,7 +990,8 @@ class combPlot :
          self.plotAllObj(['95CL','68CL','Exp','95CLInj','68CLInj','Inj','Obs','Line'])
          self.plotObjLeg(['Obs','Exp','68CL','95CL','Inj','68CLInj','95CLInj'],self.combinations[iComb]['legend'])
          if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Limit',CombKey)
-         self.addTitle() 
+         self.addTitle(self.iTitle,self.iLumi) 
+         #self.addTitle() 
          #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.,20.)
          #self.Obj2Plot['95CL']['Obj'].GetYaxis().SetRangeUser(0.1,500.)
          #self.Obj2Plot['95CL']['Obj'].GetXaxis().SetRangeUser(110.,200.)
@@ -2065,7 +2086,7 @@ class combPlot :
            return self.Results[iComb][iEnergy][iModel][iTarget][what][iPos]
        return -99.
 
-   def JCPSum(self,iComb,iEnergy,iModel,massFilter):
+   def JCPSum(self,iComb,iEnergy,iModel,iTarget,massFilter):
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
        energyList= combTools.EnergyList_Filter(iEnergy).get()
        massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
@@ -2074,19 +2095,32 @@ class combPlot :
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
 
-       iTarget='JCP' 
+       #iTarget=iModel
+       #iTarget='JCPFQQFixRange'
+       #iTarget='JCPfixmu'
+       #iTarget='JCP'
        for iMass in massList:
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         for iSet in range(0,len(paramSet['values'])) :
+             ParString=''
+             for iPar in range(0,len(paramSet['names'])) :
+               parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+               ParString += '_'+paramSet['names'][iPar]+str(parVal)
+
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
-         for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
-           for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
+         #for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
+           #for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
 
              fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             fileName += '_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.*.root'
+             if iEnergy == 7 : fileName += '_7TeV'
+             if iEnergy == 8 : fileName += '_8TeV'
+             fileName += '_'+iModel+'_'+iTarget+ParString+'.job*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.*.root'
              fileCmd = 'ls '+fileName 
              proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
              out, err = proc.communicate()
              FileList=string.split(out)
-             #print FileList
+             print fileCmd
+             print FileList
              os.system('cd /tmp/xjanssen/ ; rm JCPToys.tmp.root')
              isFileFirst=True
              for iFile in FileList:
@@ -2101,11 +2135,13 @@ class combPlot :
                  isFileFirst=False 
 
              fileTarget  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             fileTarget += '_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
+             if iEnergy == 7 : fileTarget += '_7TeV'
+             if iEnergy == 8 : fileTarget += '_8TeV'
+             fileTarget += '_'+iModel+'_'+iTarget+ParString+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
              print fileTarget
              os.system('cd /tmp/xjanssen/ ; mv JCPToys.root '+fileTarget) 
 
-   def JCPFit(self,iComb,iEnergy,iModel,massFilter):
+   def JCPFit(self,iComb,iEnergy,iModel,iTarget,massFilter):
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
        energyList= combTools.EnergyList_Filter(iEnergy).get()
        massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
@@ -2114,22 +2150,35 @@ class combPlot :
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
 
-       iTarget='JCP' 
+       #iTarget=iModel
+       #iTarget='JCPFQQFixRange'
+       #iTarget='JCP'
+       #iTarget='JCPfixmu'
        for iMass in massList:
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         for iSet in range(0,len(paramSet['values'])) :
+             ParString=''
+             for iPar in range(0,len(paramSet['names'])) :
+               parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+               ParString += '_'+paramSet['names'][iPar]+str(parVal)
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
-         for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
-           for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
+         #for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
+         #  for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
 
              fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             fileName += '_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
+             if iEnergy == 7 : fileName += '_7TeV'
+             if iEnergy == 8 : fileName += '_8TeV'
+             fileName += '_'+iModel+'_'+iTarget+ParString+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
              fileTarget  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             fileTarget += '_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)+'.qmu.FloatMu.mH'+str(iMass)+'.root'
+             if iEnergy == 7 : fileTarget += '_7TeV'
+             if iEnergy == 8 : fileTarget += '_8TeV'
+             fileTarget += '_'+iModel+'_'+iTarget+ParString+'_qmu_mH'+str(iMass).replace('.','d')+'.root'
              print 'Fitting :',fileName    
              os.system('root -q -b '+fileName+' "${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit/test/plotting/hypoTestResultTree.cxx(\\"'+fileTarget+'\\",'+str(iMass)+',1,\\"x\\")"')
 
 
 
-   def JCPPlt(self,iComb,iEnergy,iModel,massFilter):
+   def JCPPlt(self,iComb,iEnergy,iModel,iTarget,massFilter):
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
        energyList= combTools.EnergyList_Filter(iEnergy).get()
        massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
@@ -2138,74 +2187,114 @@ class combPlot :
        else:
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
 
-       iTarget='JCP' 
 
-       jcp='undef'
-       if '2pm' in iComb : jcp='2pm'
-       if '0m'  in iComb : 
-         jcp='0m'
-         targets[iTarget]['JobsParam']['FQQ'] = [0.]
+       #jcp='undef'
+       #if '2pm' in iComb : jcp='2pm'
+       #if '0m'  in iComb : 
+       #  jcp='0m'
+#      #  targets[iTarget]['JobsParam']['FQQ'] = [0.]
+       #print iComb , iComb.split('_')[-1]
+       jcp=iComb.split('_')[-1] 
 
+       #iTarget=iModel
+       #iTarget='JCPFQQFixRange'
+       #iTarget='JCPfixmu'
+       #iTarget='JCP'
        for iMass in massList:
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         iFITNUIS = -1
+         iFQQ = 0.0
+         for iSet in range(0,len(paramSet['values'])) :
+           ParString=''
+           ParSummTxt=''
+           for iPar in range(0,len(paramSet['names'])) :
+             parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+             ParString += '_'+paramSet['names'][iPar]+str(parVal)
+             if paramSet['names'][iPar] == 'FITNUIS' : ParSummTxt += '_'+paramSet['names'][iPar]+str(parVal) 
+             if paramSet['names'][iPar] == 'FITNUIS' : iFITNUISnew = paramSet['values'][iSet][iPar]
+             if paramSet['names'][iPar] == 'FQQ'     : iFQQ     = paramSet['values'][iSet][iPar]
+
+#      for iMass in massList:
          # 'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } }
-         for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
+#        for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
 
-           tableName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-           tableName += '_'+iModel+'_'+iTarget+'_FITNUIS'+str(iFITNUIS)+'.ResultsSummary.mH'+str(iMass)+'.txt' 
-           subfile = open(tableName,'w')
-           subfile.write('#Fqq     sObsSM   sExpSM  sObsALT  sExpALT CLsRatio     qObs   MeanSM medianSM   qSM68m   qSM68p   qSM95m   qSM95p  MeanALTmedianALT  qALT68m  qALT68p  qALT95m  qALT95p \n')
+           if not iFITNUISnew == iFITNUIS :
+             iFITNUIS = iFITNUISnew
+             tableName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+             if iEnergy == 7 : tableName += '_7TeV'
+             if iEnergy == 8 : tableName += '_8TeV'
+             tableName += '_'+iModel+'_'+iTarget+ParSummTxt+'_ResultsSummary_mH'+str(iMass).replace('.','d')+'.txt' 
+             subfile = open(tableName,'w')
+             subfile.write('#Fqq     sObsSM   sExpSM  sObsALT  sExpALT CLsRatio     qObs   MeanSM medianSM   qSM68m   qSM68p   qSM95m   qSM95p  MeanALTmedianALT  qALT68m  qALT68p  qALT95m  qALT95p \n')
 
-           for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
-             unblind=1
+           #for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
+           if True :
+             unblind=0
+             if not self.blind : unblind=1
              workDir   = TargetDir+'/'+str(iMass) 
              print workDir
              fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             fileName += '_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)+'.qmu.FloatMu.mH'+str(iMass)+'.root'
+             if iEnergy == 7 : fileName += '_7TeV'
+             if iEnergy == 8 : fileName += '_8TeV'
+             fileName += '_'+iModel+'_'+iTarget+ParString+'_qmu_mH'+str(iMass).replace('.','d')+'.root'
              logName   = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             logName  += '_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)+'.Results.mH'+str(iMass)+'.txt'
+             if iEnergy == 7 : logName += '_7TeV'
+             if iEnergy == 8 : logName += '_8TeV'
+             logName  += '_'+iModel+'_'+iTarget+ParString+'.Results.mH'+str(iMass)+'.txt'
              os.system('cd '+workDir+'; root -q -b /afs/cern.ch/user/x/xjanssen/cms/HWW2012/ToolBox/SignalSeparation/extractSignificanceStats.C+"(\\"'+fileName+'\\",2,'+str(unblind)+')" > '+logName)
-             baseName  = 'sigsep_'+iModel+'_'+iTarget+'_FQQ'+str(iFQQ).replace('.','d')+'_FITNUIS'+str(iFITNUIS)
+             energyExt = ''
+             if iEnergy == 7 : energyExt += '_7TeV'
+             if iEnergy == 8 : energyExt += '_8TeV'
+             baseName  = 'sigsep_'+iModel+'_'+iTarget+energyExt+ParString
              baseName  = baseName.replace('.','_')
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.eps  '+workDir+'/'+baseName+'.epf') 
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.png  '+workDir+'/'+baseName+'.png') 
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.pdf  '+workDir+'/'+baseName+'.pdf') 
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.root '+workDir+'/'+baseName+'.root') 
-             if jcp == '0m':
-               if iFQQ == 0.   : mText = '0^{-}'
+
+             mText  = self.combinations[iComb]['legend']
+
+             #if jcp == '0m':
+             #  if iFQQ == 0.   : mText = '0^{-}'
                #if iFQQ == 0.25 : mText = '0^{-}(f_{q#bar{q}}=25%)'
                #if iFQQ == 0.50 : mText = '0^{-}(f_{q#bar{q}}=50%)'
                #if iFQQ == 0.75 : mText = '0^{-}(f_{q#bar{q}}=75%)'
                #if iFQQ == 1.   : mText = '0^{-}(f_{q#bar{q}}=100%)'
-             if jcp == '2pm':
-               if iFQQ == 0.   : mText = '2^{+}_{min}(f_{q#bar{q}}=0%)'
-               if iFQQ == 0.25 : mText = '2^{+}_{min}(f_{q#bar{q}}=25%)'
-               if iFQQ == 0.50 : mText = '2^{+}_{min}(f_{q#bar{q}}=50%)'
-               if iFQQ == 0.75 : mText = '2^{+}_{min}(f_{q#bar{q}}=75%)'
-               if iFQQ == 1.   : mText = '2^{+}_{min}(f_{q#bar{q}}=100%)'
+             #if jcp == '2pm':
+             #  if iFQQ == 0.   : mText = '2^{+}_{min}(f_{q#bar{q}}=0%)'
+             #  if iFQQ == 0.25 : mText = '2^{+}_{min}(f_{q#bar{q}}=25%)'
+             #  if iFQQ == 0.50 : mText = '2^{+}_{min}(f_{q#bar{q}}=50%)'
+             #  if iFQQ == 0.75 : mText = '2^{+}_{min}(f_{q#bar{q}}=75%)'
+             #  if iFQQ == 1.   : mText = '2^{+}_{min}(f_{q#bar{q}}=100%)'
+             #else : mText = 'ALT'
+             #if iEnergy == 7 : mText += '_7TeV'
+             #if iEnergy == 8 : mText += '_8TeV'
 
              if iFITNUIS == -1 :
-               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" ')
+               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\")" ')
              else :
-               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(true,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\")" > /dev/null')
+               if self.blind : 
+                 os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\")" ')
+               else:
+                 os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(true,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\")" ')
              for line in open(logName):
                if "RESULTS_SUMMARY" in line:
                  print "%-4s %s"%(str(iFQQ),line.replace('RESULTS_SUMMARY',''))
                  subfile.write("%-4s %s"%(str(iFQQ),line.replace('RESULTS_SUMMARY','')))
 
-           subfile.close()
-           print  tableName,unblind,'25.'
-           if jcp != '0m' :  
-            if iFITNUIS == 0 :
-             self.plotFqqLim(tableName,0,'25.',massFilter[0],jcp) 
-            else:
-             self.plotFqqLim(tableName,unblind,'25.',massFilter[0],jcp) 
+           if not 'FQQ' in targets[iTarget]['JobsParam'] :
+             subfile.close()
+           
+           if 'FQQ' in targets[iTarget]['JobsParam'] :
+             if iFQQ == targets[iTarget]['JobsParam']['FQQ'][-1] :
+              subfile.close()
+              if iFITNUIS == 0 :
+               self.plotFqqLim(tableName,0,'19.5',massFilter[0],jcp,mText) 
+              else:
+               self.plotFqqLim(tableName,unblind,'19.5',massFilter[0],jcp,mText) 
 
-   def plotFqqLim(self,limFile,unblind,lumi,mass,jcp):
+   def plotFqqLim(self,limFile,unblind,lumi,mass,jcp,mText):
   
-     mText = 'Undef'
-     if jcp == '0m'  : mText = '0^{-}'
-     if jcp == '2pm' : mText = '2^{+}_{min}'
- 
      print "limFile = "+limFile
      self.squareCanvas(False,False)  
      self.c1.cd()
@@ -2222,12 +2311,13 @@ class combPlot :
      pt2.SetTextSize(0.035);
      pt2.SetFillColor(0);
      #pt2.AddText(" #sqrt{s} = 7 TeV, L = 5.051 fb^{-1}; #sqrt{s} = 8 TeV, L = 30.0 fb^{-1}");
-     if float(lumi)<10.:
-       pt2.AddText(" #sqrt{s} = 7 TeV, L = 4.9 fb^{-1}");
-     elif float(lumi)<20.:
-       pt2.AddText(" #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}");
-     else:
-       pt2.AddText(" #sqrt{s} = 7 TeV, L = 4.9 fb^{-1}; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"); 
+     #if float(lumi)<10.:
+     #  pt2.AddText(" #sqrt{s} = 7 TeV, L = 4.9 fb^{-1}");
+     #elif float(lumi)<20.:
+     #  pt2.AddText(" #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}");
+     #else:
+     #  pt2.AddText(" #sqrt{s} = 7 TeV, L = 4.9 fb^{-1}; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"); 
+     pt2.AddText(" #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}");
      pt2.SetBorderSize(0);
    
      grSM = TGraph()
@@ -2295,8 +2385,8 @@ class combPlot :
      grGR95.SetLineStyle(kDotted)
      grGR95.SetFillStyle(3356)
    
-     ymin=-10.
-     ymax=40.
+     ymin=-20.
+     ymax=50.
     
      dummyHist = TH1F("d",";f_{q#bar{q}} (%);-2 ln (L_{"+mText+"}/L_{0^{+}}) ",100,0,100)
      dummyHist.SetMinimum(ymin)
@@ -2358,9 +2448,9 @@ class combPlot :
      f.SetLineWidth(2)
      f.SetLineStyle(kDashed)
      f.Draw("same")
-     #pt.Draw("same")
-     #pt2.Draw("same")
-     self.addTitle()
+     pt.Draw("same")
+     pt2.Draw("same")
+     #self.addTitle()
      dummyHist.Draw("AXISGsame")
      self.c1.Update()
      #if not options.isBatch: raw_input("Looks ok?")

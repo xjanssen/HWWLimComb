@@ -19,6 +19,7 @@ parser.add_option("-m", "--masses",     dest="masses",      help="Run only these
 parser.add_option("-T", "--targets",    dest="targets",     help="What to do ( PVSObs, BestFit, ... )", default=[], type='string' , action='callback' , callback=combTools.list_maker('targets',','))
 parser.add_option("-u", "--unblind",    dest="unblind",     help="Unblind results",                default=False, action="store_true")
 parser.add_option("-b", "--batch"  ,    dest="runBatch",    help="Run in batch",                   default=False, action="store_true")
+parser.add_option("-g", "--grid"   ,    dest="runGrid" ,    help="Run in  grid",                   default=False, action="store_true")
 parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode for batch jobs" , default=[], type='string' , action='callback' , callback=combTools.list_maker('batchSplit',','))
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
 parser.add_option("-a", "--AltModel" ,  dest="AltModel",    help="Alternative models", default=['NONE'], type='string' , action='callback' , callback=combTools.list_maker('AltModel',','))
@@ -39,9 +40,12 @@ energyList    = combTools.EnergyList_Filter(options.energy).get()
 PhysModelList = combTools.PhysModelList_Filter(physmodels,options.models).get()
 TargetList    = combTools.TargetList_Filter(targets,options.targets).get()
 
-if options.runBatch: 
+if options.runBatch or options.runGrid: 
   print 'Call BATV Tools Init'  
-  jobs = batchTools.batchJobs(channels,combinations,'results',combList,energyList,PhysModelList,TargetList,options.batchSplit,options.masses,options.unblind,options.Version,options.AltModel)
+  jobs = batchTools.batchJobs(channels,combinations,'results',combList,energyList,PhysModelList,TargetList,options.batchSplit,options.masses,options.unblind,options.Version,options.AltModel,options.runGrid )
+
+if options.runGrid:
+  CrabDB = {}
 
 #Run Combine
 for iComb in combList:
@@ -52,8 +56,10 @@ for iComb in combList:
       massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.masses,iComb,energyList).get()
       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
         TargetDir=workspace+'/'+options.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+        TargetDirGrid=workspace.split('/')[-2]+'/'+options.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
       else:
         TargetDir=workspace+'/'+options.Version+'/'+cardDir+'/'+iComb
+        TargetDirGrid=workspace.split('/')[-2]+'/'+options.Version+'/'+cardDir+'/'+iComb
       print 'Target Dir : '+TargetDir
       print 'Masses List: '+str(massList)
       paramSet   = combTools.ParamSet_Maker(cardtypes,channels[options.Version],physmodels[iModel]['cardtype'],options.masses,'NONE',energyList).get()
@@ -96,7 +102,7 @@ for iComb in combList:
                     JobParamName.append(iJobParam)
                     JobParamSize.append(len(targets[pTarget]['JobsParam'][iJobParam])) 
                     NParam*=len(targets[pTarget]['JobsParam'][iJobParam]) 
-                  #NJobs=NJobs*NParam
+                  NJobs=NJobs*NParam
                   print NParam, JobParamName , JobParamSize
 
                 jJob=0
@@ -116,11 +122,13 @@ for iComb in combList:
                       ToysList = combTools.getToys(iComb,iTarget,options.energy,iMass,workspace,options.Version,cardtypes,physmodels,targets,'NONE',TPF)
                     NJobs=len(ToysList)
                     print   ToysList            
-                  for iJob in xrange(1,NJobs+1):
+                  print NJobs
+                for iJob in xrange(1,NJobs+1):
                     PF=''
                     if NJobs == 1 : logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'.log' 
                     else          : logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
-                    command  = 'cd '+TargetDir+'/'+str(iMass)+' && '
+                    command =''
+                    if not options.runGrid : command  += 'cd '+TargetDir+'/'+str(iMass)+' && '
                     command += 'combine '+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
                     # toys
                     if len(ToysList) > 0:
@@ -137,7 +145,9 @@ for iComb in combList:
                     # Job Multiple parameter
                     if 'JobsParam' in targets[iTarget] :
                       if len(JobParamSize) == 1:
-                        iPar=iParam-1
+                        #iPar=iParam-1
+                        iPar=(iJob-1)/(targets[iTarget]['NJobs'])
+                        #print iPar,iJob,JobParamSize[0],(iJob-1)/(targets[iTarget]['NJobs'])
                         print str(iJob), str(iPar) , JobParamName[0] , str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar])
                         command=command.replace('$'+JobParamName[0],str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar]))
                         PF=PF+'_'+JobParamName[0]+str(targets[iTarget]['JobsParam'][JobParamName[0]][iPar]).replace('.','d')
@@ -180,12 +190,29 @@ for iComb in combList:
                     jJob+=1
                     if options.pretend : print command
                     else :
-                      if not options.runBatch:
-                        os.system(command)
-                      else:
+                      if   options.runBatch:
                         jobs.Add(iComb,iModel,iMass,iTarget,jJob,command,iAltModel) 
+                      elif options.runGrid:
+                        CrabDB[jJob] = {}
+                        print str(iJob),' ',str(jJob)
+                        print TargetDir+'/'+str(iMass)+'/'+wspace
+                        print workspace.split('/')[-2]
+                        print TargetDirGrid
+                        print command 
+                        CrabDB[jJob]['wspace']  = TargetDir+'/'+str(iMass)+'/'+wspace
+                        CrabDB[jJob]['outdir']  = TargetDirGrid
+                        CrabDB[jJob]['command'] = command
+                        CrabDB[jJob]['files']   = []
+                        gridWspace = TargetDir+'/'+str(iMass)+'/'+wspace
+                        gridOutdir = TargetDirGrid
+                        gridFiles  = []
+                        jobs.AddGrid(iComb,iModel,iMass,iTarget,jJob,command,gridWspace,gridOutdir,gridFiles,iAltModel)
+                      else:
+                        os.system(command)
             else:
               print 'WARNING: Workspace does not exist : '+TargetDir+'/'+str(iMass)+'/'+wspace
 
 
 if options.runBatch and not options.pretend: jobs.Sub()
+if options.runGrid  and not options.pretend: jobs.SubCrab()
+

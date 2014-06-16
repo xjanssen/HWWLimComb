@@ -67,6 +67,8 @@ if iLumi >= 3 : iTitle=2
 else          : iTitle=1 #Set to 0 for preliminary !
 if options.combs[0] == 'HWW78TeV' : iTitle=2
 
+#iLumi=2
+
 print '==== Data Cards Version : ',options.Version
 if options.combs[0] == 'HWW2l3l' : options.combs=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape','hww_vh3l_vh2j_zh3l2j_shape']
 if options.combs[0] == 'HWW78TeV': options.combs=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape','hww_vh3l_vh2j_zh3l2j_shape']
@@ -95,7 +97,7 @@ for iPlot in options.plots:
             mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
             postFix += '_mH'+str(options.mrange[0]).replace('.','d')+'-'+str(options.mrange[1]).replace('.','d')
           else                           : mLF = massList
-          plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,options.logx,options.logy)
+          plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,options.logx,options.logy,iTitle,iLumi)
           if iPlot == 'Limit'   : plot.plotOneLimit(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'Sign'    : plot.plotSignVsMh(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'BestFit' : plot.plotMuVsMh(iComb,options.energy,iModel,mLF)
@@ -162,10 +164,11 @@ for iPlot in options.plots:
          print '------------------------------> Comb = '+iComb
          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get() 
          for iMass in massList:
-           plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
-           if iPlot == 'JCPSum'    : plot.JCPSum(iComb,options.energy,iModel,[iMass]) 
-           if iPlot == 'JCPFit'    : plot.JCPFit(iComb,options.energy,iModel,[iMass]) 
-           if iPlot == 'JCPPlot'   : plot.JCPPlt(iComb,options.energy,iModel,[iMass]) 
+           for iTarget in options.printList : 
+             plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
+             if iPlot == 'JCPSum'    : plot.JCPSum(iComb,options.energy,iModel,iTarget,[iMass]) 
+             if iPlot == 'JCPFit'    : plot.JCPFit(iComb,options.energy,iModel,iTarget,[iMass]) 
+             if iPlot == 'JCPPlot'   : plot.JCPPlt(iComb,options.energy,iModel,iTarget,[iMass]) 
  
    #
    # Mu-mH Scan: Sum disjunct mH 1D mu scan

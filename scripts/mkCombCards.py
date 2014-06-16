@@ -262,6 +262,17 @@ def ChangeModel(iChannel,iEnergy,iMass,card,iAltModel):
       dcOut.write(cardOut)
       return cardOut
 
+def KillqqHALT(card):
+    print 'Kill qqH in ',card
+    dcOut = cardTools(card)
+    cardOut=card.replace('.txt','_noqqHALT.txt')
+
+    dcOut.remCol(process='qqbarH_ALT')
+
+    os.system('rm '+cardOut)
+    dcOut.write(cardOut)
+    return cardOut
+
 # ------------------------------------------------------- MAIN --------------------------------------------
 
 parser = OptionParser(usage="usage: %prog [options]")
@@ -351,6 +362,8 @@ for iComb in combList:
                        card = SMInject(card,False)
                        card = SMToys(card)
                        card = WJetFix(card,cardOri)
+                     if iPreProc == 'KillqqHALT' :
+                       card = KillqqHALT(card)
                  if iAltModel != 'NONE' :
                     if 'altmodel' in channels[options.Version][iChannel][iEnergy] and iAltModel in channels[options.Version][iChannel][iEnergy]['altmodel']:
                        card = ChangeModel(iChannel,iEnergy,iMass,card,iAltModel)

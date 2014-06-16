@@ -94,6 +94,8 @@ physmodels = {
 #
 # Spin
 #
-  'JCP'      : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs  --PO=fqqFloating' , 'cardtype' : 'jcp' } 
+#  'JCP'      : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs ' , 'cardtype' : 'jcp' } ,
+  'JCP'      : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs --PO=muFloating'  , 'cardtype' : 'jcp' } ,
+  'JCPFQQ'   : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs --PO=fqqFloating' , 'cardtype' : 'jcp' } ,
 
 }

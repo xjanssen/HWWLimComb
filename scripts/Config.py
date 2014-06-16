@@ -3,6 +3,7 @@
 homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWWLimComb/'
 workspace   = homedir+'workspace/'
 jobdir      = homedir+'jobs/'
+crabdir     = homedir+'crab/'
 plotsdir    = homedir+'plots/'
 
 cardbase    = homedir+'cmshcg/trunk/'
@@ -25,7 +26,8 @@ plotStyle = {
 
   'Limit' :
      {
-       'Default'        : { 'linY' : [0.0 ,50.] , 'logY' : [0.01,500.] } ,
+       #'Default'        : { 'linY' : [0.0 ,50.] , 'logY' : [0.01,500.] } ,
+       'Default'        : { 'linY' : [0.0 ,50.] , 'logY' : [0.1,5000.] } ,
        'hww0jet_shape'  : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
        'hww0jet_cut'    : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
        'hww1jet_shape'  : { 'linY' : [0.0 , 5.] , 'logY' : [0.01, 50.] } ,
@@ -45,6 +47,7 @@ plotStyle = {
        'hww012j_vh3l_vh2j_zh3l2j_shape' : { 'linY' : [0.0 , 5.] , 'logY' : [0.02,50.] } ,
        'vbfbb'          : { 'linY' : [0.0 ,15.] , 'logY' : [0.05,100.] } ,
        'vbfbbsplit'          : { 'linY' : [0.0 ,15.] , 'logY' : [0.05,100.] } ,
+       'hww2l2v_01jof_EWKS' :  {'linY' : [0.0 ,15.] , 'logY' : [0.5,100.] } ,
      },
 
   'LimitExp' :

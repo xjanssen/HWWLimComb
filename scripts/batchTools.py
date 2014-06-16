@@ -9,7 +9,7 @@ import os.path
 from optparse import OptionParser
 
 class batchJobs :
-   def __init__ (self,channels,combinations,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version,AltModel=['None']):
+   def __init__ (self,channels,combinations,prefix,combList,energyList,PhysModelList,TargetList,batchSplit,masses,unblind,Version,AltModel=['None'],Grid=False):
       self.jobsDic={}
       self.jobsList=[]
       self.prefix=prefix
@@ -86,29 +86,40 @@ class batchJobs :
                       ToysList = combTools.getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,targets,iAltModel,TPF)
                       NJobs=len(ToysList)
                     for iJob in xrange(1,NJobs+1):        
+                      EnergyText = '' 
+                      if   len( energyList ) > 1 : EnergyText = ''
+                      elif '7TeV' in energyList :  EnergyText = '_7TeV'
+                      elif '8TeV' in energyList :  EnergyText = '_8TeV'
                       jJob+=1
-                      jName = self.prefix+kComb+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(jJob)
+                      jName = self.prefix+kComb+EnergyText+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(jJob)
                       print jName
-                      self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = jName
+                      if Grid:
+                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = {}
+                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob]['jName'] = jName
+                      else:
+                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = jName
                       if not jName in self.jobsList: self.jobsList.append(jName)
 
-      print self.jobsDic
+      #print self.jobsDic
       #print self.jobsList
       #print len(self.jobsList)
 
-      if not os.path.exists(jobdir) : os.system('mkdir -p '+jobdir)
-      CMSSW=os.environ["CMSSW_BASE"]
-      for jName in self.jobsList:
-        jFile = open(jobdir+'/'+jName+'.sh','w')
-        jFile.write('#!/bin/bash\n')
-        jFile.write('#$ -N '+jName+'\n')
-        jFile.write('#$ -q all.q\n')
-        jFile.write('#$ -cwd\n')
-        jFile.write('source $VO_CMS_SW_DIR/cmsset_default.sh\n') 
-        jFile.write('cd '+CMSSW+'\n')
-        jFile.write('eval `scramv1 ru -sh`\n')
-        jFile.close()
-        os.system('chmod +x '+jobdir+'/'+jName+'.sh')
+      if Grid:
+        if not os.path.exists(crabdir) : os.system('mkdir -p '+crabdir)
+      else:
+        if not os.path.exists(jobdir) : os.system('mkdir -p '+jobdir)
+        CMSSW=os.environ["CMSSW_BASE"]
+        for jName in self.jobsList:
+          jFile = open(jobdir+'/'+jName+'.sh','w')
+          jFile.write('#!/bin/bash\n')
+          jFile.write('#$ -N '+jName+'\n')
+          jFile.write('#$ -q all.q\n')
+          jFile.write('#$ -cwd\n')
+          jFile.write('source $VO_CMS_SW_DIR/cmsset_default.sh\n') 
+          jFile.write('cd '+CMSSW+'\n')
+          jFile.write('eval `scramv1 ru -sh`\n')
+          jFile.close()
+          os.system('chmod +x '+jobdir+'/'+jName+'.sh')
 
    def Add (self,iComb,iModel,iMass,iTarget,iJob,command,iAltModel) :
      jName= self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]
@@ -116,7 +127,92 @@ class batchJobs :
      jFile.write(command+'\n')
      jFile.close()
 
+   def AddGrid (self,iComb,iModel,iMass,iTarget,iJob,command,wspace,outdir,files,iAltModel) :
+     self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['command'] = command 
+     self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['wspace']  = wspace
+     self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['outdir']  = outdir
+     self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['files']   = files
+
 #     print jName,  command
+
+   def SubCrab(self):
+      print self.jobsDic
+      JOBS = []
+      Combs=''
+      Models=''
+      Targets=''
+      AltModels=''
+      for iComb in self.jobsDic:
+        Combs += '_'+iComb
+        for iModel in self.jobsDic[iComb] :
+          Models += '_'+iModel
+          for iMass in self.jobsDic[iComb][iModel] :
+            for iTarget in self.jobsDic[iComb][iModel][iMass] :
+              Targets += '_'+iTarget
+              for iAltModel in self.jobsDic[iComb][iModel][iMass][iTarget] :
+                AltModels += '_'+iAltModel
+                for iJob in self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel] :   
+                  if not self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['jName'] in JOBS : 
+                    JOBS.append(self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['jName'])
+ 
+      bashFileName = crabdir+'/'+'crab__'+Combs+AltModels+Models+Targets+'.sh' 
+      crabFileName = crabdir+'/'+'crab__'+Combs+AltModels+Models+Targets+'.cfg' 
+      print bashFileName  
+      print crabFileName
+
+    
+
+      bashFile =  open(bashFileName,'w')
+
+      bashFile.write('#!/bin/sh \n')
+      bashFile.write('\n')
+      bashFile.write('iJob=$1 \n') 
+      bashFile.write('PWD=`pwd`\n')
+      bashFile.write('echo $PWD')
+      bashFile.write('\n') 
+
+      toSEND = []
+      for iJOBS in range(0,len(JOBS)) :
+        print iJOBS
+        print JOBS[iJOBS]
+        bashFile.write('if [ "$iJob" = "'+str(iJOBS)+'" ] ; then \n')       
+        bashFile.write('  echo '+str(iJOBS)+'\n')
+        for iComb in self.jobsDic:
+          for iModel in self.jobsDic[iComb] :
+            for iMass in self.jobsDic[iComb][iModel] :
+              for iTarget in self.jobsDic[iComb][iModel][iMass] :
+                for iAltModel in self.jobsDic[iComb][iModel][iMass][iTarget] :
+                  for iJob in self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel] :
+                    if JOBS[iJOBS] == self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['jName'] :
+                      if not self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['wspace'] in toSEND : 
+                        toSEND.append(self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['wspace'])
+                      bashFile.write('  cd $PWD \n')
+                      bashFile.write('  mkdir -p '+ self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['outdir']  +'\n')
+                      bashFile.write('  cd '+ self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['outdir']  +'\n')
+                      bashFile.write('  '+self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['command'].replace('combine ','$PWD/combine $PWD/') +'\n')
+                      
+        bashFile.write('fi\n') 
+        bashFile.write('\n')
+
+      bashFile.write('  cd $PWD \n')
+      bashFile.write('tar cvzf outputToy.tgz '+self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]['outdir'].split('/')[0]  +'\n')
+
+      bashFile.close()
+
+      fileCmd = 'which combine'
+      proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+      combineProg,err = proc.communicate()
+
+      crabFile =  open(crabFileName,'w')
+      crabFile.write('[CRAB] \n\njobtype = cmssw \nscheduler = glite\n')
+      crabFile.write('[CMSSW] \n\noutput_file = outputToy.tgz\ndatasetpath=None\npset=None\ntotal_number_of_events=1\nnumber_of_jobs='+str(len(JOBS))+'\n\n')
+      crabFile.write('[USER] \n\nscript_exe = '+bashFileName+'\n\n')
+      crabFile.write('additional_input_files = '+combineProg+' ')
+      for iSEND in range(0,len(toSEND)) : crabFile.write(', '+toSEND[iSEND])
+      crabFile.write('\n')
+      crabFile.write('return_data = 1 \n') 
+
+      crabFile.close()
 
    def Sub(self,queue='8nh'):
      os.system('cd '+jobdir)

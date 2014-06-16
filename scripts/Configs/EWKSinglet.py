@@ -229,52 +229,52 @@ channels = {
    # ============ H -> WW 0/1-jet cut-based ================== 
    'hww2l2v_0jsf_cut_EWKS' :   
       {
-         '7TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [145,600]  , 
+         '7TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [200,600]  , 
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwsf_0j_cut_7TeV_EWKS.txt'} ,
-         '8TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [145,1000]  , 
+         '8TeV' : { 'tag' : 'sf0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [200,1000]  , 
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwsf_0j_cut_8TeV_EWKS.txt'} ,
       } ,
 
    'hww2l2v_1jsf_cut_EWKS' :   
       {
-         '7TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [145,600]  , 
+         '7TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'cut' , 'mrange' : [200,600]  , 
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwsf_1j_cut_7TeV_EWKS.txt'} ,
-         '8TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [145,1000]  , 
+         '8TeV' : { 'tag' : 'sf1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'cut' , 'mrange' : [200,1000]  , 
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwsf_1j_cut_8TeV_EWKS.txt'} ,
       } ,
 
    # ============ H -> WW 0/1-jet shape-based ==================
    'hww2l2v_0jof_shape_EWKS' :
       {
-         '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [145,600]  ,
+         '7TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [200,600]  ,
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwof_0j_shape_7TeV_EWKS.txt'} ,
-         '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [145,1000]  ,
+         '8TeV' : { 'tag' : 'of0j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [200,1000]  ,
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwof_0j_shape_8TeV_EWKS.txt'} ,
       } ,
 
    'hww2l2v_1jof_shape_EWKS' :
       {
-         '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [145,600]  ,
+         '7TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 7 , 'method' : 'shape' , 'mrange' : [200,600]  ,
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwof_1j_shape_7TeV_EWKS.txt'} ,
-         '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [145,1000]  ,
+         '8TeV' : { 'tag' : 'of1j' , 'prod' : 'ggH' , 'branch' : 'hww' , 'decay' : '2l2v' , 'energy' : 8 , 'method' : 'shape' , 'mrange' : [200,1000]  ,
                     'dir' : 'highmass2014' , 'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwof_1j_shape_8TeV_EWKS.txt'} ,
       } ,
 
   # ============ H -> WW VBF Cut Based =====================
   'hww2l2v_2jsf_cut_EWKS' :   
       {
-         '7TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'cut'  , 'mrange' : [145,600] , 
+         '7TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'cut'  , 'mrange' : [200,600] , 
                     'dir' : 'highmass2014'   ,  'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwsf_2j_cut_7TeV_EWKS.txt'},
-         '8TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'cut'  , 'mrange' : [145,1000] , 
+         '8TeV' : { 'tag' : 'sf2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'cut'  , 'mrange' : [200,1000] , 
                     'dir' : 'highmass2014'   ,  'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwsf_2j_cut_8TeV_EWKS.txt'},
       } ,
 
   # ============ H -> WW VBF Shape Based =====================
   'hww2l2v_2jof_shape_EWKS' : 
       {
-         '7TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'shape'  , 'mrange' : [145,600] , 
+         '7TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 7 , 'method' : 'shape'  , 'mrange' : [200,600] , 
                     'dir' : 'highmass2014'   ,  'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwof_2j_shape_7TeV_EWKS.txt' },
-         '8TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'shape'  , 'mrange' : [145,1000] , 
+         '8TeV' : { 'tag' : 'of2j'  , 'prod' : 'qqH', 'branch' : 'hww' , 'decay' : '2l2v'    , 'energy' : 8 , 'method' : 'shape'  , 'mrange' : [200,1000] , 
                     'dir' : 'highmass2014'   ,  'subdir' : 'hww2l2v/$MASS/cpsq$CP2_brnew$BRnew' , 'card' : 'hwwof_2j_shape_8TeV_EWKS.txt' },
       } ,
 
@@ -409,6 +409,8 @@ combinations = {
   'hww2l2v_01j_EWKS'  : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2l2v_0jsf_cut_EWKS'   , 'hww2l2v_1jsf_cut_EWKS' ,
                                                                             'hww2l2v_0jof_shape_EWKS' , 'hww2l2v_1jof_shape_EWKS' ] ,
                              'purposes' : [ 'ewks','ewksall' ] , 'legend' : 'HWW 0/1j SF+DF '   } ,
+  'hww2l2v_01jof_EWKS'  : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2l2v_0jof_shape_EWKS' , 'hww2l2v_1jof_shape_EWKS' ] ,
+                             'purposes' : [ 'ewks','ewksall' ] , 'legend' : 'HWW 0/1j OF '   } ,
   'hww2l2v_2j_EWKS'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2l2v_2jsf_cut_EWKS'   , 'hww2l2v_2jof_shape_EWKS' ] ,
                              'purposes' : [ 'ewks','ewksall' ] , 'legend' : 'HWW 2j SF+DF '   } ,
   'hww2l2v_of_EWKS'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww2l2v_0jof_shape_EWKS' , 'hww2l2v_1jof_shape_EWKS' , 'hww2l2v_2jof_shape_EWKS' ] ,

@@ -126,10 +126,45 @@ targets = {
 # JCP
 ######
 
-  'JCP'         : {'notblind' : True  , 'method' : 'HybridNew'   , 
-                      'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000' , 'NJobs' : 50 , 
+  'JCPfloatmu'   : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 -T 1000',
+                    'NJobs' : 10 ,
+                    'JobsParam' : { 'FITNUIS' : [1] } 
+                   },
+
+  'JCPfixmu'     : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys --setPhysicsModelParameters r=1 --freezeNuisances r -s -1 -T 1000',
+                    'NJobs' : 10 ,
+                    'JobsParam' : { 'FITNUIS' : [1] }
+                   },
+
+
+  'JCPFQQfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   , 
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 200' , 
+                    'NJobs' : 4 , 
+                      'JobsParam' : { 'FQQ' : [0.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+
+  'JCPFQQfixmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ,r=1 --freezeNuisances fqq,r  -T 1000' ,
+                    'NJobs' : 2 ,
+                      'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+
+  'JCPFQQfixmuTest'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ,r=1 --freezeNuisances fqq,r  -T 10' ,
+                    'NJobs' : 2 ,
+                      'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+
+# 'JCPFQQFixRange'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+#                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000 --setPhysicsModelParameterRanges fqq=0,0' ,
+#                    'NJobs' : 10 ,
                       #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [0,1] } },
-                      'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+#                      'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
 
 ########################
 # Fit 3 Mu: ggH, VBH, VH

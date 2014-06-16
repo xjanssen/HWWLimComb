@@ -593,8 +593,8 @@ for iChannel in channelList:
                   parVal=str(paramSet['values'][iSet][iPar])
                   for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
                   TargetDir=TargetDir.replace('$'+paramSet['names'][iPar],parVal)
-                  CardLow=CardLow.replace('$'+paramSet['names'][iPar],parVal)
-                  CardHigh=CardHigh.replace('$'+paramSet['names'][iPar],parVal)
+                  cardLow=cardLow.replace('$'+paramSet['names'][iPar],parVal)
+                  cardHigh=cardHigh.replace('$'+paramSet['names'][iPar],parVal)
                   TargetCard=TargetCard.replace('$'+paramSet['names'][iPar],parVal)
                 print 'TargetCard = ',TargetCard
                 os.system('mkdir -p '+ TargetDir)
