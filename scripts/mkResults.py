@@ -125,11 +125,15 @@ for iComb in combList:
                   print NJobs
                 for iJob in xrange(1,NJobs+1):
                     PF=''
+                    subdir=''
                     if NJobs == 1 : logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'.log' 
-                    else          : logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
+                    else          : 
+                      logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
+                      subdir = 'jobs'+str((iJob/250)*250)
+                      os.system('mkdir -p '+TargetDir+'/'+str(iMass)+'/'+subdir) 
                     command =''
-                    if not options.runGrid : command  += 'cd '+TargetDir+'/'+str(iMass)+' && '
-                    command += 'combine '+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
+                    if not options.runGrid : command  += 'cd '+TargetDir+'/'+str(iMass)+'/'+subdir+' && '
+                    command += 'combine '+TargetDir+'/'+str(iMass)+'/'+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
                     # toys
                     if len(ToysList) > 0:
                       command += ' -t '+str(targets[iTarget]['Toys']['NToysJob'])+' --toysFile='+ToysList[iJob-1]+' -s '+os.path.splitext(os.path.splitext(ToysList[iJob-1])[0])[1].replace('.','')
@@ -191,6 +195,7 @@ for iComb in combList:
                     if options.pretend : print command
                     else :
                       if   options.runBatch:
+                        print 'Add',iComb,iModel,iMass,iTarget,jJob,command,iAltModel
                         jobs.Add(iComb,iModel,iMass,iTarget,jJob,command,iAltModel) 
                       elif options.runGrid:
                         CrabDB[jJob] = {}

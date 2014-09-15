@@ -67,6 +67,26 @@ if iLumi >= 3 : iTitle=2
 else          : iTitle=1 #Set to 0 for preliminary !
 if options.combs[0] == 'HWW78TeV' : iTitle=2
 
+if options.combs[0] == 'hww01jet_jcp_2' :
+  options.combs=['hww01jet_jcp_2pm_legacy','hww01jet_jcp_2ph2','hww01jet_jcp_2ph3','hww01jet_jcp_2hp','hww01jet_jcp_2bp','hww01jet_jcp_2ph6','hww01jet_jcp_2ph7','hww01jet_jcp_2hm','hww01jet_jcp_2mh9','hww01jet_jcp_2mh10']
+
+if options.combs[0] == 'hwwhzz_jcp_2_dec' : 
+  options.combs=['hwwhzz_jcp_2ph2_dec','hwwhzz_jcp_2ph3_dec','hwwhzz_jcp_2hp_dec','hwwhzz_jcp_2bp_dec','hwwhzz_jcp_2ph6_dec','hwwhzz_jcp_2ph7_dec','hwwhzz_jcp_2hm_dec','hwwhzz_jcp_2mh9_dec','hwwhzz_jcp_2mh10_dec']
+  #options.combs=['hwwhzz_jcp_2pm_dec_legacy','hwwhzz_jcp_2ph2_dec','hwwhzz_jcp_2ph3_dec','hwwhzz_jcp_2hp_dec','hwwhzz_jcp_2bp_dec','hwwhzz_jcp_2ph6_dec','hwwhzz_jcp_2ph7_dec','hwwhzz_jcp_2hm_dec','hwwhzz_jcp_2mh9_dec','hwwhzz_jcp_2mh10_dec']
+if options.combs[0] == 'hwwhzz_jcp_2_qqb' : 
+  options.combs=['hwwhzz_jcp_2pm_qqb_legacy','hwwhzz_jcp_2ph2_qqb','hwwhzz_jcp_2ph3_qqb','hwwhzz_jcp_2hp_qqb','hwwhzz_jcp_2bp_qqb','hwwhzz_jcp_2ph6_qqb','hwwhzz_jcp_2ph7_qqb','hwwhzz_jcp_2hm_qqb','hwwhzz_jcp_2mh9_qqb','hwwhzz_jcp_2mh10_qqb']
+if options.combs[0] == 'hwwhzz_jcp_2_gg' :
+  options.combs=['hwwhzz_jcp_2pm_gg_legacy','hwwhzz_jcp_2ph2_gg','hwwhzz_jcp_2ph3_gg','hwwhzz_jcp_2hp_gg','hwwhzz_jcp_2bp_gg','hwwhzz_jcp_2ph6_gg','hwwhzz_jcp_2ph7_gg','hwwhzz_jcp_2hm_gg','hwwhzz_jcp_2mh9_gg','hwwhzz_jcp_2mh10_gg']
+
+if options.combs[0] == 'hwwhzz_jcp_12_dec' : 
+  options.combs=['hwwhzz_jcp_1hzz','hwwhzz_jcp_2pm_dec_legacy','hwwhzz_jcp_2ph2_dec','hwwhzz_jcp_2ph3_dec','hwwhzz_jcp_2hp_dec','hwwhzz_jcp_2bp_dec','hwwhzz_jcp_2ph6_dec','hwwhzz_jcp_2ph7_dec','hwwhzz_jcp_2hm_dec','hwwhzz_jcp_2mh9_dec','hwwhzz_jcp_2mh10_dec']
+if options.combs[0] == 'hwwhzz_jcp_12_qqb' : 
+  options.combs=['hwwhzz_jcp_1hzz','hwwhzz_jcp_2ph2_qqb','hwwhzz_jcp_2ph3_qqb','hwwhzz_jcp_2hp_qqb','hwwhzz_jcp_2bp_qqb','hwwhzz_jcp_2ph6_qqb','hwwhzz_jcp_2ph7_qqb','hwwhzz_jcp_2hm_qqb','hwwhzz_jcp_2mh9_qqb','hwwhzz_jcp_2mh10_qqb']
+if options.combs[0] == 'hwwhzz_jcp_12_gg' :
+  options.combs=['hwwhzz_jcp_1hzz','hwwhzz_jcp_2ph2_gg','hwwhzz_jcp_2ph3_gg','hwwhzz_jcp_2hp_gg','hwwhzz_jcp_2bp_gg','hwwhzz_jcp_2ph6_gg','hwwhzz_jcp_2ph7_gg','hwwhzz_jcp_2hm_gg','hwwhzz_jcp_2mh9_gg','hwwhzz_jcp_2mh10_gg']
+
+if options.combs[0] == 'hwwhzz_jcp_12_mix' :
+  options.combs=['hwwhzz_jcp_1hzz','hwwhzz_jcp_2pm_gg_legacy','hwwhzz_jcp_2ph2_gg','hwwhzz_jcp_2ph3_gg','hwwhzz_jcp_2hp_gg','hwwhzz_jcp_2bp_gg','hwwhzz_jcp_2ph6_gg','hwwhzz_jcp_2ph7_gg','hwwhzz_jcp_2hm_gg','hwwhzz_jcp_2mh9_gg','hwwhzz_jcp_2mh10_gg','hwwhzz_jcp_2pm_qqb_legacy','hwwhzz_jcp_2ph2_qqb','hwwhzz_jcp_2ph3_qqb','hwwhzz_jcp_2hp_qqb','hwwhzz_jcp_2bp_qqb','hwwhzz_jcp_2ph6_qqb','hwwhzz_jcp_2ph7_qqb','hwwhzz_jcp_2hm_qqb','hwwhzz_jcp_2mh9_qqb','hwwhzz_jcp_2mh10_qqb']
 #iLumi=2
 
 print '==== Data Cards Version : ',options.Version
@@ -157,7 +177,7 @@ for iPlot in options.plots:
    #
    # JCP
    #
-   elif iPlot in ['JCPSum','JCPFit','JCPPlot']:
+   elif iPlot in ['JCPSum','JCPFit','JCPPlot','JCPClean','JCPFQQ']:
       for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel
        for iComb in combList:
@@ -167,9 +187,24 @@ for iPlot in options.plots:
            for iTarget in options.printList : 
              plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
              if iPlot == 'JCPSum'    : plot.JCPSum(iComb,options.energy,iModel,iTarget,[iMass]) 
+             if iPlot == 'JCPClean'  : plot.JCPClean(iComb,options.energy,iModel,iTarget,[iMass]) 
              if iPlot == 'JCPFit'    : plot.JCPFit(iComb,options.energy,iModel,iTarget,[iMass]) 
              if iPlot == 'JCPPlot'   : plot.JCPPlt(iComb,options.energy,iModel,iTarget,[iMass]) 
- 
+             if iPlot == 'JCPFQQ'    : plot.JCPFQQ(iComb,options.energy,iModel,iTarget,[iMass]) 
+
+   elif iPlot in ['JCPView','JCPTable','JCPFB2'] : 
+     for iModel in PhysModelList:
+       print '---------------------------> Model = '+iModel
+       massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,combList[0],energyList).get()
+       for iMass in massList:
+         for iTarget in options.printList :
+           plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
+           if iPlot == 'JCPView'   : plot.JCPView(combList,options.energy,iModel,iTarget,[iMass]) 
+           if iPlot == 'JCPTable'  : plot.JCPTable(combList,options.energy,iModel,iTarget,[iMass]) 
+           if iPlot == 'JCPFB2'    : plot.JCPFB2(combList,options.energy,iModel,iTarget,[iMass]) 
+
+   
+
    #
    # Mu-mH Scan: Sum disjunct mH 1D mu scan
    #

@@ -40,6 +40,7 @@ targets = {
 
   'ACLsObs'      : { 'notblind' : False , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'treeKeys' : ['Val'] } ,
   'ACLsExp'      : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run expected' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
+  'ACLsBlind'    : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run blind   ' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
   'ACLsInjPre'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1' , 'treeKeys' : ['Val'] },
   'ACLsBkgOnly'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=0' , 'treeKeys' : ['Val'] },
   'ACLsInjPost'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1 --toysFreq' },
@@ -70,6 +71,7 @@ targets = {
   'BestFitExpT'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-10 -t -1 --expectSignal=1' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D'
 ,'68U'] },
 
+  'BestFitFixX'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2  --rMin=-5 --stepSize=0.05 --preFitValue=0.1 --robustFit=1 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --minimizerToleranceForMinos=0.01 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerAlgo=Minuit2 --minimizerStrategy=1 --minimizerTolerance=0.0001 --cminFallbackAlgo Minuit,0.001 --justFit --setPhysicsModelParameters fqq=0,x=0 --freezeNuisances fqq,x --redefineSignalPOIs MH' , 'method' : 'MaxLikelihoodFit' , 'treeKeys' : ['Val','68D','68U'] },
 ##########
 # Toys
 ########## 
@@ -128,30 +130,79 @@ targets = {
 
   'JCPfloatmu'   : {'notblind' : True  , 'method' : 'HybridNew'   ,
                     'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 -T 1000',
-                    'NJobs' : 10 ,
+                    'NJobs' : 1500  ,
                     'JobsParam' : { 'FITNUIS' : [1] } 
                    },
 
   'JCPfixmu'     : {'notblind' : True  , 'method' : 'HybridNew'   ,
                     'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys --setPhysicsModelParameters r=1 --freezeNuisances r -s -1 -T 1000',
-                    'NJobs' : 10 ,
+                    'NJobs' : 1500 ,
                     'JobsParam' : { 'FITNUIS' : [1] }
                    },
 
 
   'JCPFQQfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   , 
-                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 200' , 
-                    'NJobs' : 4 , 
-                      'JobsParam' : { 'FQQ' : [0.] , 'FITNUIS' : [1] } },
-                      #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
-                      #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 10 --redefineSignalPOI x' , 
+                    'NJobs' : 3000 , 
+                     #'JobsParam' : { 'FQQ' : [0.25] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.25,0.5,0.75] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.5] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                     'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
+
+  'JCPGGfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=0 --freezeNuisances fqq -T 10 ' ,
+                    'NJobs' : 3000 ,
+                     'JobsParam' : { 'FITNUIS' : [1] } },
+
+  'JCPQQBfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=1 --freezeNuisances fqq -T 1000 ' ,
+                    'NJobs' : 3000 ,
+                     'JobsParam' : { 'FITNUIS' : [1] } },
+
 
   'JCPFQQfixmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
-                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ,r=1 --freezeNuisances fqq,r  -T 1000' ,
-                    'NJobs' : 2 ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=$FQQ,r=1 --freezeNuisances fqq,r  -T 1000' ,
+                    'NJobs' : 500 ,
+                      #'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
+                      'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+
+  'JCPFQQfix2mu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ,rzz=1,rww=1 --freezeNuisances fqq,rzz,rww  -T 1000' ,
+                    'NJobs' : 3000 ,
                       'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
                       #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
                       #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+
+  'JCPGGfix2mu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=0,rzz=1,rww=1 --freezeNuisances fqq,rzz,rww  -T 1000' ,
+                    'NJobs' : 3000 ,
+                      'JobsParam' : { 'FITNUIS' : [1] } },
+
+  'JCPQQBfix2mu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=1,rzz=1,rww=1 --freezeNuisances fqq,rzz,rww  -T 1000' ,
+                    'NJobs' : 3000 ,
+                      'JobsParam' : { 'FITNUIS' : [1] } },
+
+  'JCPFQQfix3mu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ,rzz=1,rww=1,rgg=1 --freezeNuisances fqq,rzz,rww,rgg -T 1000' , 
+                     'NJobs' : 200 , 
+                     'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                      #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [0,1] } },
+
+  'JCPGGfix3mu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=0,rgg=1,rzz=1,rww=1 --freezeNuisances fqq,rgg,rzz,rww  -T 20' ,
+                    'NJobs' : 5000 ,
+                      'JobsParam' : { 'FITNUIS' : [1] } },
+
+  'JCPQQBfix3mu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=1,rgg=1,rzz=1,rww=1 --freezeNuisances fqq,rgg,rzz,rww  -T 20' ,
+                    'NJobs' : 5000 ,
+                      'JobsParam' : { 'FITNUIS' : [1] } },
+
 
   'JCPFQQfixmuTest'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
                     'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --setPhysicsModelParameters fqq=$FQQ,r=1 --freezeNuisances fqq,r  -T 10' ,
@@ -217,5 +268,91 @@ targets = {
   # --> Expectes Floating Others
   'BRInvExp'    :   { 'notblind' : True , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -P BRInvUndet --floatOtherPOI=1 -t -1 --expectSignal=1' ,
                       'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
-                                    
+
+#################
+# Spin: f(J^P)  
+#################
+        
+  'fJPExp'        :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -P x -S 1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} },
+  'fJPObs'        :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -P x -S 1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} },                    
+
+  'fJPExp_fqq0'   :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters fqq=0.0 --freezeNuisances fqq -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} },
+  'fJPObs_fqq0'   :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters fqq=0.0 --freezeNuisances fqq' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} },
+
+  'fJPExp_fqq1'   :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters fqq=1.0 --freezeNuisances fqq -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} },
+  'fJPObs_fqq1'   :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters fqq=1.0 --freezeNuisances fqq' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} },
+
+#################
+# Spin: m_H (Hgg) 
+#################
+
+  'JPMHObs_SM'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=0,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI MH --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMHExp_SM'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=0,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI MH --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMHObs_fqq0'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI MH --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMHExp_fqq0'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI MH --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMHObs_fqq1'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=1.0 --freezeNuisances x,fqq --redefineSignalPOI MH --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMHExp_fqq1'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=1.0 --freezeNuisances x,fqq --redefineSignalPOI MH --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+############
+# Spin: mu 
+############
+
+# 'JPMUObs_SM'     :     { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=0,fqq=0.0 --freezeNuisances x,fqq  --redefineSignalPOI r --floatOtherPOI=1' ,
+#                       'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+# 'JPMUExp_SM'     :     { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=0,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI r --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+#                       'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUObs_SM'     :     { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=0 --freezeNuisances x --redefineSignalPOI r --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUExp_SM'     :     { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=0 --freezeNuisances x --redefineSignalPOI r --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUObs_ALT'     :     { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1 --freezeNuisances x --redefineSignalPOI r --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUExp_ALT'     :     { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1 --freezeNuisances x --redefineSignalPOI r --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUObs_fqq0'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI r --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUExp_fqq0'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=0.0 --freezeNuisances x,fqq --redefineSignalPOI r --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUObs_fqq1'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=1.0 --freezeNuisances x,fqq --redefineSignalPOI r --floatOtherPOI=1' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+  'JPMUExp_fqq1'     :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters x=1,fqq=1.0 --freezeNuisances x,fqq --redefineSignalPOI r --floatOtherPOI=1 -t -1 --expectSignal=1 ' ,
+                        'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 100} },
+
+
+
+#
+# HWidth
+#
+
+  'HWidthExp_Width'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances RV,RF --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
+                          'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} }, 
+
+
+                            
 }

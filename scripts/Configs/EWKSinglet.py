@@ -1,9 +1,9 @@
 cardbase    = '/afs/cern.ch/work/x/xjanssen/cms/2HWW/cmshcg/trunk/'
 combscripts = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/highmass2014/scripts/'
 
-DefaultVersion = 'EWKS_V2'
+DefaultVersion = 'EWKS_V3'
 channels = {
- 'EWKS_V2' : 
+ 'EWKS_V3' : 
  {
    ###### Paper ( OLD CPS+Interf.) ####### 
 

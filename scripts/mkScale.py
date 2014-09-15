@@ -11,7 +11,8 @@ import batchTools
 
 from Config import *
 from manipDataCard import card as cardTools
-from copy import deepcopy 
+from copy import deepcopy as dc 
+
 
 # ----------------------------------------------------- Read YR values from combination area --------------
 
@@ -473,10 +474,122 @@ def CATSplit(card):
       dcOut.write(TargetCard)
 
 
-            
-      
+# ------------------------------------------------------- Rename Syst
 
+def RenameSyst(card,renameSyst):
+    dcIn  = cardTools(card)
+    dcOut = cardTools(card)
+    print dcIn.content['block2']['bin']  
+    TargetCard = os.path.split(card)[0] + '/' + (os.path.split(card)[1]) + '_rSyst'  
+ 
+    # Set Systematic names       
+    for iType in dcIn.content['systs'] :
+      for iSyst in dcIn.content['systs'][iType]:
+        for iRename in renameSyst:
+          oSyst =  iRename.split(':')[0]
+          tSyst =  iRename.split(':')[1]
+          if iSyst == oSyst:  
+            dcOut.content['systs'][iType][tSyst] = dc(dcIn.content['systs'][iType][iSyst])
+            dcOut.linenumbers[(iType,tSyst)] = dcOut.linenumbers[(iType,iSyst)]
+            del dcOut.content['systs'][iType][iSyst]
+            del dcOut.linenumbers[(iType,iSyst)] 
 
+    # Rename histograms
+    shFiles = []
+    for iEntry in dcIn.content['header2'] :
+      if dcIn.content['header2'][iEntry][0] == 'shapes' and dcIn.content['header2'][iEntry][1] != 'data_obs' and not ':' in dcIn.content['header2'][iEntry][3]:
+        shFiles.append(dcIn.content['header2'][iEntry][3])
+    shFiles = list(set(shFiles))
+    print shFiles
+    for iFile in shFiles:
+      fileInName  = os.path.split(card)[0]+'/'+iFile
+      fileOutName = fileInName + '_rSyst'
+      print fileInName 
+      print fileOutName   
+      fIn   = TFile.Open(fileInName,'READ')
+      fOut  = TFile.Open(fileOutName,'RECREATE')
+      Hists = [X.GetName() for X in fIn.GetListOfKeys()]
+      for iHist in Hists :
+        H = fIn.Get(iHist)
+        if len(iHist.split('_')) > 2 :
+          iSyst = '_'.join(iHist.split('_')[2:-1])+'_'+iHist.split('_')[-1].replace('Up','').replace('Down','')
+          for iRename in renameSyst:
+            oSyst =  iRename.split(':')[0]
+            tSyst =  iRename.split(':')[1]
+            if iSyst == oSyst: 
+              #print H , H.GetTitle()
+              H.SetName(iHist.replace(oSyst,tSyst))
+              H.SetTitle(H.GetTitle().replace(oSyst,tSyst))
+              #print H , H.GetTitle()
+        fOut.cd()
+        H.Write()
+
+      fIn.Close()
+      fOut.Close()
+      keepFile = os.path.split(card)[0]+'/'+iFile + '_rKeep' 
+      os.system('mv '+fileInName+' '+keepFile)
+      os.system('mv '+fileOutName+' '+fileInName) 
+
+    os.system('rm '+TargetCard)
+    dcOut.write(TargetCard)
+    keepCard = os.path.split(card)[0] + '/' + (os.path.split(card)[1]) + '_rKeep'
+    os.system('mv '+card+' '+keepCard)
+    os.system('mv '+TargetCard+' '+card) 
+
+# ------------------------------------------------------- Renormalize Proc
+
+def RenormProc(card,renormProc):
+    dcIn  = cardTools(card)
+    dcOut = cardTools(card)
+    print dcIn.content['block2']['bin']  
+    TargetCard = os.path.split(card)[0] + '_rProc/' + (os.path.split(card)[1])   
+    os.system('mkdir -p '+os.path.split(card)[0] + '_rProc') 
+
+    # Scale Yields 
+    for iBin in xrange(0 , len( dcIn.content['block2']['bin'] ) ):
+      jBin=dcIn.content['block2']['bin'][iBin]
+      iProc=dcIn.content['block2']['process'][iBin]
+      for iRenorm in renormProc:
+        pRenorm = iRenorm.split(':')[0]
+        fRenorm = float(iRenorm.split(':')[1])
+        if pRenorm == iProc :
+          YieldIn  = float(dcIn.getRate(bin=jBin,process=iProc))
+          YieldOut = YieldIn*fRenorm
+          print iProc, YieldIn , '--> ' , YieldOut
+          dcOut.setRate(bin=jBin,process=iProc,value=YieldOut) 
+ 
+    # Histograms
+
+    shFiles = []
+    for iEntry in dcIn.content['header2'] :
+      if dcIn.content['header2'][iEntry][0] == 'shapes' and dcIn.content['header2'][iEntry][1] != 'data_obs' and not ':' in dcIn.content['header2'][iEntry][3]:
+        shFiles.append(dcIn.content['header2'][iEntry][3])
+    shFiles = list(set(shFiles))
+    print shFiles
+    for iFile in shFiles:
+      fileInName  = os.path.split(card)[0]+'/'+iFile
+      fileOutName = os.path.split(card)[0] + '_rProc/' +iFile
+      print fileInName
+      print fileOutName
+      fIn   = TFile.Open(fileInName,'READ')
+      fOut  = TFile.Open(fileOutName,'RECREATE')
+      Hists = [X.GetName() for X in fIn.GetListOfKeys()] 
+      for iHist in Hists :
+        H = fIn.Get(iHist)
+        for iRenorm in renormProc:
+          pRenorm = iRenorm.split(':')[0]
+          fRenorm = float(iRenorm.split(':')[1])
+          if pRenorm in iHist : 
+            H.Scale(fRenorm)
+                     #print H , H.GetTitle()
+        fOut.cd()
+        H.Write()
+
+      fIn.Close()
+      fOut.Close()
+
+    os.system('rm '+TargetCard)
+    dcOut.write(TargetCard)
 
 # ------------------------------------------------------- MAIN --------------------------------------------
 
@@ -491,6 +604,7 @@ parser.add_option("-m", "--masses",     dest="masses",      help="Run only these
 parser.add_option("-T", "--Type"  ,     dest="Type"  ,      help="Extrapolation Type (Mass,13TeV)" , default="PDFSplit" , type='string' )
 
 parser.add_option("-d", "--dictionary", dest="Dictionary",  help="Datacards Dictionary", default='Configs.HWW2012' , type='string' )
+parser.add_option("-r", "--renameSyst", dest="renameSyst",  help="Rename systematics"  , default=[] , type='string' , action='callback' , callback=combTools.list_maker('renameSyst',','))
 
 (options, args) = parser.parse_args()
 
@@ -519,7 +633,7 @@ for iChannel in channelList:
       Energy=iEnergy
   # Validate Combination Purpose
   isValidPurpose=False
-  purposeList = ['smhiggs','himass','ewks']
+  purposeList = ['smhiggs','himass','ewks','jcp']
   for purpose in purposeList :
      if options.purpose == purpose :
        isValidPurpose=True
@@ -613,3 +727,12 @@ for iChannel in channelList:
        if options.Type == 'CATSplit':
          CATSplit(card)
 
+       # Rename Systematics
+       if options.Type == 'RenameSyst':
+          print 'Rename Syst: ',options.renameSyst
+          RenameSyst(card,options.renameSyst)
+
+       # Renormalize process
+       if options.Type == 'RenormProc':
+          print 'Renormalize process ',options.renameSyst
+          RenormProc(card,options.renameSyst)

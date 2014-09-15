@@ -80,7 +80,10 @@ class CardDir_Filter:
         for iPurpose in self.cardtypes: 
            if iPurpose == self.purpose:
              self.found   = True
-             self.CardDir = self.cardtypes[iPurpose]['dir'] 
+             if 'targetdir' in self.cardtypes[iPurpose]: 
+               self.CardDir = self.cardtypes[iPurpose]['targetdir'] 
+             else:
+               self.CardDir = self.cardtypes[iPurpose]['dir'] 
 
     def get(self):
         if not self.found:

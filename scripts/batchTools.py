@@ -91,14 +91,18 @@ class batchJobs :
                       elif '7TeV' in energyList :  EnergyText = '_7TeV'
                       elif '8TeV' in energyList :  EnergyText = '_8TeV'
                       jJob+=1
-                      jName = self.prefix+kComb+EnergyText+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(jJob)
+                      jName  = self.prefix+kComb+EnergyText+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget+'__'+str(jJob)
+                      subdir = self.prefix+kComb+EnergyText+'_'+iAltModel+'__'+kModel+'__'+kMass+'__'+kTarget + '/jobs'+str((jJob/250)*250) 
                       print jName
                       if Grid:
                         self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = {}
-                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob]['jName'] = jName
+                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob]['jName']  = subdir+'/'+jName
+                        #self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob]['subdir'] = subdir 
                       else:
-                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = jName
-                      if not jName in self.jobsList: self.jobsList.append(jName)
+                        os.system('mkdir -p '+jobdir+'/'+subdir)
+                        self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob] = subdir+'/'+jName
+                        #print self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][jJob]
+                      if not jName in self.jobsList: self.jobsList.append(subdir+'/'+jName)
 
       #print self.jobsDic
       #print self.jobsList
@@ -110,6 +114,7 @@ class batchJobs :
         if not os.path.exists(jobdir) : os.system('mkdir -p '+jobdir)
         CMSSW=os.environ["CMSSW_BASE"]
         for jName in self.jobsList:
+          #os.system(
           jFile = open(jobdir+'/'+jName+'.sh','w')
           jFile.write('#!/bin/bash\n')
           jFile.write('#$ -N '+jName+'\n')
@@ -118,11 +123,13 @@ class batchJobs :
           jFile.write('source $VO_CMS_SW_DIR/cmsset_default.sh\n') 
           jFile.write('cd '+CMSSW+'\n')
           jFile.write('eval `scramv1 ru -sh`\n')
+          jFile.write('ulimit -c 0\n')
           jFile.close()
           os.system('chmod +x '+jobdir+'/'+jName+'.sh')
 
    def Add (self,iComb,iModel,iMass,iTarget,iJob,command,iAltModel) :
      jName= self.jobsDic[iComb][iModel][iMass][iTarget][iAltModel][iJob]
+     print 'Adding to ',jobdir+'/'+jName 
      jFile = open(jobdir+'/'+jName+'.sh','a')
      jFile.write(command+'\n')
      jFile.close()
@@ -217,6 +224,7 @@ class batchJobs :
    def Sub(self,queue='8nh'):
      os.system('cd '+jobdir)
      for jName in self.jobsList:
+        print jobdir+'/'+jName
         errFile=jobdir+'/'+jName+'.err'
         outFile=jobdir+'/'+jName+'.out'
         jidFile=jobdir+'/'+jName+'.jid'
@@ -225,25 +233,33 @@ class batchJobs :
         jFile.close()
         jidFile=jobdir+'/'+jName+'.jid'
         print 'Submit',jName
-        jobid=os.system('cd '+jobdir+'; bsub -q '+queue+' -o '+outFile+' -e '+errFile+' '+jName+'.sh | grep submitted > '+jidFile)
+        #print 'cd '+jobdir+'/'+jName.split('/')[0]+'; bsub -q '+queue+' -o '+outFile+' -e '+errFile+' '+jName.split('/')[1]+'.sh | grep submitted' 
+        jobid=os.system('cd '+jobdir+'/'+jName.split('/')[0]+'/'+jName.split('/')[1]+' ; pwd ; bsub -q '+queue+' -o '+outFile+' -e '+errFile+' '+jName.split('/')[2]+'.sh  > '+jidFile)
 
 def batchResub():
-    fileCmd = 'ls '+jobdir+'/'+'*.sh'
-    proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+    dirCmd = 'ls '+jobdir
+    proc=subprocess.Popen(dirCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
     out, err = proc.communicate()
-    FileList=string.split(out)
-    os.system('cd '+jobdir)
-    for iFile in FileList:
-      jidFile=iFile.replace('.sh','.jid')
-      doneFile=iFile.replace('.sh','.done')
-      if not ( os.path.isfile(jidFile) or os.path.isfile(doneFile) ) :
-        print 'Resubmit',iFile
-        errFile=iFile.replace('.sh','.err')
-        outFile=iFile.replace('.sh','.out')
-        jobid=os.system('cd '+jobdir+'; bsub -q 8nh -o '+outFile+' -e '+errFile+' '+iFile+' | grep submitted > '+jidFile)
+    DirList=string.split(out)
+    for iDir in DirList :
+      fileCmd = 'ls '+jobdir+'/'+iDir+'/*/'+'*.sh'
+      print fileCmd 
+      proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+      out, err = proc.communicate()
+      FileList=string.split(out)
+      print FileList
+      os.system('cd '+jobdir)
+      for iFile in FileList:
+        jidFile=iFile.replace('.sh','.jid')
+        doneFile=iFile.replace('.sh','.done')
+        if not ( os.path.isfile(jidFile) or os.path.isfile(doneFile) ) :
+          print 'Resubmit',iFile
+          errFile=iFile.replace('.sh','.err')
+          outFile=iFile.replace('.sh','.out')
+          jobid=os.system('cd '+jobdir+'; bsub -q 8nh -o '+outFile+' -e '+errFile+' '+iFile+' | grep submitted > '+jidFile)
 
 def batchClean():
-    fileCmd = 'ls '+jobdir+'/'+'*.sh'
+    fileCmd = 'ls '+jobdir+'/*/'+'*.sh'
     proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
     out, err = proc.communicate()
     FileList=string.split(out)
@@ -255,7 +271,7 @@ def batchClean():
         os.system('cd '+jobdir+'; rm '+cleanFile)
 
 def batchStatus():
-    fileCmd = 'ls '+jobdir+'/'+'*.sh'
+    fileCmd = 'ls '+jobdir+'/*/'+'*.sh'
     proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
     out, err = proc.communicate()
     FileList=string.split(out)

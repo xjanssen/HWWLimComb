@@ -11,6 +11,7 @@ import subprocess
 import string
 from scipy.stats.mstats import mquantiles
 import rootlogonTDR
+from collections import OrderedDict
 
 from Config import *
 import combTools
@@ -21,8 +22,9 @@ gROOT.ProcessLine('.L '+combscripts+'contours.cxx')
 gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 
-CMSText=["CMS Preliminary","#bf{CMS}","#bf{CMS} Projection"] 
+CMSText=["CMS preliminary","CMS","CMS Projection"] 
 LumText=["4.9 fb^{-1} (7 TeV) + 19.4 fb^{-1} (8 TeV)","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 13 TeV, L = 30 fb^{-1}","#sqrt{s} = 13 TeV, L = 120 fb^{-1}"]
+LumText=["19.4 fb^{-1} (8 TeV) + 4.9 fb^{-1} (7 TeV)","4.9 fb^{-1} (7 TeV)","19.4 fb^{-1} (8 TeV)","#sqrt{s} = 13 TeV, L = 30 fb^{-1}","#sqrt{s} = 13 TeV, L = 120 fb^{-1}"]
 #LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 
 class combPlot :
@@ -89,8 +91,8 @@ class combPlot :
        self.c1.cd()
        print 'addTitle ' , iCMS , iLumi  
  
-       x1=0.10
-       y1=0.92
+       x1=0.09
+       y1=0.90
        x2=0.99
        y2=0.98
        if iCMS == 0 :
@@ -101,18 +103,18 @@ class combPlot :
          if self.isSquareCanvas : fontSize = 0.033
    
        self.cmsprel = TPaveText(x1,y1,x2,y2,"brtlNDC");  
-       self.cmsprel.SetTextSize(fontSize);
+       self.cmsprel.SetTextSize(fontSize*1.3);
        self.cmsprel.SetFillColor(0)
        self.cmsprel.SetFillStyle(0)
        self.cmsprel.SetLineStyle(0)
        self.cmsprel.SetLineWidth(0)
        self.cmsprel.SetTextAlign(11)
-       self.cmsprel.SetTextFont(42);
+       self.cmsprel.SetTextFont(61);
        self.cmsprel.AddText(CMSText[iCMS]);
        self.cmsprel.SetBorderSize(0);
        self.cmsprel.Draw("same");
 
-       self.lumi = TPaveText(x1,y1,x2,y2,"brtlNDC");  
+       self.lumi = TPaveText(x1,y1*1.01,x2,y2,"brtlNDC");  
        self.lumi.SetTextSize(fontSize);
        self.lumi.SetFillColor(0)
        self.lumi.SetFillStyle(0)
@@ -136,8 +138,10 @@ class combPlot :
        else                     : pF = self.postFix
        self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.pdf')
        self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.png')
+       self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.root')
+       self.c1.SaveAs(self.plotsdir+'/'+Name+pF+'.C')
        #os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.png') 
-       os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.gif') 
+       #os.system('convert '+self.plotsdir+'/'+Name+pF+'.pdf '+self.plotsdir+'/'+Name+pF+'.gif') 
 
    def treeAccess(self,tree,var=[]):
         tree.SetBranchStatus('*',0)
@@ -190,6 +194,21 @@ class combPlot :
 #    return (x[imatch]*d2 + x[imatch+1]*d1)/(d1+d2);
 #}
 
+   def find2DNLLScan1D(self,graph,parVal,xmin=-9e99,xmax=9e99):
+
+       x = graph.GetX();
+       y = graph.GetY();
+       n = graph.GetN()
+       
+       val = -999
+       dx  =  999 
+       for i in range(1,n):
+         if abs(x[i]-parVal) < dx :
+            dx  = abs(x[i]-parVal) 
+            val = y[i]
+
+       return val
+ 
    def findCrossingOfScan1D(self,graph,threshold,leftSide,xmin=-9e99,xmax=9e99):
        x = graph.GetX();
        y = graph.GetY();
@@ -228,10 +247,10 @@ class combPlot :
    def ParamSet_Maker(self,iModel='OneHiggs',iTarget='NONE' ):
        paramSet = {}
        if 'params' in cardtypes[physmodels[iModel]['cardtype']] : 
-         #print cardtypes[physmodels[iModel]['cardtype']]['params']
+         print cardtypes[physmodels[iModel]['cardtype']]['params']
          for iEntry in cardtypes[physmodels[iModel]['cardtype']]['params']:
            paramSet[iEntry] = cardtypes[physmodels[iModel]['cardtype']]['params'][iEntry]
-       if iTarget in targets and 'JobsParam' in targets[iTarget] :
+       elif iTarget in targets and 'JobsParam' in targets[iTarget] :
          print targets[iTarget]['JobsParam'] 
          paramSet['values'] = []
          paramSet['names']  = []
@@ -251,6 +270,7 @@ class combPlot :
                arr.append(targets[iTarget]['JobsParam'][paramSet['names'][1]][iPar2])
                paramSet['values'].append(arr)
        else:
+
          paramSet['values'] = [[]]
          paramSet['names']  = []
          paramSet['rules']  = {}
@@ -671,7 +691,7 @@ class combPlot :
        obj =  TGraph( nP , array('d',vX) ,array('d',[vCent]*nP) )
        obj.SetLineColor(Color)
        obj.SetMarkerColor(Color)
-       obj.SetLineWidth(2)
+       obj.SetLineWidth(Width)
        obj.SetLineStyle(Style)
        obj.SetMarkerStyle(0)
        obj.SetMarkerSize(0)
@@ -770,6 +790,7 @@ class combPlot :
          if 'Large' in Position : x2 = 0.6
        if   'Top'   in Position :
          y1 = 0.87-(NLeg+1)*.040
+         if 'Large' in Position : y1 = 0.87-(NLeg+1)*.060
          y2 = 0.87 
        elif 'Bottom' in Position : 
          y1 = 0.50-(NLeg+1)*.040
@@ -778,6 +799,7 @@ class combPlot :
        self.Legend = TLegend(x1,y1,x2,y2)
        if ( Ncol > 1 ) : self.Legend.SetNColumns(Ncol); 
        self.Legend.SetTextSize(0.033)
+       if 'Large' in Position : self.Legend.SetTextSize(0.04)
        self.Legend.SetFillColor(0)
        self.Legend.SetFillStyle(0)
        self.Legend.SetBorderSize(0)
@@ -910,10 +932,11 @@ class combPlot :
        if (self.logY) : self.postFix += '_logY'
  
        paramSet = self.ParamSet_Maker(iModel) 
+       print paramSet
        for iSet in range(0,len(paramSet['values'])) :
          extSet=''
          for iPar in range(0,len(paramSet['names'])) :
-           #print paramSet['names'][iPar]
+           print paramSet['names'][iPar]
            parVal=str(paramSet['values'][iSet][iPar])
            parVal = parVal.replace('.','d')
            for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
@@ -921,6 +944,8 @@ class combPlot :
            extSet+='_' + paramSet['names'][iPar] + '_' + parVal
          CombKey = iComb+extSet
          print CombKey      
+#        self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp')
+       
  
          self.squareCanvas(False,False)
          self.c1.cd()
@@ -1103,13 +1128,32 @@ class combPlot :
        LTyp = [    1   ,    2   ,   1   ,   2   ,   1   ,  2   ,    1     ,    2     ,     1   ,   2    ,    1    ,   2     ]
 
        iLC=0 
+       toPlot = []
        for iComb in CombList:
-          self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp')
-          aMass         = self.Results[iComb][iEnergy][iModel]['ACLsExp']['mass']
-          aMedExpLimit  = self.Results[iComb][iEnergy][iModel]['ACLsExp']['Val']
-          self.plotHorizCurve(iComb, aMass , aMedExpLimit , LCol[iLC] , LTyp[iLC]  , 2  , self.combinations[iComb]['legend'] )
-          iLC+=1
+         self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp')
+         for iKey in self.Results : print iKey
+         paramSet = self.ParamSet_Maker(iModel)
+         print paramSet
+         for iSet in range(0,len(paramSet['values'])) :
+           extSet=''
+           for iPar in range(0,len(paramSet['names'])) :
+             print paramSet['names'][iPar]
+             parVal=str(paramSet['values'][iSet][iPar])
+             parVal = parVal.replace('.','d')
+             for iRule in paramSet['rules'] : parVal = parVal.replace(iRule,paramSet['rules'][iRule])
+             #print parVal
+             extSet+='_' + paramSet['names'][iPar] + '_' + parVal
+           CombKey = iComb+extSet
+           print CombKey
+           toPlot.append(CombKey)
+           aMass         = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['mass']
+           aMedExpLimit  = self.Results[CombKey][iEnergy][iModel]['ACLsExp']['Val']
+           print self.Results[CombKey][iEnergy][iModel]['ACLsExp']['Val'] 
+           if 'EWKS' in CombKey : self.plotHorizCurve(CombKey, aMass , aMedExpLimit , LCol[iLC] , LTyp[iLC]  , 2  , extSet )
+           else                 : self.plotHorizCurve(CombKey, aMass , aMedExpLimit , LCol[iLC] , LTyp[iLC]  , 2  , self.combinations[iComb]['legend'] )
+           iLC+=1
       
+       CombListAll = dc(toPlot)
        aMass = [110,1000] 
        self.plotHorizLine('Line', aMass , 1. , kRed , 1    , 'CL=1')
   
@@ -1117,14 +1161,18 @@ class combPlot :
        #self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.05,200.)
 
        self.SetRange('LimitExp',CombList[0])
-       toPlot = dc(CombList)
        toPlot.append('Line')
        self.plotAllObj(toPlot)
        LT=''
        LP='TopRight'
        Ncol=1
        PF=''
-       if    ( CombList[0] == 'of_cp2_ext_1d0' ) : 
+       if ( 'EWKS' in CombList[0] ) :
+         LT   = self.combinations[CombList[0]]['legend']  
+         self.addTitle(0,2) 
+         PF   = '_'+CombList[0] 
+
+       elif    ( CombList[0] == 'of_cp2_ext_1d0' ) : 
          LT   = 'H #rightarrow WW (DF 0/1-jet), BR_{Inv} = 0' 
          LP   = 'TopLeftLarge'
          Ncol = 2
@@ -1157,7 +1205,7 @@ class combPlot :
 
        else:
          self.addTitle() 
-       self.plotObjLeg(CombList,LT,LP,Ncol)
+       self.plotObjLeg(CombListAll,LT,LP,Ncol)
        if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'LimitExp',CombList[0])
 
 
@@ -1847,7 +1895,9 @@ class combPlot :
            print fileTarget
            os.system('cd /tmp/xjanssen/ ; mv MDFGrid.root '+fileTarget) 
 
-   def MDF1D(self,iComb,iEnergy,iModel,massFilter,bFast=False):
+   def MDF1D(self,iComb,iEnergy,iModel,massFilter,bFast=False,bSigma=False):
+       y2Sigma=3.84
+       if bSigma : y2Sigma=4.
        print 'MDF1D',iComb,iEnergy,iModel,massFilter
        Fast=''
        if bFast : Fast='Fast'
@@ -1870,7 +1920,7 @@ class combPlot :
          maxXP           = PlotDic[iPlot]['MaxPlt'][0]
          minYP           = PlotDic[iPlot]['MinPlt'][1]
          maxYP           = PlotDic[iPlot]['MaxPlt'][1]
-
+         dX              = maxXP-minXP
 
          Ext             = ''
          if 'Ext' in PlotDic[iPlot] : Ext= PlotDic[iPlot]['Ext']
@@ -1880,10 +1930,10 @@ class combPlot :
          objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+'Exp'+Ext+self.postFix
 
          # Observed
-         #if (not self.blind ) : 
-         if (False) : 
-           self.readMDF1D(iComb,iEnergy,iModel,massFilter,TargetBase+Fast+'ExpFix'+Ext+self.postFix,PlotDic[iPlot])
-           objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+'ExpFix'+Ext+self.postFix
+         if (not self.blind ) : 
+         #if (False) : 
+           self.readMDF1D(iComb,iEnergy,iModel,massFilter,TargetBase+Fast+'Obs'+Ext+self.postFix,PlotDic[iPlot])
+           objNameObs=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+'Obs'+Ext+self.postFix
 
          # Plot 
          frame = TH1F("Frame","Frame",5,float(minXP),float(maxXP))
@@ -1894,54 +1944,111 @@ class combPlot :
          frame.GetYaxis().SetNdivisions(505)
          frame.Draw()
 
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineWidth(2)
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineStyle(2)
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineColor(kBlack)
-         self.Obj2Plot['gr__'+objNameExp]['Obj'].Draw("samel")
-         self.Obj2Plot['gr__'+objNameExp]['Legend']= 'Exp. for SM H'
-         LegList=['gr__'+objNameExp]
-
-         #if (not self.blind ) : 
-         if (False) :
+         LegList=[]
+         if (not self.blind ) : 
+         #if (False) :
            self.Obj2Plot['gr__'+objNameObs]['Obj'].SetLineWidth(2)
            self.Obj2Plot['gr__'+objNameObs]['Obj'].SetLineStyle(1)
            self.Obj2Plot['gr__'+objNameObs]['Obj'].SetLineColor(kBlack)
            self.Obj2Plot['gr__'+objNameObs]['Obj'].Draw("samel") 
-           self.Obj2Plot['gr__'+objNameObs]['Legend']= 'Exp. for SM H (Fix)'
+           self.Obj2Plot['gr__'+objNameObs]['Legend']= 'Observed'
            LegList.append('gr__'+objNameObs)
 
+         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineWidth(2)
+         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineStyle(2)
+         self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineColor(kBlack)
+         self.Obj2Plot['gr__'+objNameExp]['Obj'].Draw("samel")
+         self.Obj2Plot['gr__'+objNameExp]['Legend']= 'Expected'
+         LegList.append('gr__'+objNameExp)
+
          Lines=['One','Four']
-         self.plotHorizLine('One' , [float(minXP),float(maxXP)] , 1 , kRed , 1    , '1sigma')
-         self.plotHorizLine('Four', [float(minXP),float(maxXP)] , 4 , kRed , 1    , '2sigma')
+         self.plotHorizLine('One' , [float(minXP),float(maxXP)] , 1 , kBlack , 9    , 1 , '1sigma')
+         self.plotHorizLine('Four', [float(minXP),float(maxXP)] , y2Sigma , kBlack , 9 , 1 , '2sigma')
 
          # Fing 1/2 Sigma X-ing
          if self.blind : gr = self.Obj2Plot['gr__'+objNameExp]['Obj']
          else          : gr = self.Obj2Plot['gr__'+objNameObs]['Obj']
          hi68 = self.findCrossingOfScan1D(gr, 1.00, False, minXP, maxXP);
          lo68 = self.findCrossingOfScan1D(gr, 1.00, True,  minXP, maxXP);
-         hi95 = self.findCrossingOfScan1D(gr, 4.00, False, minXP, maxXP);
-         lo95 = self.findCrossingOfScan1D(gr, 4.00, True,  minXP, maxXP);
+         hi95 = self.findCrossingOfScan1D(gr, y2Sigma, False, minXP, maxXP);
+         lo95 = self.findCrossingOfScan1D(gr, y2Sigma, True,  minXP, maxXP);
+         dnll = self.find2DNLLScan1D(gr,1.,minXP, maxXP)
 
-         if hi68 >= minXP and hi68 <= maxXP:
-            self.plotVertLine('X1R', hi68 , [0,1] , kRed , 1    , '1sigmaR')
-            Lines.append('X1R')
-         if lo68 >= minXP and lo68 <= maxXP:
-            self.plotVertLine('X1L', lo68 , [0,1] , kRed , 1    , '1sigmaL')
-            Lines.append('X1L')
-         if hi95 >= minXP and hi95 <= maxXP:
-            self.plotVertLine('X2R', hi95 , [0,4] , kRed , 1    , '2sigmaR')
-            Lines.append('X2R')
-         if lo95 >= minXP and lo95 <= maxXP:
-            self.plotVertLine('X2L', lo95 , [0,4] , kRed , 1    , '2sigmaL')
-            Lines.append('X2L')
+         gr = self.Obj2Plot['gr__'+objNameExp]['Obj']
+         hi68Exp = self.findCrossingOfScan1D(gr, 1.00, False, minXP, maxXP);
+         lo68Exp = self.findCrossingOfScan1D(gr, 1.00, True,  minXP, maxXP);
+         hi95Exp = self.findCrossingOfScan1D(gr, y2Sigma, False, minXP, maxXP);
+         lo95Exp = self.findCrossingOfScan1D(gr, y2Sigma, True,  minXP, maxXP);
+         dnllExp = self.find2DNLLScan1D(gr,1.,minXP, maxXP)
+
+#        if hi68 >= minXP and hi68 <= maxXP:
+#           self.plotVertLine('X1R', hi68 , [0,1] , kRed , 1    , '1sigmaR')
+#           Lines.append('X1R')
+#        if lo68 >= minXP and lo68 <= maxXP:
+#           self.plotVertLine('X1L', lo68 , [0,1] , kRed , 1    , '1sigmaL')
+#           Lines.append('X1L')
+#        if hi95 >= minXP and hi95 <= maxXP:
+#           self.plotVertLine('X2R', hi95 , [0,y2Sigma] , kRed , 1    , '2sigmaR')
+#           Lines.append('X2R')
+#        if lo95 >= minXP and lo95 <= maxXP:
+#           self.plotVertLine('X2L', lo95 , [0,y2Sigma] , kRed , 1    , '2sigmaL')
+#           Lines.append('X2L')
 
 
          self.plotAllObj(Lines,True)
-         self.plotObjLeg(LegList,self.combinations[iComb]['legend'],'TopLeft')
+         if 'jcp' in iComb:
+           Decay = 'WW'
+           if 'hgg_' in iComb : Decay = '#gamma#gamma'
+           Prod = ''
+           if '_1' in iComb : Prod = 'q#bar{q}'
+           else : 
+             if 'fqq0' in TargetBase+Fast+Ext :  Prod = 'gg'
+             if 'fqq1' in TargetBase+Fast+Ext :  Prod = 'q#bar{q}'
+           if 'SM' in TargetBase+Fast+Ext:
+             self.plotObjLeg(LegList,'H #rightarrow '+Decay,'TopLeftLarge')
+           else:
+             self.plotObjLeg(LegList,Prod+' #rightarrow X('+self.combinations[iComb]['legend']+') #rightarrow '+Decay,'TopLeftLarge')
+         else:
+           self.plotObjLeg(LegList,self.combinations[iComb]['legend'],'TopLeftLarge')
          self.addTitle(self.iTitle,self.iLumi) 
+
+         self.c1.cd()
+         pt = TPaveText(minXP+0.04*dX,1.05,minXP+0.12*dX,1.5);
+         pt.SetBorderSize(0);
+         pt.SetFillColor(0);
+         pt.SetFillStyle(0);
+         pt.SetTextFont(42);
+         pt.SetTextSize(0.025);
+         text = pt.AddText("68% CL");
+         pt.Draw();
+
+         pt2 = TPaveText(minXP+0.04*dX,3.94,minXP+0.12*dX,4.3);
+         pt2.SetBorderSize(0);
+         pt2.SetFillColor(0);
+         pt2.SetFillStyle(0);
+         pt2.SetTextFont(42);
+         pt2.SetTextSize(0.025);
+         text = pt2.AddText("95% CL");
+         pt2.Draw();
+
+         #self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")
+         #self.Obj2Plot['gr0__'+objNameObs]['Obj'].Print()
+
          self.c1.Update() 
          self.Save(iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext)
 
+         # Save values
+         cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb+'/'+str(massFilter[0])+'/'
+         limFile= TargetDir+iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext+'.txt' 
+         print limFile
+         subfile = open(limFile,'w')
+         subfile.write ('Exp  '+ str(lo95Exp) + ' ' + str(lo68Exp) + ' ' + str(hi68Exp) + ' ' + str(hi95Exp)+'\n')
+         if not self.blind : 
+           subfile.write ('Obs  '+ str(lo95)    + ' ' + str(lo68)    + ' ' + str(hi68)    + ' ' + str(hi95) +'\n' ) 
+           subfile.write ('Best '+ str(self.Obj2Plot['gr0__'+objNameObs]['Obj'].GetX()[0])+' '+str(hi68-self.Obj2Plot['gr0__'+objNameObs]['Obj'].GetX()[0])+' '+str(lo68-self.Obj2Plot['gr0__'+objNameObs]['Obj'].GetX()[0])+'\n')
+           #subfile.write ('Test '+ str(dnllExp)+' '+str(dnll) +'\n')
+         subfile.close()
          self.Wait()
 
    def MDF2D(self,iComb,iEnergy,iModel,massFilter,bSimple=False,bFast=False):
@@ -2099,6 +2206,7 @@ class combPlot :
        #iTarget='JCPFQQFixRange'
        #iTarget='JCPfixmu'
        #iTarget='JCP'
+       os.system('mkdir -p /tmp/xjanssen/'+iComb)
        for iMass in massList:
          paramSet = self.ParamSet_Maker(iModel,iTarget)
          for iSet in range(0,len(paramSet['values'])) :
@@ -2111,35 +2219,143 @@ class combPlot :
          #for iFQQ in targets[iTarget]['JobsParam']['FQQ'] :
            #for iFITNUIS in targets[iTarget]['JobsParam']['FITNUIS'] :
 
-             fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
-             if iEnergy == 7 : fileName += '_7TeV'
-             if iEnergy == 8 : fileName += '_8TeV'
-             fileName += '_'+iModel+'_'+iTarget+ParString+'.job*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.*.root'
-             fileCmd = 'ls '+fileName 
-             proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+
+             FileList=[]
+             dirName = TargetDir+'/'+str(iMass)+'/'
+             dirCmd  = 'ls '+dirName+' | grep jobs | sed "s:/::" '
+             proc=subprocess.Popen(dirCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
              out, err = proc.communicate()
-             FileList=string.split(out)
-             print fileCmd
+             DirList=string.split(out)
+             for iDir in DirList:
+               fileName  = TargetDir+'/'+str(iMass)+'/'+iDir+'/higgsCombine_'+iComb
+               if iEnergy == 7 : fileName += '_7TeV'
+               if iEnergy == 8 : fileName += '_8TeV'
+               fileName += '_'+iModel+'_'+iTarget+ParString+'.job*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.*.root'
+               fileCmd = 'ls '+fileName # +' '+fileName.replace('higgsCombine','jobs*/higgsCombine')  
+               proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+               out, err = proc.communicate()
+               FileList+=string.split(out)
+             FileListGood = {}
+             #print fileCmd
              print FileList
-             os.system('cd /tmp/xjanssen/ ; rm JCPToys.tmp.root')
+             os.system('cd /tmp/xjanssen/'+iComb+'/ ; rm JCPToys.tmp.root')
              isFileFirst=True
+             iCount = 0
              for iFile in FileList:
                isFileOk=True
-               try:
-                 if isFileFirst : os.system('cd /tmp/xjanssen/ ; hadd JCPToys.tmp.root '+iFile+' > /dev/null')
-                 else           : os.system('cd /tmp/xjanssen/ ; hadd JCPToys.tmp.root JCPToys.root '+iFile+' > /dev/null')
-               except:  
-                 isFileOk=False
-               if isFileOk :
-                 os.system('cd /tmp/xjanssen/ ; mv JCPToys.tmp.root JCPToys.root') 
-                 isFileFirst=False 
+               fileCmd='ls -l '+iFile+' | awk \'{print $5}\' '
+               proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+               out, err = proc.communicate()
+               #print int(out)
+               if int(out) > 1400: 
+                 iCount +=1
+                 iBlock = (iCount/500)
+                 if not iBlock in FileListGood : FileListGood[iBlock] = []
+                 FileListGood[iBlock].append(iFile)
+#                try:
+#                  if isFileFirst : os.system('cd /tmp/xjanssen/'+iComb+'/ ; hadd JCPToys.tmp.root '+iFile+' > /dev/null')
+#                  else           : os.system('cd /tmp/xjanssen/'+iComb+'/ ; hadd JCPToys.tmp.root JCPToys.root '+iFile+' > /dev/null')
+#                except:  
+#                  isFileOk=False
+#                if isFileOk :
+#                  os.system('cd /tmp/xjanssen/'+iComb+'/ ; mv JCPToys.tmp.root JCPToys.root') 
+#                  isFileFirst=False 
+
+             os.system('cd /tmp/xjanssen/'+iComb+'/ ; rm hi*' ) 
+             for iBlock in FileListGood:
+               fileTarget  = 'higgsCombine_'+iComb
+               if iEnergy == 7 : fileTarget += '_7TeV'
+               if iEnergy == 8 : fileTarget += '_8TeV'
+               fileTarget += '_'+iModel+'_'+iTarget+ParString+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.Block'+str(iBlock)+'.root'
+               print fileTarget 
+               command = 'cd /tmp/xjanssen/'+iComb+'/ ; hadd -f '+fileTarget
+               for iFile in FileListGood[iBlock] : command += ' '+iFile 
+               print '---------------------'
+               #print command 
+               os.system(command)
+
+
 
              fileTarget  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
              if iEnergy == 7 : fileTarget += '_7TeV'
              if iEnergy == 8 : fileTarget += '_8TeV'
              fileTarget += '_'+iModel+'_'+iTarget+ParString+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
-             print fileTarget
-             os.system('cd /tmp/xjanssen/ ; mv JCPToys.root '+fileTarget) 
+             command = 'cd /tmp/xjanssen/'+iComb+'/ ; hadd -f '+fileTarget 
+             for iBlock in FileListGood: 
+               fileSource  = 'higgsCombine_'+iComb
+               if iEnergy == 7 : fileSource += '_7TeV'
+               if iEnergy == 8 : fileSource += '_8TeV'
+               fileSource += '_'+iModel+'_'+iTarget+ParString+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.Block'+str(iBlock)+'.root'
+               command += ' '+fileSource
+             os.system(command) 
+
+#            print fileTarget
+#            os.system('cd /tmp/xjanssen/'+iComb+'/ ; mv JCPToys.root '+fileTarget) 
+
+
+   def JCPClean(self,iComb,iEnergy,iModel,iTarget,massFilter):
+
+       # First Sum to avoid catastrophy !
+       self.JCPSum(iComb,iEnergy,iModel,iTarget,massFilter)
+
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
+       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+         TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+       else:
+         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+
+       os.system('mkdir -p /tmp/xjanssen/'+iComb)
+       for iMass in massList:
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         for iSet in range(0,len(paramSet['values'])) :
+             ParString=''
+             for iPar in range(0,len(paramSet['names'])) :
+               parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+               ParString += '_'+paramSet['names'][iPar]+str(parVal)
+
+             FileList=[]
+             dirName = TargetDir+'/'+str(iMass)+'/'
+             dirCmd  = 'ls '+dirName+' | grep jobs | sed "s:/::" '
+             proc=subprocess.Popen(dirCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+             out, err = proc.communicate()
+             DirList=string.split(out)
+             for iDir in DirList:
+               if iDir != 'jobsSum' :
+                 os.system('rm '+TargetDir+'/'+str(iMass)+'/'+iDir+'/*.log')
+                 fileName  = TargetDir+'/'+str(iMass)+'/'+iDir+'/higgsCombine_'+iComb
+                 if iEnergy == 7 : fileName += '_7TeV'
+                 if iEnergy == 8 : fileName += '_8TeV'
+                 fileName += '_'+iModel+'_'+iTarget+ParString+'.job*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.*.root'
+                 fileCmd = 'ls '+fileName # +' '+fileName.replace('higgsCombine','jobs*/higgsCombine')  
+                 proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+                 out, err = proc.communicate()
+                 FileList+=string.split(out)
+             FileListGood = {}
+             #print fileCmd
+             print FileList
+
+             for iFile in FileList:
+               isFileOk=True
+               fileCmd='ls -l '+iFile+' | awk \'{print $5}\' '
+               proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
+               out, err = proc.communicate()
+               if int(out) > 1400: os.system('rm '+iFile)
+
+             # Save Previous Toys 
+
+             fileSource  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+             if iEnergy == 7 : fileSource += '_7TeV'
+             if iEnergy == 8 : fileSource += '_8TeV'
+             fileSource += '_'+iModel+'_'+iTarget+ParString+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
+
+             fileTarget  = TargetDir+'/'+str(iMass)+'/jobsSum/higgsCombine_'+iComb
+             if iEnergy == 7 : fileTarget += '_7TeV'
+             if iEnergy == 8 : fileTarget += '_8TeV'
+             fileTarget += '_'+iModel+'_'+iTarget+ParString+'.jobSum.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.PreviousRuns.root'
+             os.system('mkdir -p '+TargetDir+'/'+str(iMass)+'/jobsSum')
+             os.system('cp '+fileSource+' '+fileTarget)
 
    def JCPFit(self,iComb,iEnergy,iModel,iTarget,massFilter):
        cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
@@ -2253,6 +2469,9 @@ class combPlot :
              os.system('cd '+workDir+';mv '+workDir+'/sigsep_combine.root '+workDir+'/'+baseName+'.root') 
 
              mText  = self.combinations[iComb]['legend']
+             if jcp == '1hzz' or jcp == '1qqb' :
+               if   iFQQ == 0.   : mText = '1^{-}'
+               elif iFQQ == 1.   : mText = '1^{+}'
 
              #if jcp == '0m':
              #  if iFQQ == 0.   : mText = '0^{-}'
@@ -2269,14 +2488,82 @@ class combPlot :
              #else : mText = 'ALT'
              #if iEnergy == 7 : mText += '_7TeV'
              #if iEnergy == 8 : mText += '_8TeV'
+             print "-----------------------------------------------------------------------"
+             os.system('echo \'---------------------------- Andre Macro ------------------------\' >> '+logName)  
+             iLumiLocal=0
+
+             print jcp , iFQQ
+
+             chText  = ''
+             chText2 = ''
+             if jcp == '1hzz' or jcp == '1qqb' or jcp == '1m' or jcp == '1p' or jcp == '1mix' : 
+               chText += 'q#bar{q} #rightarrow X('+mText+') #rightarrow '
+               chText2 += 'q#bar{q} #rightarrow X('+mText+') #rightarrow '
+             else: 
+               if   iFQQ == 1. or jcp == 'qqb'  : chText += 'q#bar{q} #rightarrow X('+mText+') #rightarrow '
+               elif iFQQ == 0.   : chText += 'gg #rightarrow X('+mText+') #rightarrow '
+               else              : chText += 'gg/q#bar{q}(f_{q#bar{q}}='+str(iFQQ)+') #rightarrow X('+mText+') #rightarrow '   
+               #if jcp == 'qqb' : chText += 'q#bar{q} #rightarrow X('+mText+') #rightarrow '
+               chText2 += 'X('+mText+') #rightarrow ' 
+
+             if   'hgghzzhww' in iComb : 
+               chText  += 'ZZ + WW + #gamma#gamma'
+               chText2 += 'ZZ + WW + #gamma#gamma'
+               iLumiLocal=1 
+             elif   'hwwhzz' in iComb : 
+               #chText += 'ZZ #rightarrow 4l + WW #rightarrow 2l2#nu'
+               chText  += 'ZZ + WW'
+               chText2 += 'ZZ + WW'
+               iLumiLocal=1 
+             elif 'hww'    in iComb : 
+               chText  += 'WW'
+               chText2 += 'WW'
+               if iEnergy == 7 : iLumiLocal = 7
+               if iEnergy == 8 : iLumiLocal = 8
+               iLumiLocal = 0
+             elif 'hzz'    in iComb : 
+               chText  += 'ZZ'
+               chText2 += 'ZZ'
+               iLumiLocal=1 
+             elif 'hgg'    in iComb :
+               chText  += '#gamma#gamma'
+               chText2 += '#gamma#gamma'
+               iLumiLocal=1
+
+             # Status: 0=Published 1=Unpub 2=Prel   
+             iStatus=1
+             iStatus2=1
+             if 'float' in iTarget :
+               if    'hgghzzhww' in iComb :
+                 if '_gg'  in iComb : iStatus=0
+                 if '_dec' in iComb : iStatus2=0
+               elif  'hwwhzz'    in iComb :
+                 if  '1hzz' in iComb :
+                   # 1+ in paper
+                   if iFQQ == 1. : iStatus=0
+                 if  '2pm'  in iComb :
+                   # gg->X + fqq scan
+                   if '_gg'  in iComb : iStatus=0
+                   if '_dec' in iComb : iStatus2=0
+                 if  '2ph2'  in  iComb :
+                   # gg->X
+                   if '_dec' in  iComb :
+                     if iFQQ == 0. : iStatus=0 
+                   if '_gg'  in  iComb : iStatus=0
+               elif  'hww01'    in iComb :
+                 if  '1p'    in  iComb : iStatus=0
+                 if  '2ph2'  in  iComb :
+                   if iFQQ == 0. : iStatus=0 
+                   iStatus2=0
+                 
 
              if iFITNUIS == -1 :
-               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\")" ')
+               os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\",\\"'+chText+'\\",'+str(iLumiLocal)+','+str(iStatus)+')" ')
              else :
                if self.blind : 
-                 os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\")" ')
+                 os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(false,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\",\\"'+chText+'\\",'+str(iLumiLocal)+','+str(iStatus)+')" >>'+logName)
                else:
-                 os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(true,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\")" ')
+                 os.system('cd '+workDir+'; root -q -b /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/plotting/extractSignificanceStats.C+"(true,\\"'+mText+'\\",\\"'+jcp+'\\",\\"'+fileName+'\\",\\"'+fileName.replace('.root','')+'\\",\\"'+chText+'\\",'+str(iLumiLocal)+','+str(iStatus)+')" >>'+logName)
              for line in open(logName):
                if "RESULTS_SUMMARY" in line:
                  print "%-4s %s"%(str(iFQQ),line.replace('RESULTS_SUMMARY',''))
@@ -2289,27 +2576,62 @@ class combPlot :
              if iFQQ == targets[iTarget]['JobsParam']['FQQ'][-1] :
               subfile.close()
               if iFITNUIS == 0 :
-               self.plotFqqLim(tableName,0,'19.5',massFilter[0],jcp,mText) 
+               self.plotFqqLim(tableName,0,iLumiLocal,massFilter[0],jcp,mText,chText2,iStatus2) 
               else:
-               self.plotFqqLim(tableName,unblind,'19.5',massFilter[0],jcp,mText) 
+               self.plotFqqLim(tableName,unblind,iLumiLocal,massFilter[0],jcp,mText,chText2,iStatus2) 
 
-   def plotFqqLim(self,limFile,unblind,lumi,mass,jcp,mText):
+   def plotFqqLim(self,limFile,unblind,iLumiLocal,mass,jcp,mText,title,iStatus,iRange=1):
   
      print "limFile = "+limFile
      self.squareCanvas(False,False)  
      self.c1.cd()
      self.c1.SetLeftMargin(0.15) 
 
-     pt = TPaveText(0.1,0.91,0.45,0.99,"NDC");
-     pt.SetTextAlign(12);
-     pt.SetTextSize(0.04);
-     pt.SetFillColor(0);
-     pt.AddText("CMS Preliminary");
+
+     pt = TPaveText(0.15,0.93,0.45,0.99,"NDC");
      pt.SetBorderSize(0);
-     pt2 = TPaveText(0.55,0.91,0.9,0.99,"NDC");
-     pt2.SetTextAlign(32);
-     pt2.SetTextSize(0.035);
-     pt2.SetFillColor(0);
+     pt.SetTextAlign(12);
+     pt.SetFillStyle(0);
+     pt.SetTextFont(61);
+     pt.SetTextSize(0.045);
+     pt.AddText(0.01,0.45,"CMS");
+
+     pt2 = TPaveText(0.85,0.93,0.45,0.99,"NDC");
+     pt2.SetBorderSize(0);
+     pt2.SetTextAlign(12);
+     pt2.SetFillStyle(0);
+     pt2.SetTextFont(42);
+     pt2.SetTextSize(0.030); 
+     if   iLumiLocal == 0 : pt2.AddText(0.25,0.35,"19.4 fb^{-1} (8 TeV) + 4.9 fb^{-1} (7 TeV)")
+     elif iLumiLocal == 1 : pt2.AddText(0.25,0.35,"19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)")
+     elif iLumiLocal == 7 : pt2.AddText(0.45,0.35,"4.9 fb^{-1} (7 TeV)")
+     elif iLumiLocal == 8 : pt2.AddText(0.45,0.35,"19.5 fb^{-1} (8 TeV)")
+
+     pt3= TPaveText(0.250,0.91,0.45,0.99,"NDC");
+     pt3.SetBorderSize(0);
+     pt3.SetTextAlign(12);
+     pt3.SetFillStyle(0);
+     pt3.SetTextFont(52);
+     pt3.SetTextSize(0.03);
+     if ( iStatus == 1 ) : pt3.AddText(0.01,0.5,"Unpublished");
+     if ( iStatus == 2 ) : pt3.AddText(0.01,0.5,"Preliminary");
+
+#    pt = TPaveText(0.15,0.91,0.45,0.99,"NDC");
+#    pt.SetTextAlign(12);
+#    pt.SetTextSize(0.045);
+#    pt.SetFillColor(0);
+#    pt.SetTextFont(61);
+#    pt.AddText("CMS");
+#    pt.SetBorderSize(0);
+#    pt2 = TPaveText(0.85,0.91,0.9,0.99,"NDC");
+#    pt2.SetTextAlign(42);
+#    pt2.SetTextSize(0.035);
+#    pt2.SetFillColor(0);
+#    if   iLumiLocal == 0 : pt2.AddText("19.4 fb^{-1} (8 TeV) + 4.9 fb^{-1} (7 TeV)")
+#    elif iLumiLocal == 1 : pt2.AddText("19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)")
+#    elif iLumiLocal == 7 : pt2.AddText("4.9 fb^{-1} (7 TeV)")
+#    elif iLumiLocal == 8 : pt2.AddText("19.5 fb^{-1} (8 TeV)")
+
      #pt2.AddText(" #sqrt{s} = 7 TeV, L = 5.051 fb^{-1}; #sqrt{s} = 8 TeV, L = 30.0 fb^{-1}");
      #if float(lumi)<10.:
      #  pt2.AddText(" #sqrt{s} = 7 TeV, L = 4.9 fb^{-1}");
@@ -2317,8 +2639,8 @@ class combPlot :
      #  pt2.AddText(" #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}");
      #else:
      #  pt2.AddText(" #sqrt{s} = 7 TeV, L = 4.9 fb^{-1}; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"); 
-     pt2.AddText(" #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}");
-     pt2.SetBorderSize(0);
+     #pt2.AddText("19.5 fb^{-1} (8 TeV)");
+     #pt2.SetBorderSize(0);
    
      grSM = TGraph()
      grSM68 = TGraphAsymmErrors()
@@ -2338,17 +2660,17 @@ class combPlot :
      for line in open(limFile):
        if not "#" in line: 
          vec = line.split()
-         grSM.SetPoint(p,float(vec[0])*100.,float(vec[iSM]))
-         grSM68.SetPoint(p,float(vec[0])*100.,float(vec[iSM]))
-         grSM95.SetPoint(p,float(vec[0])*100.,float(vec[iSM]))
+         grSM.SetPoint(p,float(vec[0]),float(vec[iSM]))
+         grSM68.SetPoint(p,float(vec[0]),float(vec[iSM]))
+         grSM95.SetPoint(p,float(vec[0]),float(vec[iSM]))
          grSM68.SetPointError(p,0.,0.,abs(float(vec[iSM])-float(vec[9])),abs(float(vec[iSM])-float(vec[10])))
          grSM95.SetPointError(p,0.,0.,abs(float(vec[iSM])-float(vec[11])),abs(float(vec[iSM])-float(vec[12])))
-         grGRAV.SetPoint(p,float(vec[0])*100.,float(vec[iGR]))
-         grGR68.SetPoint(p,float(vec[0])*100.,float(vec[iGR]))
-         grGR95.SetPoint(p,float(vec[0])*100.,float(vec[iGR]))
+         grGRAV.SetPoint(p,float(vec[0]),float(vec[iGR]))
+         grGR68.SetPoint(p,float(vec[0]),float(vec[iGR]))
+         grGR95.SetPoint(p,float(vec[0]),float(vec[iGR]))
          grGR68.SetPointError(p,0.,0.,abs(float(vec[iGR])-float(vec[15])),abs(float(vec[iGR])-float(vec[16])))
          grGR95.SetPointError(p,0.,0.,abs(float(vec[iGR])-float(vec[17])),abs(float(vec[iGR])-float(vec[18])))
-         grData.SetPoint(p,float(vec[0])*100.,float(vec[6]))
+         grData.SetPoint(p,float(vec[0]),float(vec[6]))
          p+=1
    
      grData.SetMarkerStyle(kFullCircle)
@@ -2387,8 +2709,17 @@ class combPlot :
    
      ymin=-20.
      ymax=50.
-    
-     dummyHist = TH1F("d",";f_{q#bar{q}} (%);-2 ln (L_{"+mText+"}/L_{0^{+}}) ",100,0,100)
+     if iRange == 2:
+       ymin=-40.
+       ymax=70.
+     if iRange == 3:
+       ymin=-50.
+       ymax=100.  
+ 
+     if 'jcp_2' in limFile : fText= 'f(q#bar{q})' 
+     else : fText= 'f_{b2}^{WW}'
+     #dummyHist = TH1F("d",";f(q#bar{q}) ;-2 ln (L_{"+mText+"}/L_{0^{+}}) ",100,0,1)
+     dummyHist = TH1F("d",";"+fText+" ;-2 #times ln (L_{J^{P}}/L_{0^{+}}) ",100,0,1)
      dummyHist.SetMinimum(ymin)
      dummyHist.SetMaximum(ymax)
      dummyHist.SetStats(0)
@@ -2405,34 +2736,57 @@ class combPlot :
 
      dummyHist.Draw("AXIS")
    
-     leg = TLegend(0.20,0.65,0.40,0.89);
-     leg.SetHeader("WW #rightarrow 2l2#nu + 0/1-jet")
-     leg.SetLineColor(0);
-     leg.SetFillColor(0);
-     leg.SetTextSize(0.033)
-     leg.SetFillStyle(0)
-     leg.SetBorderSize(0)
-     leg.SetTextFont (42)
+     #leg = TLegend(0.20,0.65,0.40,0.89);
+     #if   'hgghzzhww' in limFile : leg.SetHeader("#gamma#gamma + ZZ #rightarrow 4l + WW #rightarrow 2l2#nu ")
+     #elif 'hwwhzz'    in limFile : leg.SetHeader("ZZ #rightarrow 4l + WW #rightarrow 2l2#nu ")
+     #elif 'hww'       in limFile : leg.SetHeader("WW #rightarrow 2l2#nu ")
+     #elif 'hzz'       in limFile : leg.SetHeader("ZZ #rightarrow 4l ")
+     #elif 'hgg'       in limFile : leg.SetHeader("#gamma#gamma ")
+
+
+     pt4 = TPaveText(0.28,0.83,0.88,0.93,"brNDC");
+     if 'hww01' in limFile : pt4 = TPaveText(0.62,0.83,0.88,0.93,"brNDC");
+     if 'hwwhzz_' in limFile : pt4 = TPaveText(0.62,0.83,0.88,0.93,"brNDC");
+     pt4.SetBorderSize(0);
+     pt4.SetFillStyle(0);
+     pt4.SetTextAlign(12);
+     pt4.SetTextFont(42);
+     pt4.SetTextSize(0.04);
+     pt4.AddText(0,0.5,title);
+
+     leg1 = TLegend(0.3,0.7,0.6,0.82)#,NULL,"brNDC");
+     leg1.SetLineColor(0);
+     leg1.SetFillColor(0);
+     leg1.SetTextSize(0.033)
+     leg1.SetFillStyle(0)
+     leg1.SetBorderSize(0)
+     leg1.SetTextFont (42)
+
+     leg2 = TLegend(0.62,0.7,0.92,0.86)#,NULL,"brNDC"); 
+     leg2.SetLineColor(0);
+     leg2.SetFillColor(0);
+     leg2.SetTextSize(0.033)
+     leg2.SetFillStyle(0)
+     leg2.SetBorderSize(0)
+     leg2.SetTextFont (42)
 
 
       
-     #leg.AddEntry(grSM,"X#rightarrow#gamma#gamma 0^{+}","lp");
-     #leg.AddEntry(grSM,"Y #rightarrow WW where Y=0^{+}","lp");
-     leg.AddEntry(grSM,"0^{+}","lp");
-     leg.AddEntry(grSM68,"#pm 1#sigma expected","f");
-     leg.AddEntry(grSM95,"#pm 2#sigma expected","f");
-     #leg.AddEntry(grGRAV,"X#rightarrow#gamma#gamma 2^{+}_{m}","lp");
-     #leg.AddEntry(grGRAV,"Y #rightarrow WW where Y=2^{+}_{min}","lp");
-     leg.AddEntry(grGRAV,mText,"lp");
-     leg.AddEntry(grGR68,"#pm 1#sigma expected","f");
-     leg.AddEntry(grGR95,"#pm 2#sigma expected","f");
+     leg1.AddEntry(grSM,"0^{+}","lp");
+     leg1.AddEntry(grSM68,"#pm 1#sigma expected","f");
+     leg1.AddEntry(grSM95,"#pm 2#sigma expected","f");
+     
+     
+     if unblind: leg2.AddEntry(grData,"Observed","lp")
+     leg2.AddEntry(grGRAV,"J^{P}","lp");
+     leg2.AddEntry(grGR68,"#pm 1#sigma expected","f");
+     leg2.AddEntry(grGR95,"#pm 2#sigma expected","f");
 
-     if unblind: leg.AddEntry(grData,"Observed","lp")
 
-     TlMH=TLatex()
-     TlMH.SetTextSize(0.03);
-     TlMH.SetNDC()
-     TlMH.DrawLatex(0.72,0.87,'m_{H} = '+str(mass)+' GeV')
+     #TlMH=TLatex()
+     #TlMH.SetTextSize(0.03);
+     #TlMH.SetNDC()
+     #TlMH.DrawLatex(0.72,0.87,'m_{H} = '+str(mass)+' GeV')
 
    
      grSM95.Draw("E3same")
@@ -2442,7 +2796,8 @@ class combPlot :
      grGR95.Draw("E3same")
      grGR68.Draw("E3same")
      if unblind: grData.Draw("LPsame")
-     leg.Draw("SAME")
+     leg1.Draw("SAME")
+     leg2.Draw("SAME")
      f = TF1('f','0.',0.,100.)
      f.SetLineColor(kBlack)
      f.SetLineWidth(2)
@@ -2450,6 +2805,8 @@ class combPlot :
      f.Draw("same")
      pt.Draw("same")
      pt2.Draw("same")
+     pt3.Draw("same")
+     pt4.Draw("same")
      #self.addTitle()
      dummyHist.Draw("AXISGsame")
      self.c1.Update()
@@ -2457,6 +2814,8 @@ class combPlot :
      self.c1.Update()
      self.c1.Print(limFile.replace('txt','png'))
      self.c1.Print(limFile.replace('txt','pdf'))
+     self.c1.Print(limFile.replace('txt','root'))
+     self.c1.Print(limFile.replace('txt','C'))
    
    # grSM.SetName('fqqSM')
    # grGRAV.SetName('fqqGRAV')
@@ -2471,6 +2830,993 @@ class combPlot :
    # if unblind: grData.Write()
    # canv.SetName('fqq')
    # canv.Write()  
+
+   def JCPFB2(self,combList,iEnergy,iModel,iTarget,massFilter):
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,combList[0],energyList).get()
+     
+       tComb = 'hww01jet_jcp_1hww'  
+       for iMass in massList:
+         ParSummTxt='_FITNUIS1'
+         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+tComb+'/'+str(iMass)
+         os.system('mkdir -p '+TargetDir)
+         tableName  = TargetDir+'/higgsCombine_'+tComb
+         if iEnergy == 7 : tableName += '_7TeV'
+         if iEnergy == 8 : tableName += '_8TeV'
+         tableName += '_'+iModel+'_'+iTarget+ParSummTxt+'_ResultsSummary_mH'+str(iMass).replace('.','d')+'.txt' 
+         subfile = open(tableName,'w')
+         print tableName
+
+         for iComb in combList :
+           if '1mix' in iComb : iFQQ = 0.5
+           elif '1m' in iComb : iFQQ = 0.0
+           elif '1p' in iComb : iFQQ = 1.0
+           TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb+'/'+str(iMass)
+           limFile = TargetDir+'/higgsCombine_'+iComb
+           if iEnergy == 7 : limFile += '_7TeV'
+           if iEnergy == 8 : limFile += '_8TeV'
+           limFile += '_'+iModel+'_'+iTarget+ParSummTxt+'_ResultsSummary_mH'+str(iMass).replace('.','d')+'.txt'
+           print limFile
+           for line in open(limFile):
+             if "#" not in line:
+               print line.replace("0.0",str(iFQQ))
+               subfile.write(line.replace("0.0",str(iFQQ)))
+         subfile.close()
+         self.plotFqqLim(tableName,1,0,massFilter[0],'1hww','1','q#bar{q} #rightarrow X #rightarrow WW',0)
+       #for iMass in massList:
+       #  limFile = 'hww_spin1_limFile.txt'
+       #  for iComb in combList :
+       #    iFQQ = -1.
+       #    if   '1mix' in iComb : iFQQ = 0.5
+       #    elif '1m'   in iComb : iFQQ = 0.0
+       #    elif '1p'   in iComb : iFQQ = 1.0
+
+       #limFile = '/afs/cern.ch/work/x/xjanssen/cms/HWWLimComb/workspace/Spin2014_V3/jcp/hww_spin1_limFile.txt'
+       #self.plotFqqLim(limFile,1,0,massFilter[0],'1hww','1') 
+
+   def JCPFQQ(self,iComb,iEnergy,iModel,iTarget,massFilter):
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,iComb,energyList).get()
+       if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+         TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+       else:
+         TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+
+       for iMass in massList:
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         iFITNUIS = -1
+         iFQQ = 0.0
+         for iSet in range(0,len(paramSet['values'])) :
+           ParString=''
+           ParSummTxt=''
+           for iPar in range(0,len(paramSet['names'])) :
+             parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+             ParString += '_'+paramSet['names'][iPar]+str(parVal)
+             if paramSet['names'][iPar] == 'FITNUIS' : ParSummTxt += '_'+paramSet['names'][iPar]+str(parVal) 
+             if paramSet['names'][iPar] == 'FITNUIS' : iFITNUISnew = paramSet['values'][iSet][iPar]
+             if paramSet['names'][iPar] == 'FQQ'     : iFQQ     = paramSet['values'][iSet][iPar]
+
+         if 'hww01' in iComb or '_dec' in iComb :
+           jcp=iComb.split('_')[-1] 
+           tableName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+           if iEnergy == 7 : tableName += '_7TeV'
+           if iEnergy == 8 : tableName += '_8TeV'
+           tableName += '_'+iModel+'_'+iTarget+ParSummTxt+'_ResultsSummary_mH'+str(iMass).replace('.','d')+'.txt' 
+         else:
+           print 'MIXING'
+           jcp='mix'
+           baseDir  = workspace+'/'+self.Version+'/'+cardDir+'/'  
+           endStr     = ''
+           if iEnergy == 7 : endStr += '_7TeV'
+           if iEnergy == 8 : endStr += '_8TeV' 
+           endStr  +='_'+iModel+'_'+iTarget+ParSummTxt+'_ResultsSummary_mH'+str(iMass).replace('.','d')+'.txt'
+           tableGG  = baseDir+iComb                      +'/'+str(iMass)+'/higgsCombine_'+iComb                      +endStr.replace('JCPFQQf','JCPGGf')
+           tableFQQ = baseDir+iComb.replace('_gg','_dec')+'/'+str(iMass)+'/higgsCombine_'+iComb.replace('_gg','_dec')+endStr
+           tableQQB = baseDir+iComb.replace('_gg','_qqb')+'/'+str(iMass)+'/higgsCombine_'+iComb.replace('_gg','_qqb')+endStr.replace('JCPFQQf','JCPQQBf')
+           tableMIX = baseDir+iComb.replace('_gg','_mix')+'/'+str(iMass)+'/higgsCombine_'+iComb.replace('_gg','_mix')+endStr
+           os.system('mkdir -p '+baseDir+iComb.replace('_gg','_mix')+'/'+str(iMass))
+           print tableFQQ
+           print tableMIX
+           subfile = open(tableMIX,'w')          
+           for line in open(tableGG): 
+             if "#" not in line: subfile.write(line)
+           for line in open(tableFQQ):
+             if "#" not in line: 
+               vec = line.split()
+               if float(vec[0])>0.0 and float(vec[0]) < 1.0: subfile.write(line)
+           for line in open(tableQQB):
+             if "#" not in line: subfile.write(line.replace('0.0','1.0'))
+           subfile.close()
+           tableName = tableMIX
+
+         unblind=0
+         if not self.blind : unblind=1
+         iLumiLocal=0
+         mText = self.combinations[iComb]['legend']
+         chText2 = 'X('+mText+') #rightarrow ' 
+
+         iRange=1
+         if   'hgghzzhww' in iComb : 
+            chText2 += 'ZZ + WW + #gamma#gamma'
+            iLumiLocal=1 
+            iRange=2
+         elif   'hwwhzz' in iComb : 
+            if '2pm' not in iComb : iRange=3
+            if '2bp' in iComb : iRange=2
+            if '2mh9' in iComb : iRange=2
+            if '2ph2' in iComb : iRange=2
+            if '2ph3' in iComb : iRange=2
+            chText2 += 'ZZ + WW'
+            iLumiLocal=1 
+         elif 'hww'    in iComb : 
+            chText2 += 'WW'
+            if iEnergy == 7 : iLumiLocal = 7
+            if iEnergy == 8 : iLumiLocal = 8
+            iLumiLocal = 0
+         elif 'hzz'    in iComb : 
+            chText2 += 'ZZ'
+            iLumiLocal=1 
+         elif 'hgg'    in iComb :
+            chText2 += '#gamma#gamma'
+            iLumiLocal=1
+
+         iStatus2=1
+         if 'float' in iTarget :
+           if    'hgghzzhww' in iComb :
+             if '_gg' in iComb : iStatus2=0
+           elif  'hwwhzz'    in iComb :
+             if  '2pm'  in iComb :
+               if '_dec' in iComb : iStatus2=0
+               if '_gg' in iComb : iStatus2=0
+             if  '2ph2'  in  iComb :
+                   # gg->X
+                if '_dec' in  iComb : iStatus2=0
+           elif  'hww01'    in iComb :
+                 if  '2ph2'  in  iComb :
+                   iStatus2=0
+ 
+
+         self.plotFqqLim(tableName,unblind,iLumiLocal,massFilter[0],jcp,mText,chText2,iStatus2,iRange) 
+
+
+
+
+   def JCPTable(self,combList,iEnergy,iModel,iTarget,massFilter):
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,combList[0],energyList).get()
+
+       for iMass in massList:
+
+         tableContent = OrderedDict()
+
+         for iComb in combList :
+
+# Spin 1
+
+           if '1hzz' in iComb or '1m'   in iComb or '1p'   in iComb:
+             if    '1hzz' in iComb :
+               iModelS1 = iModel.replace('DEC','')
+               iTargetS1 = iTarget.replace('JCPGGfloatmu','JCPFQQfloatmu').replace('JCPQQBfloatmu','JCPFQQfloatmu')
+             elif  '1m'   in iComb :
+               iModelS1  = 'JCP'
+               iTargetS1 = iTarget.replace('FQQ','')
+             
+             elif  '1p'   in iComb :
+               iModelS1  = 'JCP'
+               iTargetS1 = iTarget.replace('FQQ','')
+
+             paramSet = self.ParamSet_Maker(iModelS1,iTargetS1)
+             print 'param'
+             print paramSet
+             iFITNUIS = -1
+             iFQQ = 0.0
+             for iSet in range(0,len(paramSet['values'])) :
+               ParString=''
+               ParSummTxt=''
+               for iPar in range(0,len(paramSet['names'])) :
+                 parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+                 ParString += '_'+paramSet['names'][iPar]+str(parVal)
+                 if paramSet['names'][iPar] == 'FITNUIS' : ParSummTxt += '_'+paramSet['names'][iPar]+str(parVal)
+                 if paramSet['names'][iPar] == 'FITNUIS' : iFITNUISnew = paramSet['values'][iSet][iPar]
+                 if paramSet['names'][iPar] == 'FQQ'     : iFQQ     = paramSet['values'][iSet][iPar]
+  
+               if not iFITNUISnew == iFITNUIS :
+                 iFITNUIS = iFITNUISnew
+  
+               if iFQQ == 0 or iFQQ == 1 :
+                 print ParString
+                 print iComb
+                 if 'targetdir' in cardtypes[physmodels[iModelS1]['cardtype']]:
+                   TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModelS1]['cardtype']]['targetdir']+'/'+iComb
+                 else:
+                   TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+                 print TargetDir
+                 logName   = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb  
+                 if iEnergy == 7 : logName += '_7TeV'
+                 if iEnergy == 8 : logName += '_8TeV'
+                 logName  += '_'+iModelS1+'_'+iTargetS1+ParString+'.Results.mH'+str(iMass)+'.txt'
+                 print logName
+
+                 legend=''
+                 legend = 'q\\bar{q}\\rightarrow '
+                 if   iFQQ == 0 : legend = '1^{-}'
+                 elif iFQQ == 1 : legend = '1^{+}'
+                 if  '1m'   in iComb: legend = '1^{-}' 
+                 if  '1p'   in iComb: legend = '1^{+}' 
+                 if  '1mix' in iComb: legend = '1mix' 
+
+                 #legend += self.combinations[iComb]['legend']
+                 print legend
+  
+                 tableContent[legend] = {}
+                 if   'float' in iTarget : 
+                   muType = 'FloatMu'
+                 else : 
+                   muType = 'FixMu'
+                 tableContent[legend][muType]   = {} 
+  
+                 for line in open(logName):
+                   if   "Toys generated SM" in line:
+                     values=line.split()
+                     tableContent[legend][muType]['nToys'] =  values[3]
+                   elif "Separation from histograms" in line :
+                     values=line.split()
+                     tableContent[legend][muType]['HistSep'] = values[4]
+                   elif "RESULTS_SUMMARY" in line:
+                     values=line.split()
+                     tableContent[legend][muType]['sSMObs'] = values[1]
+                     tableContent[legend][muType]['sSMExp'] = values[2]
+                     tableContent[legend][muType]['sJPObs'] = values[3]
+                     tableContent[legend][muType]['sJPExp'] = values[4]
+                     tableContent[legend][muType]['CLs']    = values[5]
+
+                     
+
+                 if  muType == 'FloatMu' :
+                   if    'hww01'   in iComb : logName = logName.replace('floatmu','fixmu')
+                   elif  'hwwhzz_' in iComb : logName = logName.replace('floatmu','fix2mu')
+                   print  logName
+                   muType = 'FixMu' 
+                   tableContent[legend][muType]   = {}
+  
+                   for line in open(logName):
+                     if   "Toys generated SM" in line:
+                       values=line.split()
+                       tableContent[legend][muType]['nToys'] =  values[3]
+                     elif "Separation from histograms" in line :
+                       values=line.split()
+                       tableContent[legend][muType]['HistSep'] = values[4]
+                     elif "RESULTS_SUMMARY" in line:
+                       values=line.split()
+                       tableContent[legend][muType]['sSMObs'] = values[1]
+                       tableContent[legend][muType]['sSMExp'] = values[2]
+                       tableContent[legend][muType]['sJPObs'] = values[3]
+                       tableContent[legend][muType]['sJPExp'] = values[4]
+                       tableContent[legend][muType]['CLs']    = values[5]
+  
+                 if 'hww01' in iComb :
+                   logName = TargetDir+'/'+str(iMass)+'/'+iComb+'_0_JCP_fJP.txt'  
+                   if os.path.isfile(logName) :
+                     tableContent[legend]['fJP'] = {} 
+                     
+                     for line in open(logName):    
+                       if 'Exp' in line:
+                         values=line.split()
+                         print values, min(1,abs(float(values[3])))
+                         tableContent[legend]['fJP']['Exp68hi'] = min(1,abs(float(values[3])))
+                         tableContent[legend]['fJP']['Exp95hi'] = min(1,abs(float(values[4])))
+                         tableContent[legend]['fJP']['Exp68lo'] = max(0,float(values[2]))
+                         tableContent[legend]['fJP']['Exp95lo'] = max(0,float(values[1]))
+                       if 'Obs' in line:
+                         values=line.split()
+                         tableContent[legend]['fJP']['Obs68hi'] = min(1,abs(float(values[3])))
+                         tableContent[legend]['fJP']['Obs95hi'] = min(1,abs(float(values[4])))
+                         tableContent[legend]['fJP']['Obs68lo'] = max(0,float(values[2]))
+                         tableContent[legend]['fJP']['Obs95lo'] = max(0,float(values[1]))
+                       if 'Best' in line:
+                         values=line.split()
+                         tableContent[legend]['fJP']['Best'] = float(values[1])
+                         tableContent[legend]['fJP']['BestUp'] = tableContent[legend]['fJP']['Obs68hi'] - tableContent[legend]['fJP']['Best']
+                         tableContent[legend]['fJP']['BestDo'] = tableContent[legend]['fJP']['Best'] - tableContent[legend]['fJP']['Obs68lo']
+                       if 'Test' in line:
+                         values=line.split()
+                         tableContent[legend]['fJP']['CExp'] = sqrt(float(values[1]))
+                         tableContent[legend]['fJP']['CObs'] = sqrt(float(values[2]))
+                     print 'TEST' , tableContent[legend]['fJP']  
+# Spin 2
+
+
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         print paramSet
+         iFITNUIS = -1
+         iFQQ = 0.0
+         for iSet in range(0,len(paramSet['values'])) :
+           ParString=''
+           ParSummTxt=''
+           for iPar in range(0,len(paramSet['names'])) :
+             parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+             ParString += '_'+paramSet['names'][iPar]+str(parVal)
+             if paramSet['names'][iPar] == 'FITNUIS' : ParSummTxt += '_'+paramSet['names'][iPar]+str(parVal)
+             if paramSet['names'][iPar] == 'FITNUIS' : iFITNUISnew = paramSet['values'][iSet][iPar]
+             if paramSet['names'][iPar] == 'FQQ'     : iFQQ     = paramSet['values'][iSet][iPar]
+
+           if not iFITNUISnew == iFITNUIS :
+             iFITNUIS = iFITNUISnew
+
+           if iFQQ == 0 or iFQQ == 1 :
+
+             print ParString
+             for iComb in combList : 
+              if not ( '1hzz' in iComb or '1m' in iComb or '1p' in iComb ) : 
+               print iComb
+               if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+                 TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+               else:
+                 TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+               print TargetDir
+               logName   = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+               if iEnergy == 7 : logName += '_7TeV'
+               if iEnergy == 8 : logName += '_8TeV'
+               logName  += '_'+iModel+'_'+iTarget+ParString+'.Results.mH'+str(iMass)+'.txt'
+               print logName
+              
+               legend=''
+               if   iFQQ == 0 : legend = 'gg\\rightarrow '
+               elif iFQQ == 1 : legend = 'q\\bar{q}\\rightarrow '
+               if 'QQB' in iTarget : 
+                 legend = 'q\\bar{q}\\rightarrow '
+                 iFQQ == 1
+
+               legend += self.combinations[iComb]['legend']
+               print legend
+
+               tableContent[legend] = {}
+               if   'float' in iTarget : 
+                 muType = 'FloatMu'
+               else : 
+                 muType = 'FixMu'
+               tableContent[legend][muType]   = {} 
+
+               tableContent[legend][muType]['nToys'] = 0 
+               for line in open(logName):
+                 if   "Toys generated SM" in line:
+                   values=line.split()
+                   tableContent[legend][muType]['nToys'] =  values[3]
+                 elif "Separation from histograms" in line :
+                   values=line.split()
+                   tableContent[legend][muType]['HistSep'] = values[4]
+                 elif "RESULTS_SUMMARY" in line:
+                   values=line.split()
+                   tableContent[legend][muType]['sSMObs'] = values[1]
+                   tableContent[legend][muType]['sSMExp'] = values[2]
+                   tableContent[legend][muType]['sJPObs'] = values[3]
+                   tableContent[legend][muType]['sJPExp'] = values[4]
+                   tableContent[legend][muType]['CLs']    = values[5]
+
+               if  muType == 'FloatMu' :
+                 if    'hww01'   in iComb : logName = logName.replace('floatmu','fixmu')
+                 if    'hgg_'    in iComb : logName = logName.replace('floatmu','fixmu')
+                 elif  'hwwhzz_' in iComb : logName = logName.replace('floatmu','fix2mu')
+                 elif  'hgghzzhww_' in iComb : logName = logName.replace('floatmu','fix3mu')
+                 print  logName
+                 muType = 'FixMu' 
+                 tableContent[legend][muType]   = {}
+
+                 tableContent[legend][muType]['nToys'] = '0'
+                 tableContent[legend][muType]['HistSep'] = '0'
+
+                 if os.path.isfile(logName) : 
+                  for line in open(logName):
+                   if   "Toys generated SM" in line:
+                     values=line.split()
+                     tableContent[legend][muType]['nToys'] =  values[3]
+                   elif "Separation from histograms" in line :
+                     values=line.split()
+                     tableContent[legend][muType]['HistSep'] = values[4]
+                   elif "RESULTS_SUMMARY" in line:
+                     values=line.split()
+                     tableContent[legend][muType]['sSMObs'] = values[1]
+                     tableContent[legend][muType]['sSMexp'] = values[2]
+                     tableContent[legend][muType]['sJPObs'] = values[3]
+                     tableContent[legend][muType]['sJPExp'] = values[4]
+                     tableContent[legend][muType]['CLs']    = values[5]
+
+               if 'hww01' in iComb :
+                   logName = TargetDir+'/'+str(iMass)+'/'+iComb
+                   if iFQQ == 0 : logName  += '_0_JCPFQQ_fJP_fqq0.txt'
+                   if iFQQ == 1 : logName  += '_0_JCPFQQ_fJP_fqq1.txt'
+                   if os.path.isfile(logName) :
+                     tableContent[legend]['fJP'] = {}
+
+                     for line in open(logName):
+                       if 'Exp' in line:
+                         values=line.split()
+                         print values, min(1,abs(float(values[3])))
+                         tableContent[legend]['fJP']['Exp68hi'] = min(1,abs(float(values[3])))
+                         tableContent[legend]['fJP']['Exp95hi'] = min(1,abs(float(values[4])))
+                         tableContent[legend]['fJP']['Exp68lo'] = max(0,float(values[2]))
+                         tableContent[legend]['fJP']['Exp95lo'] = max(0,float(values[1]))
+                       if 'Obs' in line:
+                         values=line.split()
+                         tableContent[legend]['fJP']['Obs68hi'] = min(1,abs(float(values[3])))
+                         tableContent[legend]['fJP']['Obs95hi'] = min(1,abs(float(values[4])))
+                         tableContent[legend]['fJP']['Obs68lo'] = max(0,float(values[2]))
+                         tableContent[legend]['fJP']['Obs95lo'] = max(0,float(values[1]))
+                       if 'Best' in line:
+                         values=line.split()
+                         tableContent[legend]['fJP']['Best'] = float(values[1])
+                         tableContent[legend]['fJP']['BestUp'] = tableContent[legend]['fJP']['Obs68hi'] - tableContent[legend]['fJP']['Best']
+                         tableContent[legend]['fJP']['BestDo'] = tableContent[legend]['fJP']['Best'] - tableContent[legend]['fJP']['Obs68lo']
+                       if 'Test' in line:
+                         values=line.split()
+                         tableContent[legend]['fJP']['CExp'] = sqrt(float(values[1])) 
+                         tableContent[legend]['fJP']['CObs'] = sqrt(float(values[2])) 
+                     print tableContent[legend]['fJP']
+
+         # Make table
+
+
+
+         print tableContent
+
+         targetFile='aTable'
+         if   'hww01' in   combList[0] : targetFile+= '_hww'
+         if   'hgg_'  in   combList[0] : targetFile+= '_hgg'
+         elif 'hwwhzz_' in combList[0] : 
+           targetFile+= '_hzzhww'
+           if '_2'    in   combList[0] :
+             if '_dec'  in   combList[0] : targetFile+= '_decay'
+             if '_gg'  in   combList[0] : targetFile+= '_gg'
+             if '_qqb'  in   combList[0] : targetFile+= '_qqb'
+         elif 'hgghzzhww_' in combList[0] :
+           targetFile+= '_hgghzzhww' 
+           if '_dec'  in   combList[0] : targetFile+= '_decay'
+           if '_gg'  in   combList[0] : targetFile+= '_gg'
+           if '_qqb'  in   combList[0] : targetFile+= '_qqb'
+         if   '_1'    in   combList[0] : targetFile+= '_spin1'
+         else : targetFile+= '_spin2'
+
+         targetFile+='.txt'
+         fo = open(targetFile, "w")
+         fo.write("\documentclass{article}\n")
+         fo.write("\usepackage[margin=0.5cm]{geometry}\n")
+         fo.write("\\begin{document}\n")
+         fo.write("\\begin{table}\n")
+         fo.write("\\begin{center} \n")
+         if 'hww01' in   combList[0] :
+           fo.write("\\begin{tabular}{l|c|c|c|c|c|c|c|c}\n")
+           fo.write("$Model$ & n. of Toys & Expected & Obs. $0^+$ & Obs. $J^P$ & CL$_s$ & fJP 95\\% CL & fJP best fit & Compatibilty \\\\ \n")    
+         else:
+           fo.write("\\begin{tabular}{l|c|c|c|c|c}\n")
+           fo.write("$Model$ & n. of Toys & Expected & Obs. $0^+$ & Obs. $J^P$ & CL$_s$  \\\\ \n")    
+         fo.write("\hline \n") 
+         for iLeg in tableContent:
+           fo.write( "$"+iLeg+"$" + " & " + str(tableContent[iLeg]['FloatMu']['nToys']) + " (" +  str(tableContent[iLeg]['FixMu']['nToys']) +") & " )
+           fo.write( str(round(abs(float(tableContent[iLeg]['FloatMu']['HistSep'])),1)) + "$\\sigma$ (" +  str(round(abs(float(tableContent[iLeg]['FixMu']['HistSep'])),1)) +"$\\sigma$) &")
+           fo.write( str(round(float(tableContent[iLeg]['FloatMu']['sSMObs']),1))  + "$\\sigma$ & " +  str(round(float(tableContent[iLeg]['FloatMu']['sJPObs']),1))  + "$\\sigma$ & " )
+           fo.write( str(float(tableContent[iLeg]['FloatMu']['CLs'])*100) + ' \\% ' ) 
+           if 'fJP' in tableContent[iLeg] :
+             fo.write( '& $<$'+str(round(tableContent[iLeg]['fJP']['Obs95hi'],2)) + " (" + str(round(tableContent[iLeg]['fJP']['Exp95hi'],2)) +") & " )
+             fo.write( str(round(tableContent[iLeg]['fJP']['Best'],2)) )
+             fo.write('$^{+'+str(round(tableContent[iLeg]['fJP']['BestUp'],2))+'}')
+             fo.write('_{-'+str(round(tableContent[iLeg]['fJP']['BestDo'],2))+'}$ &')
+             #fo.write(str(round(tableContent[iLeg]['fJP']['CObs'],1)) )
+             #fo.write(str(round(tableContent[iLeg]['fJP']['CObs'],1)) + ' (' + str(round(tableContent[iLeg]['fJP']['CExp'],1)) + ')')
+             #fo.write("["+str(round(abs(float(tableContent[iLeg]['FixMu']['sJPExp'])),1))+"]")
+           fo.write( "\\\\ \n")
+           
+         fo.write("\hline \n")
+         fo.write("\end{tabular}  \n")
+         fo.write("\end{center} \n")
+         fo.write("\end{table} \n")
+         fo.write("\end{document} \n")
+         fo.close()
+         os.system("latex "+targetFile)
+         os.system("dvipdf "+targetFile.replace(".txt",".dvi"))
+         os.system("dvipng "+targetFile.replace(".txt",".dvi"))
+         os.system("mv "+targetFile.replace(".txt","1.png")+" "+targetFile.replace(".txt",".png"))
+
+   def JCPView(self,combList,iEnergy,iModel,iTarget,massFilter):
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,combList[0],energyList).get()
+       
+       for iMass in massList:
+
+         plotContent = OrderedDict()
+         plotContent['q#bar{q}'] = OrderedDict()
+         plotContent['gg production']  = OrderedDict()
+         plotContent['q#bar{q} production'] = OrderedDict()
+
+# Spin 1
+
+         for iComb in combList :
+           if '1hzz' in iComb or '1m'   in iComb or '1p'   in iComb:
+             if    '1hzz' in iComb :
+               iModelS1 = iModel.replace('DEC','')
+               iTargetS1 = iTarget.replace('JCPGGfloatmu','JCPFQQfloatmu').replace('JCPQQBfloatmu','JCPFQQfloatmu')
+             elif  '1m'   in iComb : 
+               iModelS1  = 'JCP'
+               iTargetS1 = iTarget.replace('FQQ','')
+             elif  '1p'   in iComb :
+               iModelS1  = 'JCP'
+               iTargetS1 = iTarget.replace('FQQ','')
+
+             paramSet = self.ParamSet_Maker(iModelS1,iTargetS1)
+             print paramSet
+             iFITNUIS = -1
+             iFQQ = 0.0
+             for iSet in range(0,len(paramSet['values'])) :
+               ParString=''
+               ParSummTxt=''
+               for iPar in range(0,len(paramSet['names'])) :
+                 parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+                 ParString += '_'+paramSet['names'][iPar]+str(parVal)
+                 if paramSet['names'][iPar] == 'FITNUIS' : ParSummTxt += '_'+paramSet['names'][iPar]+str(parVal)
+                 if paramSet['names'][iPar] == 'FITNUIS' : iFITNUISnew = paramSet['values'][iSet][iPar]
+                 if paramSet['names'][iPar] == 'FQQ'     : iFQQ     = paramSet['values'][iSet][iPar]
+  
+               if not iFITNUISnew == iFITNUIS :
+                 iFITNUIS = iFITNUISnew
+  
+               if iFQQ == 0 or iFQQ == 1 :
+                 print ParString
+                 print iComb
+                 if 'targetdir' in cardtypes[physmodels[iModelS1]['cardtype']]:
+                   TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModelS1]['cardtype']]['targetdir']+'/'+iComb
+                 else:
+                   TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+                 print TargetDir
+                 logName   = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb  
+                 if iEnergy == 7 : logName += '_7TeV'
+                 if iEnergy == 8 : logName += '_8TeV'
+                 logName  += '_'+iModelS1+'_'+iTargetS1+ParString+'.Results.mH'+str(iMass)+'.txt'
+                 print logName
+                 for line in open(logName):
+                   if "RESULTS_SUMMARY" in line:
+                     print line
+                     values=line.split()
+                     print values
+                     legend=''
+                     if   iFQQ == 0 : legend = '1^{-}'
+                     elif iFQQ == 1 : legend = '1^{+}'
+                     if  '1m'   in iComb: legend = '1^{-}' 
+                     if  '1p'   in iComb: legend = '1^{+}' 
+                     type = 'q#bar{q}'
+                     #legend += self.combinations[iComb]['legend']
+                     print legend
+                     plotContent[type][legend] = [
+  # observed
+                                             values[6] ,
+  # median
+                                             values[8] ,
+                                             values[14] ,
+  # mean
+                                             values[7] ,
+                                             values[13] ,
+  # 68%
+                                             -float(values[ 9])+float(values[7]) ,
+                                              float(values[10])-float(values[7]) ,
+                                             -float(values[15])+float(values[13]) ,
+                                              float(values[16])-float(values[13]) ,
+  # 95%
+                                             -float(values[11])+float(values[7]) ,
+                                              float(values[12])-float(values[7]) ,
+                                             -float(values[17])+float(values[13]) ,
+                                              float(values[18])-float(values[13]) ,
+  # 99%
+                                             -float(values[19])+float(values[7]) ,
+                                              float(values[20])-float(values[7]) ,
+                                             -float(values[21])+float(values[13]),
+                                              float(values[22])-float(values[13])
+  
+                                           ]
+  
+                     plotContent[type][legend] = [float(X) for X in plotContent[type][legend]]
+
+         print plotContent
+         
+# Spin 2
+
+
+         paramSet = self.ParamSet_Maker(iModel,iTarget)
+         iFITNUIS = -1
+         iFQQ = 0.0
+         for iSet in range(0,len(paramSet['values'])) :
+           ParString=''
+           ParSummTxt=''
+           for iPar in range(0,len(paramSet['names'])) :
+             parVal=str(paramSet['values'][iSet][iPar]).replace('.','d')
+             ParString += '_'+paramSet['names'][iPar]+str(parVal)
+             if paramSet['names'][iPar] == 'FITNUIS' : ParSummTxt += '_'+paramSet['names'][iPar]+str(parVal)
+             if paramSet['names'][iPar] == 'FITNUIS' : iFITNUISnew = paramSet['values'][iSet][iPar]
+             if paramSet['names'][iPar] == 'FQQ'     : iFQQ     = paramSet['values'][iSet][iPar]
+
+           if not iFITNUISnew == iFITNUIS :
+             iFITNUIS = iFITNUISnew
+
+           if iFQQ == 0 or iFQQ == 1 :
+
+             print ParString
+             for iComb in combList : 
+              if not ( '1hzz' in iComb or '1m' in iComb or '1p' in iComb ) : 
+               print iComb
+               iTargetS1 = iTarget
+               if '_qqb' in iComb :
+                  iTargetS1 = iTarget.replace('JCPGGfloatmu','JCPQQBfloatmu')
+               if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+                 TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+               else:
+                 TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+               print TargetDir
+               logName   = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+               if iEnergy == 7 : logName += '_7TeV'
+               if iEnergy == 8 : logName += '_8TeV'
+               logName  += '_'+iModel+'_'+iTargetS1+ParString+'.Results.mH'+str(iMass)+'.txt'
+               print logName
+               for line in open(logName):
+                 if "RESULTS_SUMMARY" in line:
+                   print line
+                   values=line.split() 
+                   print values
+                   legend=''
+                   type=''
+                   #if   iFQQ == 0 : legend = 'gg#rightarrow '
+                   #elif iFQQ == 1 : legend = 'q#bar{q}#rightarrow '
+                   if   iFQQ == 0 : type = 'gg production'
+                   if   iFQQ == 1 or '_qqb' in iComb : type = 'q#bar{q} production'
+                   legend += self.combinations[iComb]['legend']
+                   print legend
+                   plotContent[type][legend] = [ 
+# observed
+                                           values[6] ,  
+# median
+                                           values[8] ,
+                                           values[14] ,
+# mean
+                                           values[7] ,
+                                           values[13] ,
+# 68%
+                                           -float(values[ 9])+float(values[7]) ,
+                                            float(values[10])-float(values[7]) ,
+                                           -float(values[15])+float(values[13]) ,
+                                            float(values[16])-float(values[13]) ,
+# 95%
+                                           -float(values[11])+float(values[7]) ,
+                                            float(values[12])-float(values[7]) ,
+                                           -float(values[17])+float(values[13]) ,
+                                            float(values[18])-float(values[13]) ,
+# 99%
+                                           -float(values[19])+float(values[7]) ,
+                                            float(values[20])-float(values[7]) ,
+                                           -float(values[21])+float(values[13]),
+                                            float(values[22])-float(values[13])
+
+                                         ]
+
+                   plotContent[type][legend] = [float(X) for X in plotContent[type][legend]]
+
+
+         print plotContent
+         hwwOnly=True
+         Extra='_hww'
+         if 'hwwhzz_' in combList[0] :
+          hwwOnly=False
+          Extra='_hzzhww'
+          if '_dec' in combList[1] : Extra+='_decay'
+          if '_qqb' in combList[1] : Extra+='_ggqqb'
+          if '_gg'  in combList[1] : Extra+='_ggqqb'
+ 
+         self.plotSummary_properties('./',plotContent,hwwOnly,Extra)
+
+#      if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
+#        TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
+#      else:
+#        TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb
+#      print TargetDir
+
+
+
+   def plotSummary_properties(self,plotDir,plotContent,hwwOnly=True,Extra='_hww'):
+
+        nentries=0
+	plotContentKeys = OrderedDict()
+        for iType in plotContent: 
+       	  nentries += len(plotContent[iType].keys())
+          plotContentKeys[iType] = plotContent[iType].keys()
+
+	plotContentEntries = ['yObserved','ySmMedian','yAltMedian','ySm','yAlt','ySmErrM','ySmErrP','yAltErrM','yAltErrP','ySmErr2M','ySmErr2P','yAltErr2M','yAltErr2P','ySmErr3M','ySmErr3P','yAltErr3M','yAltErr3P']
+
+	xyVals = OrderedDict() 
+	#for key,val in plotContent.iteritems():
+	#	# sanity check
+	#	if not len(val)==17: sys.exit('Set %s doesn\'t have 17 entries.'%key)
+
+	# predefined
+	xyVals['xObserved']    = array('f',[ 5 + 10*i    for i in range(nentries)])
+	xyVals['xSm']          = array('f',[ 2.75 + 10*i for i in range(nentries)])
+	xyVals['xAlt']         = array('f',[ 7.25 + 10*i for i in range(nentries)])
+	xyVals['xObservedErr'] = array('f',[4.5]*nentries)
+	xyVals['yObservedErr'] = array('f',[0.0]*nentries)     
+	xyVals['xErr']         = array('f',[2.25]*nentries)
+        xyVals['labels']       = []
+        for iType in plotContent:
+	  xyVals['labels']       += plotContentKeys[iType]
+        for entry in plotContentEntries : xyVals[entry] = array('f',[0.0]*nentries)
+
+	# fill from content
+        iLabel = 0
+        for iType in plotContent:
+          for Label in plotContentKeys[iType] :
+	    for ientry,entry in enumerate(plotContentEntries): 
+              xyVals[entry][iLabel] = plotContent[iType][Label][ientry]
+            iLabel +=1
+	      #xyVals[entry] = array('f',[plotContent[iType][x][ientry] for x in plotContentKeys[iType]])
+
+	baseHisto = TH1F("Base Histo", "", nentries, 0, nentries*10)
+	baseHisto.SetStats(0)
+	baseHisto.GetXaxis().SetLabelSize(0.05)
+	baseHisto.GetXaxis().SetTickLength(0)
+	baseHisto.GetYaxis().SetTickLength(0.01)
+	baseHisto.GetXaxis().SetTitleFont(42)
+	baseHisto.GetYaxis().SetTitleFont(42)
+	baseHisto.GetXaxis().SetTitleOffset(1.7)
+	baseHisto.GetYaxis().SetTitleOffset(0.7)
+	baseHisto.GetYaxis().SetTitle("-2 #times ln(L_{J^{P}} / L_{0^{+}})")
+# CL_{S} (J^{P}_{ALT}
+# J^{P}
+	if (hwwOnly) : baseHisto.SetAxisRange(-30,  60, "Y")
+	else         : baseHisto.SetAxisRange(-65, 120, "Y")
+
+	observed = TGraphErrors(nentries, xyVals['xObserved'], xyVals['yObserved'], xyVals['xObservedErr'], xyVals['yObservedErr'])
+	observed.SetMarkerColor(1)
+	observed.SetMarkerStyle(20)
+	observed.SetMarkerSize(2)
+	observed.SetLineWidth(1)
+
+	MedianSM = TGraphErrors(nentries, xyVals['xSm'], xyVals['ySmMedian'], xyVals['xErr'], xyVals['yObservedErr'])
+	MedianSM.SetLineColor(1)
+	MedianSM.SetMarkerColor(1)
+#	MedianSM.SetMarkerSize(0)
+#	MedianSM.SetMarkerStyle(1)
+	MedianSM.SetLineWidth(1)
+	MedianSM.SetLineStyle(2)
+	
+	MedianALT = TGraphErrors(nentries, xyVals['xAlt'], xyVals['yAltMedian'], xyVals['xErr'], xyVals['yObservedErr'])
+	MedianALT.SetLineColor(1)
+	MedianALT.SetMarkerColor(1)
+#	MedianALT.SetMarkerSize(3)
+#	MedianALT.SetMarkerStyle(1)
+	MedianALT.SetLineWidth(1)
+	MedianALT.SetLineStyle(2)
+	
+	SM = TGraphAsymmErrors(nentries, xyVals['xSm'], xyVals['ySm'], xyVals['xErr'], xyVals['xErr'], xyVals['ySmErrM'], xyVals['ySmErrP'])
+	SM.SetFillColor(kOrange+7)
+	SM.SetLineColor(kOrange+7)
+#	SM.SetMarkerColor(kAzure+1)
+	SM.SetMarkerSize(3)
+	SM.SetMarkerStyle(1)
+	SM.SetFillStyle(1001)
+	SM.SetLineWidth(1)
+	SM.SetLineStyle(1)
+	
+	ALT = TGraphAsymmErrors(nentries, xyVals['xAlt'], xyVals['yAlt'], xyVals['xErr'], xyVals['xErr'], xyVals['yAltErrM'], xyVals['yAltErrP'])
+	ALT.SetFillColor(kAzure-3)
+	ALT.SetLineColor(kAzure-3)
+#	ALT.SetMarkerColor(kOrange+1)
+	ALT.SetMarkerSize(0)
+	ALT.SetMarkerStyle(1)
+	ALT.SetFillStyle(1001)
+	ALT.SetLineWidth(1)
+	ALT.SetLineStyle(1)
+	
+	SM2 = TGraphAsymmErrors(nentries, xyVals['xSm'], xyVals['ySm'], xyVals['xErr'], xyVals['xErr'], xyVals['ySmErr2M'], xyVals['ySmErr2P'])
+	SM2.SetFillColor(kOrange+1)
+	SM2.SetLineColor(kOrange+1)
+#	SM2.SetMarkerColor(kAzure+1)
+	SM2.SetMarkerSize(0)
+	SM2.SetMarkerStyle(1)
+#	SM2.SetFillStyle(1001)
+	SM2.SetLineWidth(1)
+	SM2.SetLineStyle(1)
+
+	ALT2 = TGraphAsymmErrors(nentries, xyVals['xAlt'], xyVals['yAlt'], xyVals['xErr'], xyVals['xErr'], xyVals['yAltErr2M'], xyVals['yAltErr2P'])
+	ALT2.SetFillColor(kAzure+1)
+	ALT2.SetLineColor(kAzure+1)
+#	ALT2.SetMarkerColor(kOrange+1)
+	ALT2.SetMarkerSize(0)
+	ALT2.SetMarkerStyle(1)
+#	ALT2.SetFillStyle(1001)
+	ALT2.SetLineWidth(1)
+	ALT2.SetLineStyle(1)
+	
+	SM3 = TGraphAsymmErrors(nentries, xyVals['xSm'], xyVals['ySm'], xyVals['xErr'], xyVals['xErr'], xyVals['ySmErr3M'], xyVals['ySmErr3P'])
+	SM3.SetFillColor(kOrange-9)
+	SM3.SetLineColor(kOrange-9)
+#	SM3.SetMarkerColor(kAzure+1)
+	SM3.SetMarkerSize(0)
+	SM3.SetMarkerStyle(1)
+#	SM3.SetFillStyle(1001)
+	SM3.SetLineWidth(1)
+	SM3.SetLineStyle(1)
+	
+	ALT3 = TGraphAsymmErrors(nentries, xyVals['xAlt'], xyVals['yAlt'], xyVals['xErr'], xyVals['xErr'], xyVals['yAltErr3M'], xyVals['yAltErr3P'])
+	ALT3.SetFillColor(kAzure-9)
+	ALT3.SetLineColor(kAzure-9)
+#	ALT3.SetMarkerColor(kOrange+1)
+	ALT3.SetMarkerSize(0)
+	ALT3.SetMarkerStyle(1)
+#	ALT3.SetFillStyle(1001)
+	ALT3.SetLineWidth(1)
+	ALT3.SetLineStyle(1)
+
+	SM3.SetHistogram(baseHisto)
+
+	vLine = [None]*(nentries-1)
+	hLine = [None]*4
+	for iv in range(nentries-1):
+		if hwwOnly : vLine[iv] = TLine(10*(iv+1), -30, 10*(iv+1),  60)
+		else       : vLine[iv] = TLine(10*(iv+1), -65, 10*(iv+1), 120)
+		vLine[iv].SetLineStyle(3)
+        if hwwOnly :
+          hLine[0] = TLine( 0, 0.158655,  60, 0.158655)
+          hLine[1] = TLine( 0, 0.022750,  60, 0.022750)
+          hLine[2] = TLine( 0, 0.001349,  60, 0.001349)
+          hLine[3] = TLine( 0, 0.000032,  60, 0.000032)
+        else:
+	  hLine[0] = TLine( 0, 0.158655, 120, 0.158655)
+	  hLine[1] = TLine( 0, 0.022750, 120, 0.022750)
+	  hLine[2] = TLine( 0, 0.001349, 120, 0.001349)
+	  hLine[3] = TLine( 0, 0.000032, 120, 0.000032)
+	for h in hLine: 
+		h.SetLineStyle(8)
+		h.SetLineColor(kRed)
+	
+	textSigma = [None]*4
+	textSigma[0] = TLatex(.92, .80, "1#sigma")
+	textSigma[1] = TLatex(.92, .80, "2#sigma")
+	textSigma[2] = TLatex(.92, .80, "3#sigma")
+	textSigma[3] = TLatex(.92, .80, "4#sigma")
+	for t in textSigma:
+		t.SetNDC(kTRUE)
+		t.SetTextFont(42)
+		t.SetTextSize(0.04)
+		t.SetTextColor(kRed)
+	for i in range(nentries): baseHisto.GetXaxis().SetBinLabel(i+1,xyVals['labels'][i])
+	baseHisto.SetTitleFont(82)
+	baseHisto.GetXaxis().LabelsOption("v")
+
+	canvas = TCanvas("Summary plot canvas", "", 1680, 900)
+#	canvas.SetLogy()
+	canvas.SetTicks(1,1)
+	gPad.SetBottomMargin(0.2)
+	gPad.SetTopMargin(0.1)
+	gPad.SetLeftMargin(0.1)
+	SM3.Draw("za2")
+	ALT3.Draw("z2")
+	SM2.Draw("z2")
+	ALT2.Draw("z2")
+	SM.Draw("samez2")
+	ALT.Draw("samez2")
+	observed.Draw("zp")
+	MedianALT.Draw("samez")
+	MedianSM.Draw("samez")
+	baseHisto.Draw("sameaxis")
+
+	for v in vLine: v.Draw("same")
+
+	pt = TPaveText(0.055, 0.9, 0.99, 0.95, "NDC")
+	pt.SetBorderSize(0)
+	pt.SetTextAlign(12)
+	pt.SetFillStyle(0)
+	pt.SetTextFont(61)
+	pt.SetTextSize(0.045)
+	textCMS = pt.AddText( 0, 0.6, "CMS" )
+	pt.Draw("same")
+
+        ptl = TPaveText(0.055, 0.9, 0.99, 0.95, "NDC")
+        ptl.SetBorderSize(0)
+        ptl.SetTextAlign(12)
+        ptl.SetFillStyle(0)
+        ptl.SetTextFont(42)
+        ptl.SetTextSize(0.035)
+	if hwwOnly : textCMS = ptl.AddText(0.69, 0.5,"19.4 fb^{-1} (8 TeV) + 4.9 fb^{-1} (7 TeV)")
+	else       : textCMS = ptl.AddText(0.69, 0.5,"19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)")
+	ptl.Draw("same")
+
+        pt2 = TPaveText(0.055, 0.9, 0.99, 0.95, "NDC")
+        pt2.SetBorderSize(0)
+        pt2.SetTextAlign(12)
+        pt2.SetFillStyle(0)
+        pt2.SetTextFont(42)
+        pt2.SetTextSize(0.035)  
+        if not hwwOnly : textCMS = pt2.AddText(0.40, 0.5,"X #rightarrow ZZ + WW")
+        else:            textCMS = pt2.AddText(0.40, 0.5,"X #rightarrow WW")
+        pt2.Draw()
+	
+	legData = TLegend( 0.13, 0.84, 0.4, 0.895 )
+	legData.SetNColumns(2)
+	legData.SetFillColor(0)
+	legData.SetLineColor(0)
+	legData.SetBorderSize(0)
+	legData.SetFillStyle(1001)
+	legData.SetTextFont(42)
+	legData.AddEntry(observed, "Observed", "lp" )
+	legData.AddEntry(MedianSM, "Expected", "l" )
+	legData.Draw()
+	
+	leg = TLegend( 0.13, 0.7, 0.4, 0.84 )
+	leg.SetNColumns(2)
+	leg.SetFillColor(0)
+	leg.SetLineColor(0)
+	leg.SetBorderSize(0)
+	leg.SetFillStyle(1001)
+	leg.SetTextFont(42)
+	leg.AddEntry(SM, "0^{+} #pm 1#sigma","f")
+	leg.AddEntry(ALT, "J^{P} #pm 1#sigma","f")
+	leg.AddEntry(SM2, "0^{+} #pm 2#sigma","f")
+	leg.AddEntry(ALT2, "J^{P} #pm 2#sigma","f")
+	leg.AddEntry(SM3, "0^{+} #pm 3#sigma","f")
+	leg.AddEntry(ALT3, "J^{P} #pm 3#sigma","f")
+	leg.Draw()
+
+	for i in range(nentries): baseHisto.GetXaxis().SetBinLabel(i+1,'')
+ 	l = TLatex();
+	l.SetTextSize(0.047);#	//0.047
+	l.SetTextFont(132);
+	l.SetTextAlign(12);
+	l.SetTextAngle(90);
+        for i in range(nentries):
+          if hwwOnly : l.DrawLatex(xyVals['xObserved'][i], -40 ,xyVals['labels'][i]) 
+          else:        l.DrawLatex(xyVals['xObserved'][i], -86 ,xyVals['labels'][i]) 
+
+        iProd = 0
+        nProd = len(plotContent)
+        nlen  = 0
+        ptV = {}
+        pl_separator_c = {}
+        for iType in plotContent : 
+          iProd+=1
+          nold = nlen
+          nlen += len(plotContent[iType]) 
+          print iProd
+          if iProd < nProd : 
+            pointx = array('f',[0]*2)
+            pointy = array('f',[0]*2)
+            pointx[0] = nlen*10 
+            pointx[1] = nlen*10 
+            if hwwOnly :
+              pointy[0] = -60 
+              pointy[1] = -30
+            else:
+              pointy[0] = -140
+              pointy[1] = -65
+            pl_separator_c[iProd] = TPolyLine(2, pointx, pointy, "");
+            pl_separator_c[iProd].SetUniqueID(1000+iProd);
+            pl_separator_c[iProd].SetLineColor(1);
+            pl_separator_c[iProd].SetLineStyle(3);
+            pl_separator_c[iProd].SetLineWidth(1);
+            pl_separator_c[iProd].Draw("same");
+
+          if hwwOnly : ptV[iProd] = ( TPaveText(nold*10,-50 ,nlen*10,-45) )
+          else:        ptV[iProd] = ( TPaveText(nold*10,-115 ,nlen*10,-87) ) 
+          ptV[iProd].SetBorderSize(0)
+          #ptV[iProd].SetTextAlign(12)
+          ptV[iProd].SetFillStyle(0)
+          ptV[iProd].SetTextFont(42)
+          ptV[iProd].SetTextSize(0.035) 
+          ptV[iProd].AddText(0.50, 0.5,iType)
+          ptV[iProd].Draw("same")
+
+	canvas.Modified()
+	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".pdf")
+	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".png")
+	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".root")
+	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".C")
+
 
 
    def MUMHSum(self,iComb,iEnergy,iModel,massFilter):
@@ -3043,6 +4389,7 @@ class combPlot :
       self.Results = {}
 
       if 'ACLsExp'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp') 
+      if 'ACLsBlind'in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsBlind') 
       if 'ACLsExpPost'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExpPost') 
       if 'ACLsInjPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsInjPre') 
       if 'ACLsBkgOnly' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsBkgOnly')
@@ -3076,6 +4423,8 @@ class combPlot :
       if 'ACLsBkgOnly'  in printList :
          txtPrint+='| CLsInjBkg '
       if 'ACLsExp' in printList : 
+         txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
+      if 'ACLsBlind' in printList :
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
       if 'ACLsExpPost' in printList : 
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
@@ -3120,6 +4469,13 @@ class combPlot :
             d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','68D')
             u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','68U')
             u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExp','95U')
+            txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2)) 
+        if 'ACLsBlind' in printList :
+            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','Val')
+            d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','95D')
+            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','68D')
+            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','68U')
+            u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','95U')
             txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2)) 
         if 'ACLsExpPost' in printList :
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','Val')
