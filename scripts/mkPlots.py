@@ -67,6 +67,9 @@ if iLumi >= 3 : iTitle=2
 else          : iTitle=1 #Set to 0 for preliminary !
 if options.combs[0] == 'HWW78TeV' : iTitle=2
 
+if options.combs[0] == 'hww01jet_jcp_12' :
+  options.combs=[ 'hww01jet_jcp_1m', 'hww01jet_jcp_1mix', 'hww01jet_jcp_1p', 'hww01jet_jcp_2pm_legacy','hww01jet_jcp_2ph2','hww01jet_jcp_2ph3','hww01jet_jcp_2hp','hww01jet_jcp_2bp','hww01jet_jcp_2ph6','hww01jet_jcp_2ph7','hww01jet_jcp_2hm','hww01jet_jcp_2mh9','hww01jet_jcp_2mh10']
+
 if options.combs[0] == 'hww01jet_jcp_2' :
   options.combs=['hww01jet_jcp_2pm_legacy','hww01jet_jcp_2ph2','hww01jet_jcp_2ph3','hww01jet_jcp_2hp','hww01jet_jcp_2bp','hww01jet_jcp_2ph6','hww01jet_jcp_2ph7','hww01jet_jcp_2hm','hww01jet_jcp_2mh9','hww01jet_jcp_2mh10']
 
@@ -100,6 +103,9 @@ combList      = combTools.CombList_Filter(combinations,options.combs).get()
 energyList    = combTools.EnergyList_Filter(options.energy).get()
 PhysModelList = combTools.PhysModelList_Filter(physmodels,options.models).get()
 postFix       = options.postFix
+
+#iLumi=2
+#iTitle=0
 
 for iPlot in options.plots:
    print '---------------------- Making plot: '+iPlot 
@@ -158,7 +164,7 @@ for iPlot in options.plots:
        if  iPlot == 'LimCC': plot.plotLimitChannel(CombList,options.energy,iModel,[125.6]) 
 
    #
-   # 2D MutliDim Fits
+   # 1D/2D MutliDim Fits
    #
    elif iPlot in ['MDFSum','MDFSumFast','MDF1D','MDF2D','MDF2DFast']:
      for iModel in PhysModelList:
@@ -174,6 +180,15 @@ for iPlot in options.plots:
            if iPlot == 'MDF1D'     : plot.MDF1D(iComb,options.energy,iModel,[iMass],False) 
            if iPlot == 'MDF2D'     : plot.MDF2D(iComb,options.energy,iModel,[iMass],bSimple,False)
            if iPlot == 'MDF2DFast' : plot.MDF2D(iComb,options.energy,iModel,[iMass],bSimple,True)
+   
+   elif iPlot in ['MDF1DExp'] :
+     for iModel in PhysModelList:
+       print '---------------------------> Model = '+iModel
+       massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,combList[0],energyList).get()
+       for iMass in massList:
+         plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,False,False,iTitle,iLumi)
+         if iPlot == 'MDF1DExp' : plot.MDF1DExp(combList,options.energy,iModel,[iMass],False)
+
    #
    # JCP
    #
@@ -192,7 +207,7 @@ for iPlot in options.plots:
              if iPlot == 'JCPPlot'   : plot.JCPPlt(iComb,options.energy,iModel,iTarget,[iMass]) 
              if iPlot == 'JCPFQQ'    : plot.JCPFQQ(iComb,options.energy,iModel,iTarget,[iMass]) 
 
-   elif iPlot in ['JCPView','JCPTable','JCPFB2'] : 
+   elif iPlot in ['JCPView','JCPTable','JCPFB2','FJPView'] : 
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel
        massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,combList[0],energyList).get()
@@ -202,7 +217,7 @@ for iPlot in options.plots:
            if iPlot == 'JCPView'   : plot.JCPView(combList,options.energy,iModel,iTarget,[iMass]) 
            if iPlot == 'JCPTable'  : plot.JCPTable(combList,options.energy,iModel,iTarget,[iMass]) 
            if iPlot == 'JCPFB2'    : plot.JCPFB2(combList,options.energy,iModel,iTarget,[iMass]) 
-
+           if iPlot == 'FJPView'   : plot.FJPView(combList,options.energy,iModel,iTarget,[iMass])
    
 
    #

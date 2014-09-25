@@ -2038,7 +2038,7 @@ class combPlot :
          self.Save(iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext)
 
          # Save values
-         cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+         cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype'],'target').get()
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb+'/'+str(massFilter[0])+'/'
          limFile= TargetDir+iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext+'.txt' 
          print limFile
@@ -2050,6 +2050,102 @@ class combPlot :
            #subfile.write ('Test '+ str(dnllExp)+' '+str(dnll) +'\n')
          subfile.close()
          self.Wait()
+
+   def MDF1DExp(self,CombList,iEnergy,iModel,massFilter,bFast=False,bSigma=False):
+       y2Sigma=3.84
+       if bSigma : y2Sigma=4.
+       print 'MDF1D',CombList,iEnergy,iModel,massFilter
+       Fast=''
+       if bFast : Fast='Fast'
+       TargetBase = 'MDFGrid'
+       if 'TargetBase' in physmodels[iModel]['MDFTree'] : TargetBase=physmodels[iModel]['MDFTree']['TargetBase']
+       PlotDic={}
+       if 'POISetKeys' in physmodels[iModel]['MDFTree'] :
+         for iPOISetKey in physmodels[iModel]['MDFTree']['POISetKeys']:
+           if physmodels[iModel]['MDFTree'][iPOISetKey]['NDim'] == 1 : PlotDic[iPOISetKey] = physmodels[iModel]['MDFTree'][iPOISetKey]
+       elif physmodels[iModel]['MDFTree']['NDim'] == 1 : PlotDic['NONE'] = physmodels[iModel]['MDFTree']
+
+       for iPlot in PlotDic:
+         print iPlot,' : ',PlotDic[iPlot]
+         self.squareCanvas(False,False)
+         self.c1.cd()
+         self.resetPlot()
+         self.xAxisTitle = PlotDic[iPlot]['AxisTitle'][0]
+         self.yAxisTitle = '-2 #Delta ln L'
+         minXP           = PlotDic[iPlot]['MinPlt'][0]
+         maxXP           = PlotDic[iPlot]['MaxPlt'][0]
+         minYP           = PlotDic[iPlot]['MinPlt'][1]
+         maxYP           = PlotDic[iPlot]['MaxPlt'][1]
+         dX              = maxXP-minXP
+
+         Ext             = ''
+         if 'Ext' in PlotDic[iPlot] : Ext= PlotDic[iPlot]['Ext']
+
+
+         LCol = [ kBlack , kBlack , kBlue , kBlue ,  kRed , kRed , kMagenta , kMagenta ,  kGreen , kGreen , kOrange , kOrange ]
+         LTyp = [    1   ,    2   ,   1   ,   2   ,   1   ,  2   ,    1     ,    2     ,     1   ,   2    ,    1    ,   2     ]
+
+         iLC=0
+         LegList=[]
+         List='Exp'
+         for iComb in CombList: 
+           List+='_'+iComb
+           self.readMDF1D(iComb,iEnergy,iModel,massFilter,TargetBase+Fast+'Exp'+Ext+self.postFix,PlotDic[iPlot])
+           objNameExp=iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+'Exp'+Ext+self.postFix
+
+           self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineWidth(2)
+           self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineStyle( LTyp[iLC] )
+           self.Obj2Plot['gr__'+objNameExp]['Obj'].SetLineColor( LCol[iLC] )
+           #self.Obj2Plot['gr__'+objNameExp]['Obj'].Draw("samel")
+           self.Obj2Plot['gr__'+objNameExp]['Legend']= self.combinations[iComb]['legend']
+           LegList.append('gr__'+objNameExp) 
+           iLC+=1 
+
+         # Plot
+         frame = TH1F("Frame","Frame",5,float(minXP),float(maxXP))
+         frame.GetXaxis().SetTitle(self.xAxisTitle)
+         frame.GetYaxis().SetTitle(self.yAxisTitle)
+         frame.GetYaxis().SetRangeUser(float(minYP),float(maxYP))
+         frame.GetXaxis().SetNdivisions(505)
+         frame.GetYaxis().SetNdivisions(505)
+         frame.Draw()
+
+
+         Lines=['One','Four']
+         self.plotHorizLine('One' , [float(minXP),float(maxXP)] , 1 , kBlack , 9    , 1 , '1sigma')
+         self.plotHorizLine('Four', [float(minXP),float(maxXP)] , y2Sigma , kBlack , 9 , 1 , '2sigma')
+
+         self.plotAllObj(LegList,True)
+         self.plotAllObj(Lines,True)
+         self.plotObjLeg(LegList,'Expected','TopLeftLarge')
+         self.addTitle(self.iTitle,self.iLumi)
+         
+         self.c1.cd()
+         pt = TPaveText(minXP+0.04*dX,1.05,minXP+0.12*dX,1.5);
+         pt.SetBorderSize(0);
+         pt.SetFillColor(0);
+         pt.SetFillStyle(0);
+         pt.SetTextFont(42);
+         pt.SetTextSize(0.025);
+         text = pt.AddText("68% CL");
+         pt.Draw();
+
+         pt2 = TPaveText(minXP+0.04*dX,3.94,minXP+0.12*dX,4.3);
+         pt2.SetBorderSize(0);
+         pt2.SetFillColor(0);
+         pt2.SetFillStyle(0);
+         pt2.SetTextFont(42);
+         pt2.SetTextSize(0.025);
+         text = pt2.AddText("95% CL");
+         pt2.Draw();
+
+
+         self.c1.Update()
+         self.Save(List+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext) 
+
+
+
+
 
    def MDF2D(self,iComb,iEnergy,iModel,massFilter,bSimple=False,bFast=False):
        print 'MDF2D',iComb,iEnergy,iModel,massFilter
@@ -2535,7 +2631,7 @@ class combPlot :
              iStatus2=1
              if 'float' in iTarget :
                if    'hgghzzhww' in iComb :
-                 if '_gg'  in iComb : iStatus=0
+                 if '_gg'  in iComb : iStatus=2
                  if '_dec' in iComb : iStatus2=0
                elif  'hwwhzz'    in iComb :
                  if  '1hzz' in iComb :
@@ -2965,7 +3061,7 @@ class combPlot :
          iStatus2=1
          if 'float' in iTarget :
            if    'hgghzzhww' in iComb :
-             if '_gg' in iComb : iStatus2=0
+             if '_gg' in iComb : iStatus2=2
            elif  'hwwhzz'    in iComb :
              if  '2pm'  in iComb :
                if '_dec' in iComb : iStatus2=0
@@ -3327,7 +3423,7 @@ class combPlot :
        for iMass in massList:
 
          plotContent = OrderedDict()
-         plotContent['q#bar{q}'] = OrderedDict()
+         #plotContent['q#bar{q}'] = OrderedDict()
          plotContent['gg production']  = OrderedDict()
          plotContent['q#bar{q} production'] = OrderedDict()
 
@@ -3816,6 +3912,483 @@ class combPlot :
 	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".png")
 	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".root")
 	canvas.SaveAs(plotDir + "JP_SummaryPlot"+Extra+".C")
+
+   def FJPView(self,combList,iEnergy,iModel,iTarget,massFilter):
+       cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()
+       energyList= combTools.EnergyList_Filter(iEnergy).get()
+       massList  = combTools.MassList_Filter(cardtypes,self.channels[self.Version],self.combinations,physmodels[iModel]['cardtype'],massFilter,combList[0],energyList).get()
+   
+       for iMass in massList:
+
+         
+         plotContent = OrderedDict()
+         #plotContent['q#bar{q}'] = OrderedDict()
+         if ('1m' in combList[0] or '1p' in combList[0] or '1mix' in combList[0] ) : 
+            #plotContent['q#bar{q}'] = OrderedDict()
+            plotContent[' '] = OrderedDict()
+         plotContent['gg production']  = OrderedDict()
+         plotContent['q#bar{q} production'] = OrderedDict()
+
+         for iComb in combList:
+          
+           # Spin 1:
+           if ( '1m' in iComb or '1p' in iComb or '1mix' in iComb ) :
+             iTargetS = 'JCP'
+             TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['dir']+'/'+iComb+'/'+str(iMass)
+             print   TargetDir
+             legend = self.combinations[iComb]['legend']
+             if '1mix' in iComb: legend = 'f_{b2}^{WW}=0.5' 
+             #elif '1m' in iComb: legend = 'f_{b2}=0' 
+             #elif '1p' in iComb: legend = 'f_{b2}=1' 
+             logName   = TargetDir+'/'+iComb+'_0_'+iTargetS+'_fJP.txt'
+             print logName  
+             #iKey = 'q#bar{q}'
+             iKey = ' '
+             plotContent[iKey][legend] = {} 
+             for line in open(logName):
+                 values=line.split()
+                 if 'Exp'  in values[0] : plotContent[iKey][legend]['Exp']  = [ values[1] ,  values[2] ,  values[3] ,  values[4] ]
+                 if 'Obs'  in values[0] : plotContent[iKey][legend]['Obs']  = [ values[1] ,  values[2] ,  values[3] ,  values[4] ]
+                 if 'Best' in values[0] : plotContent[iKey][legend]['Best'] = [ values[1] ]
+
+ 
+           # Spin 2:
+           if not ( '1hzz' in iComb or '1m' in iComb or '1p' in iComb or '1mix' in iComb ) :
+             TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['dir']+'/'+iComb+'/'+str(iMass)
+             print   TargetDir
+             legend = self.combinations[iComb]['legend']
+             for iFQQ in ['0','1'] :
+               logName   = TargetDir+'/'+iComb+'_0_'+iTarget+'_fJP_fqq'+iFQQ+'.txt'
+               print logName  
+               iKey = 'NONE'
+               if iFQQ == '0' : iKey =  'gg production'
+               if iFQQ == '1' : iKey =  'q#bar{q} production'
+               plotContent[iKey][legend] = {} 
+               for line in open(logName):
+                 values=line.split()
+                 if 'Exp'  in values[0] : plotContent[iKey][legend]['Exp']  = [ values[1] ,  values[2] ,  values[3] ,  values[4] ]
+                 if 'Obs'  in values[0] : plotContent[iKey][legend]['Obs']  = [ values[1] ,  values[2] ,  values[3] ,  values[4] ]
+                 if 'Best' in values[0] : plotContent[iKey][legend]['Best'] = [ values[1] ]
+                                                              
+
+       #print plotContent
+       if ( '1m' in combList[0] or '1p' in combList[0] or '1mix' in combList[0] ) : 
+         self.plotSummary_fJP('all',plotContent)
+       else:
+         self.plotSummary_fJP('spin2',plotContent)
+       
+   def plotSummary_fJP(self,plotDir,plotContent,hwwOnly=True,Extra='_hww'):
+  
+        Green  = 211
+        Yellow = 90 
+ 
+        nentries=0
+        for iType in plotContent: 
+          print iType
+          nentries += len( plotContent[iType] )  
+ 
+        #vnames       = array('c',['2^+_m']*nentries)
+    
+        vexp_95CL_up = array('f',[0.]*nentries)
+        vexp_68CL_up = array('f',[0.]*nentries)
+        vexp_95CL_do = array('f',[0.]*nentries)
+        vexp_68CL_do = array('f',[0.]*nentries)
+
+
+        vobs_95CL_up = array('f',[0.]*nentries)
+        vobs_68CL_up = array('f',[0.]*nentries)
+        vobs_95CL_do = array('f',[0.]*nentries)
+        vobs_68CL_do = array('f',[0.]*nentries)
+        vobs         = array('f',[0.]*nentries)
+     
+        # fill from content
+        iLabel = 0
+        for iType in plotContent:
+          for Label in plotContent[iType] :
+            vexp_95CL_do [iLabel] = max(0.,float(plotContent[iType][Label]['Exp'][0] ))
+            vexp_68CL_do [iLabel] = max(0.,float(plotContent[iType][Label]['Exp'][1] ))
+            vexp_68CL_up [iLabel] = min(1.,abs(float(plotContent[iType][Label]['Exp'][2] )))
+            vexp_95CL_up [iLabel] = min(1.,abs(float(plotContent[iType][Label]['Exp'][3] )))
+
+            vobs         [iLabel] = max(0.,float(plotContent[iType][Label]['Best'][0])) 
+
+            vobs_95CL_do [iLabel] = max(0.,float(plotContent[iType][Label]['Obs'][0] ))
+            vobs_68CL_do [iLabel] = max(0.,float(plotContent[iType][Label]['Obs'][1] ))
+            vobs_68CL_up [iLabel] = min(1.,abs(float(plotContent[iType][Label]['Obs'][2] )))
+            vobs_95CL_up [iLabel] = min(1.,abs(float(plotContent[iType][Label]['Obs'][3] )))
+
+            print Label, vexp_68CL_up[iLabel] , vexp_95CL_up[iLabel]
+            iLabel+=1
+   
+
+
+	canvas = TCanvas("Summary plot canvas", "", 1200, 400)
+	canvas.SetTicks(1,0)
+	gPad.SetBottomMargin(0.22)
+	gPad.SetTopMargin(0.06)
+	gPad.SetLeftMargin(0.07)
+	gPad.SetRightMargin(0.01)
+
+ 
+
+        baseHisto = TH1F("Base Histo", "", nentries, 0. , nentries+1.5)
+	baseHisto.SetStats(0)
+	baseHisto.GetXaxis().SetTickLength(0)
+	baseHisto.GetYaxis().SetTickLength(0.03)
+	baseHisto.GetXaxis().SetTitleFont(42)
+	baseHisto.GetYaxis().SetTitleFont(42)
+	baseHisto.GetXaxis().SetTitleOffset(1.7)
+	baseHisto.GetYaxis().SetTitleOffset(0.3)
+	baseHisto.GetYaxis().SetLabelOffset(0.005)
+	baseHisto.GetYaxis().SetTitleSize( 0.08 );
+	baseHisto.GetYaxis().SetLabelSize( 0.035 );
+
+        baseHisto.GetYaxis().SetRangeUser(0,1)
+
+        #baseHisto.GetYaxis().SetTitleSize(0.2)
+	baseHisto.GetYaxis().SetTitle("f(J^{P})")
+        baseHisto.Draw()
+ 
+        pointx = array('f',[0]*5)
+        pointy = array('f',[0]*5)
+   
+        pl_separator = {}
+        pl_95CL = {} 
+        pl_68CL = {} 
+        pl_obs95 = {}
+        pl_obs68 = {}
+        pl_obs68u = {}
+        pl_obs68d = {}
+        pm_obs = {}
+   
+        for i in range(nentries) :
+       
+           # Model separator
+           pointx[0] = 1.5 + i + 1;
+           pointx[1] = 1.5 + i + 1;
+           pointy[0] = 0;
+           pointy[1] = 1;
+    
+           pl_separator[i] = TPolyLine(2, pointx, pointy, "");
+           pl_separator[i].SetLineColor(1);
+           pl_separator[i].SetLineStyle(2);
+           pl_separator[i].SetLineWidth(1);
+           pl_separator[i].Draw("same");
+   
+           # Expected @ 95% CL  
+           pointx[0] = 0.7 + i + 1;
+           pointx[1] = 0.7 + i + 1;
+           pointx[2] = 1.3 + i + 1;
+           pointx[3] = 1.3 + i + 1;
+           pointy[0] = 0.0025;
+           pointy[1] = vexp_95CL_up[i];
+           pointy[2] = vexp_95CL_up[i];
+           pointy[3] = 0.0025;
+   
+           pl_95CL[i] = TPolyLine(4, pointx, pointy, "");
+           pl_95CL[i].SetFillColor(Yellow);
+           pl_95CL[i].Draw("f");
+   
+           # Expected @ 95% CL  
+           pointx[0] = 0.7 + i + 1;
+           pointx[1] = 0.7 + i + 1;
+           pointx[2] = 1.3 + i + 1;
+           pointx[3] = 1.3 + i + 1;
+           pointy[0] = 0.0025;
+           pointy[1] = vexp_68CL_up[i];
+           pointy[2] = vexp_68CL_up[i];
+           pointy[3] = 0.0025;
+   
+           pl_68CL[i] = TPolyLine(4, pointx, pointy, "");
+           pl_68CL[i].SetFillColor(Green);
+           pl_68CL[i].Draw("f");
+   
+           # Observation @ 95% CL (Filled area) 
+           if vobs_95CL_up[i] < 1 :
+             pointx[0] = 0.6 + i + 1;
+             pointx[1] = 0.6 + i + 1;
+             pointx[2] = 1.4 + i + 1;
+             pointx[3] = 1.4 + i + 1;
+             pointy[0] = vobs_95CL_up[i];
+             pointy[1] = 0.9975;
+             pointy[2] = 0.9975;
+             pointy[3] = vobs_95CL_up[i];
+   
+             pl_obs95[i] = TPolyLine(4, pointx, pointy, "");
+             pl_obs95[i].SetFillColor(kBlack);
+             pl_obs95[i].SetFillStyle(3254);
+             pl_obs95[i].SetLineStyle(2);
+             pl_obs95[i].Draw("f");
+   
+           # Observation @ 68% CL (error line)
+           pointx[0] = 1 + i + 1;
+           pointx[1] = 1 + i + 1;
+           pointy[0] = vobs_68CL_do[i];
+           pointy[1] = vobs_68CL_up[i];
+       
+           pl_obs68[i] = TPolyLine(2, pointx, pointy, "");
+           pl_obs68[i].SetLineColor(kBlack);
+           pl_obs68[i].SetLineStyle(1);
+           pl_obs68[i].SetLineWidth(1);
+           pl_obs68[i].SetLineStyle(1);
+           pl_obs68[i].Draw("same");
+          
+           pointx[0] = 0.7 + i + 1;
+           pointx[1] = 1.3 + i + 1;
+           pointy[0] = vobs_68CL_do[i];
+           pointy[1] = vobs_68CL_do[i];
+   
+           pl_obs68d[i] = TPolyLine(2, pointx, pointy, "");
+           pl_obs68d[i].SetLineColor(kBlack);
+           pl_obs68d[i].SetLineStyle(1);
+           pl_obs68d[i].SetLineWidth(1);
+           pl_obs68d[i].SetLineStyle(1);
+           pl_obs68d[i].Draw("same");
+   
+           pointx[0] = 0.7 + i + 1;
+           pointx[1] = 1.3 + i + 1;
+           pointy[0] = vobs_68CL_up[i];
+           pointy[1] = vobs_68CL_up[i];
+   
+           pl_obs68u[i] = TPolyLine(2, pointx, pointy, "");
+           pl_obs68u[i].SetLineColor(kBlack);
+           pl_obs68u[i].SetLineStyle(1);
+           pl_obs68u[i].SetLineWidth(1);
+           pl_obs68d[i].SetLineStyle(1);
+           pl_obs68u[i].Draw("same");
+   
+           # Observation (Point)
+   
+           pointx[0] = 0.6 + i + 1;
+           pointx[1] = 1.4 + i + 1;
+           pointy[0] = vobs[i];
+           pointy[1] = vobs[i];
+   
+           pointx[0] = 0.5*pointx[0] + 0.5*pointx[1];
+           pointy[0] = 0.5*pointy[0] + 0.5*pointy[0];
+   
+           pm_obs[i] = TMarker(pointx[0], pointy[0], 8);
+           pm_obs[i].SetMarkerColor(kBlack);
+           pm_obs[i].SetMarkerStyle(8);
+           pm_obs[i].SetMarkerSize(1.0);
+           pm_obs[i].Draw("same");
+   
+        # Title
+  
+	CP = TLatex();
+	CP.SetNDC(kTRUE);
+	CP.SetTextSize(0.045);
+	CP.SetTextAlign(31);
+	CP.SetTextFont(61);
+	CP.SetTextAlign(11);
+	CP.DrawLatex( 0.07, 0.95, "CMS" );
+
+	CP2 = TLatex();
+	CP2.SetNDC(kTRUE);
+	CP2.SetTextSize(0.040);
+	CP2.SetTextAlign(31);
+	CP2.SetTextFont(42);
+	CP2.SetTextAlign(11);
+	if hwwOnly : 
+          CP2.DrawLatex( 0.5, 0.95, "H #rightarrow WW" );
+	  CP2.DrawLatex( 0.82 , 0.95, "19.4 fb^{-1} (8 TeV) + 4.9 fb^{-1} (7 TeV)" );
+ 
+	CP3 = TLatex();
+	CP3.SetNDC(kTRUE);
+	CP3.SetTextSize(0.040);
+	CP3.SetTextAlign(31);
+	CP3.SetTextFont(52);
+	CP3.SetTextAlign(11);
+        #CP3.DrawLatex( 0.105, 0.95, "Unpublished" );
+
+
+
+        # Legend
+        legendx = array('f',[0]*5)
+        legendy = array('f',[0]*5)
+
+
+	
+	# Frame coordinates
+	legendx[0] = -0.050*(nentries+1)-0.5;
+	legendx[1] = -0.050*(nentries+1)-0.5;
+	legendx[2] = 0.05*(nentries+1)-0.5;
+	legendx[3] = 0.05*(nentries+1)-0.5;
+	legendx[4] = legendx[0];
+	legendy[0] = -0.295;
+	legendy[1] = -0.05;
+	legendy[2] = -0.05;
+	legendy[3] = -0.295;
+	legendy[4] = legendy[0];
+
+        # Observed: Text
+     	pointx[0] = (legendx[2] - legendx[0])*0.04 + legendx[0];
+	pointx[1] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointy[0] = legendy[0] + 0.21;
+	pointy[1] = legendy[0] + 0.21;
+
+	legend_entries2 = TLatex();
+	legend_entries2.SetTextSize(0.04);
+	legend_entries2.SetTextFont(132);
+	legend_entries2.SetTextAlign(12);
+	legend_entries2.DrawLatex(pointx[1]+(legendx[2] - legendx[0])*0.02, pointy[0], "Best fit #pm 1#sigma");
+
+        lpl_obs = TPolyLine(2, pointx, pointy, "");
+	lpl_obs.SetFillColor(kBlack);
+	lpl_obs.SetLineColor(kBlack);
+	lpl_obs.SetLineStyle(1);
+	lpl_obs.SetLineWidth(2);
+	lpl_obs.Draw("same");
+
+        # Observed: Dot
+	pointx[0] = 0.5*pointx[0] + 0.5*pointx[1];
+	pointy[0] = 0.5*pointy[0] + 0.5*pointy[1];
+	lpm_obs = TMarker(pointx[0], pointy[0], 8);
+	lpm_obs.SetMarkerColor(kBlack);
+	lpm_obs.SetMarkerStyle(8);
+	lpm_obs.SetMarkerSize(1.0);
+	lpm_obs.Draw("f");
+
+ 
+	# 95% Onserved exclusion entry coordinates
+	pointx[0] = (legendx[2] - legendx[0])*0.05 + legendx[0];
+	pointx[1] = (legendx[2] - legendx[0])*0.05 + legendx[0];
+	pointx[2] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointx[3] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointy[0] = legendy[0] + 0.15 - 0.025;
+	pointy[1] = legendy[0] + 0.15 + 0.025;
+	pointy[2] = legendy[0] + 0.15 + 0.025;
+	pointy[3] = legendy[0] + 0.15 - 0.025;
+
+	lpl95 = TPolyLine(4, pointx, pointy, "");
+	lpl95.SetFillColor(kBlack);
+	lpl95.SetFillStyle(3254);
+	lpl95.SetLineStyle(2);
+	lpl95.Draw("f");
+
+	legend_entries = TText();
+	legend_entries.SetTextSize(0.04);
+	legend_entries.SetTextFont(132);
+	legend_entries.SetTextAlign(12);
+	legend_entries.SetText(pointx[2]+(legendx[2] - legendx[0])*0.02, 0.5*pointy[0] + 0.5*pointy[1],	"Excluded at 95% CL");
+	legend_entries.Draw("same");
+ 
+        # Expected 95 CI coordinates
+	pointx[0] = (legendx[2] - legendx[0])*0.05 + legendx[0];
+	pointx[1] = (legendx[2] - legendx[0])*0.05 + legendx[0];
+	pointx[2] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointx[3] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointy[0] = legendy[0] + 0.09 - 0.025;
+	pointy[1] = legendy[0] + 0.09 + 0.025;
+	pointy[2] = legendy[0] + 0.09 + 0.025;
+	pointy[3] = legendy[0] + 0.09 - 0.025;
+	
+	lpl_95CL = TPolyLine(4, pointx, pointy, "");
+	lpl_95CL.SetUniqueID(3000);
+	lpl_95CL.SetFillColor(Yellow);
+	lpl_95CL.SetLineStyle(2);
+	lpl_95CL.Draw("f");
+	
+	legend_entries4 = TLatex();
+	legend_entries4.SetTextSize(0.04);
+	legend_entries4.SetTextFont(132);
+	legend_entries4.SetTextAlign(12);
+	legend_entries4.DrawLatex(pointx[2]+(legendx[2] - legendx[0])*0.02, 0.5*pointy[0] + 0.5*pointy[1], "Expected at 95% CL");
+	
+ 	# Expected 68 CI coordinates
+	pointx[0] = (legendx[2] - legendx[0])*0.05 + legendx[0];
+	pointx[1] = (legendx[2] - legendx[0])*0.05 + legendx[0];
+	pointx[2] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointx[3] = (legendx[2] - legendx[0])*0.20 + legendx[0];
+	pointy[0] = legendy[0] + 0.03 - 0.025;
+	pointy[1] = legendy[0] + 0.03 + 0.025;
+	pointy[2] = legendy[0] + 0.03 + 0.025;
+	pointy[3] = legendy[0] + 0.03 - 0.025;
+	
+	lpl_1s = TPolyLine(4, pointx, pointy, "");
+	lpl_1s.SetUniqueID(3000);
+	lpl_1s.SetFillColor(Green);
+	lpl_1s.SetLineStyle(2);
+	lpl_1s.Draw("f");
+	
+	legend_entries3 = TLatex();
+	legend_entries3.SetTextSize(0.04);
+	legend_entries3.SetTextFont(132);
+	legend_entries3.SetTextAlign(12);
+	legend_entries3.DrawLatex(pointx[2]+(legendx[2] - legendx[0])*0.02, 0.5*pointy[0] + 0.5*pointy[1], "Expected at 68% CL");
+	
+ 
+
+        # X-axis
+
+        for i in range(nentries): baseHisto.GetXaxis().SetBinLabel(i+1,'')
+        l = TLatex();
+	l.SetTextSize(0.058);#	//0.047
+	l.SetTextFont(132);
+	l.SetTextAlign(12);
+	l.SetTextAngle(90);
+        l2 = TLatex();
+	l2.SetTextSize(0.052);#	//0.047
+	l2.SetTextFont(132);
+	l2.SetTextAlign(12);
+	l2.SetTextAngle(90);
+
+        iLabel=0
+        for iType in plotContent:
+          for Label in plotContent[iType] :
+            pointx[0] = 1 + iLabel + 1;
+            pointy[0] = -0.14
+            if 'b2' in Label:
+              l2.DrawLatex(pointx[0], -0.29 , Label )
+            elif '1^' in  Label:
+              l.DrawLatex(pointx[0], -0.11 , Label)
+            else:
+              l.DrawLatex(pointx[0], pointy[0] , Label )
+            iLabel += 1
+
+        # Groups
+
+        iProd = 0
+        nProd = len(plotContent)
+        nlen  = 0
+        ptV = {}
+        pl_separator_c = {}
+        for iType in plotContent : 
+          iProd+=1
+          nold = nlen
+          nlen += len(plotContent[iType]) 
+          print iProd
+          if iProd < nProd : 
+            pointx[0] = nlen+1.5 
+            pointx[1] = nlen+1.5 
+            pointy[0] = -0.3
+            pointy[1] = 0 
+            pl_separator_c[iProd] = TPolyLine(2, pointx, pointy, "");
+            pl_separator_c[iProd].SetUniqueID(1000+iProd);
+            pl_separator_c[iProd].SetLineColor(1);
+            pl_separator_c[iProd].SetLineStyle(2);
+            pl_separator_c[iProd].SetLineWidth(1);
+            pl_separator_c[iProd].Draw("same");
+
+          ptV[iProd] = ( TPaveText(nold+1.5,-0.25 ,nlen+1.5,-0.14) ) 
+
+
+          ptV[iProd].SetBorderSize(0)
+          #ptV[iProd].SetTextAlign(12)
+          ptV[iProd].SetFillStyle(0)
+          ptV[iProd].SetTextFont(42)
+          ptV[iProd].SetTextSize(0.05) 
+          ptV[iProd].AddText(0.50, 0.1,iType)
+          ptV[iProd].Draw("same")
+
+
+        #canvas.WaitPrimitive() 
+        
+        canvas.Modified()
+        canvas.SaveAs(plotDir + "NIS_SummaryPlot"+Extra+".pdf")
+        canvas.SaveAs(plotDir + "NIS_SummaryPlot"+Extra+".png")
+        canvas.SaveAs(plotDir + "NIS_SummaryPlot"+Extra+".root")
+        canvas.SaveAs(plotDir + "NIS_SummaryPlot"+Extra+".C")
 
 
 
@@ -4390,6 +4963,8 @@ class combPlot :
 
       if 'ACLsExp'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExp') 
       if 'ACLsBlind'in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsBlind') 
+      if 'RVACLsBlind'in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'RVACLsBlind') 
+      if 'RFACLsBlind'in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'RFACLsBlind') 
       if 'ACLsExpPost'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsExpPost') 
       if 'ACLsInjPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsInjPre') 
       if 'ACLsBkgOnly' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsBkgOnly')
@@ -4425,6 +5000,10 @@ class combPlot :
       if 'ACLsExp' in printList : 
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
       if 'ACLsBlind' in printList :
+         txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
+      if 'RVACLsBlind' in printList :
+         txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
+      if 'RFACLsBlind' in printList :
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
       if 'ACLsExpPost' in printList : 
          txtPrint+='| CLsExp | 95Do | 68Do | 68Up | 95Up '
@@ -4477,6 +5056,20 @@ class combPlot :
             u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','68U')
             u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsBlind','95U')
             txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2)) 
+        if 'RVACLsBlind' in printList :
+            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RVACLsBlind','Val')
+            d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RVACLsBlind','95D')
+            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RVACLsBlind','68D')
+            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RVACLsBlind','68U')
+            u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RVACLsBlind','95U')
+            txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2))
+        if 'RFACLsBlind' in printList :
+            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RFACLsBlind','Val')
+            d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RFACLsBlind','95D')
+            d68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RFACLsBlind','68D')
+            u68=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RFACLsBlind','68U')
+            u95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'RFACLsBlind','95U')
+            txtPrint+='| '+str(round(Val,2))+' | '+str(round(d95,2))+' | '+str(round(d68,2))+' | '+str(round(u68,2))+' | '+str(round(u95,2))
         if 'ACLsExpPost' in printList :
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','Val')
             d95=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsExpPost','95D')

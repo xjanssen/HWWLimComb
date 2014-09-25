@@ -72,7 +72,7 @@ class CombList_Filter:
 
 #--- CardDir Filter
 class CardDir_Filter:
-    def __init__(self, cardtypes , purpose):
+    def __init__(self, cardtypes , purpose , level='src' ):
         self.cardtypes  = cardtypes
         self.purpose    = purpose
         self.found      = False
@@ -80,7 +80,7 @@ class CardDir_Filter:
         for iPurpose in self.cardtypes: 
            if iPurpose == self.purpose:
              self.found   = True
-             if 'targetdir' in self.cardtypes[iPurpose]: 
+             if  'target' in level  and 'targetdir' in self.cardtypes[iPurpose]: 
                self.CardDir = self.cardtypes[iPurpose]['targetdir'] 
              else:
                self.CardDir = self.cardtypes[iPurpose]['dir'] 

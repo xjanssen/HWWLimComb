@@ -190,7 +190,8 @@ for iComb in combList:
                     if (NJobs) > 1 : JobN += '.job'+str(iJob)
                     command +=' -n '+outname+'_'+iTarget+PF+TPF+JobN
                     # logfile 
-                    command += ' 2>&1 | tee '+logfile
+                    command += ' 2>&1 > /dev/null' 
+                    #command += ' 2>&1 | tee '+logfile
                     jJob+=1
                     if options.pretend : print command
                     else :

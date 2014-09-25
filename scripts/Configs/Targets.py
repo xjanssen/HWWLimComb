@@ -45,6 +45,11 @@ targets = {
   'ACLsBkgOnly'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=0' , 'treeKeys' : ['Val'] },
   'ACLsInjPost'  : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1 --toysFreq' },
 
+
+  'RFACLsBlind'    : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run blind --setPhysicsModelParameters RV=1 --freezeNuisances RV --redefineSignalPOI RF ' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } , 
+  'RVACLsBlind'    : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run blind --setPhysicsModelParameters RF=1 --freezeNuisances RF --redefineSignalPOI RV ' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } , 
+
+
 #############################
 # Limits: SM Higgs Injection
 #############################
@@ -79,6 +84,42 @@ targets = {
   'ToysNoSyst'    : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 500 --toysNoSystematics --saveToys --expectSignal=1 -s -1' , 'NJobs' : 10 },
   'ToysSyst'      : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 500 --saveToys --expectSignal=1 -s -1' , 'NJobs' : 10 },
   'ToysAsimov'    : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t -1 --saveToys --expectSignal=1' },
+
+  'ToysBB1EXP'   : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t 250  --saveToys -s -1 --expectSignal=1' ,
+                     'NJobs' : 4  ,
+                     'AltModel' : 'Gen' , 
+                     'FreezeNuis' : {1:['lnU','*'],2:['lnN','*'],3:['param','*CAT*'],4:['param','CMS_scale_j'],5:['param','CMS_res_j']}
+                   },                 
+  'MLToysBB1EXP'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-40 --rMax=40' , 
+                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBB1EXP' , 'NToysJob' : 250  } ,
+                     'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
+                     'AltModel' : 'Use' 
+                   },
+  'ToysBBNoSyst_Zfit' : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 250  --saveToys -s -1 --expectSignal=$MUEXP' ,
+                     'NJobs' : 4  ,
+                     'AltModel' : 'Gen' , 
+                     'FreezeNuis' : {1:['lnU','*'],2:['lnN','*']} ,
+                     #'FreezeNuis' : {1:['lnU','*']},
+                     'JobsParam' : { 'MUEXP' : [0,1,2,3,4] }
+                   },
+  'MLToysBBNoSyst_Zfit' : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-40 --rMax=40' , 
+                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBBNoSyst_Zfit' , 'NToysJob' : 250  } ,
+                     'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
+                     #'FreezeNuis' : {1:['lnN','*']},
+                     'AltModel' : 'Use'              
+                   },
+  'ToysBB' : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 250  --saveToys -s -1 --expectSignal=$MUEXP' ,
+                     'NJobs' : 4  ,
+                     'AltModel' : 'Gen' , 
+                     'FreezeNuis' : {1:['lnU','*'],2:['lnN','*'],3:['param','CMS_scale_j'],4:['param','CMS_res_j'],5:['param','*CAT*']} ,
+                     'JobsParam' : { 'MUEXP' : [0,1,2,3,4] }
+                   },   
+  'MLToysBB' : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 20 --expectSignal=1 --noErrors --minos none --rMin=-40 --rMax=40' , 
+                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBB' , 'NToysJob' : 250  } ,
+                     'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
+                     'AltModel' : 'Use'
+                   },
+
 
   #
   # Toys Debug
@@ -142,14 +183,14 @@ targets = {
 
 
   'JCPFQQfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   , 
-                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 10 --redefineSignalPOI x' , 
-                    'NJobs' : 3000 , 
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000 --redefineSignalPOI x' , 
+                    'NJobs' : 500 , 
                      #'JobsParam' : { 'FQQ' : [0.25] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.25,0.5,0.75] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.5] , 'FITNUIS' : [1] } },
-                     #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
-                     'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
+                     'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
 
   'JCPGGfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
                     'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=0 --freezeNuisances fqq -T 10 ' ,
@@ -350,9 +391,12 @@ targets = {
 # HWidth
 #
 
-  'HWidthExp_Width'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 7 -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances RV,RF --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
-                          'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 200} }, 
+  'HWidthExp_Width'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances RV,RF,CMS_widthH_kbkg --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,120  -t -1 --expectSignal=1 ' ,
+                          'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
 
+  'HWidthExp_WidthFloatMu'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances CMS_widthH_kbkg --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,120  -t -1 --expectSignal=1 ' ,
+                          'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
+  
 
                             
 }

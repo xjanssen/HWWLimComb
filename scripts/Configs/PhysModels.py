@@ -38,6 +38,7 @@ physmodels = {
 #
 # ... (muVBF+VH,mu_ggH+ttH)
 #
+  'rVrF'     : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs' , 'cardtype' : 'smhiggs' } ,
   'rVrFXSH'  : { 'model' : 'HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs' , 
                  'cardtype' : 'couplings' , 
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['RV','RF'] , 'AxisTitle' : ['#mu_{VBF,VH}','#mu_{ggH}'] , 
@@ -106,15 +107,15 @@ physmodels = {
                } ,
 
   'JCPFQQ'   : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs --PO=fqqFloating' , 'cardtype' : 'jcp' ,
-#                 'MDFTree' : { 'TargetBase' : 'fJP' , 'POISetKeys'  : [ 'x_fqq0' , 'x_fqq1' ] , 
-#                               'x_fqq0' : { 'NDim' : 1 , 'Keys' : ['x'] , 'Ext' : '_fqq0' , 'AxisTitle' : ['f(J^{P})'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,12.]  } ,
-#                               'x_fqq1' : { 'NDim' : 1 , 'Keys' : ['x'] , 'Ext' : '_fqq1' , 'AxisTitle' : ['f(J^{P})'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,12.]  } ,
-#                            }
-                 'MDFTree' : { 'TargetBase' : 'JPMU' , 'POISetKeys'  : [ 'MU_SM' , 'MU_fqq0' ,  'MU_fqq1' ] ,
-                               'MU_SM' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_SM' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
-                               'MU_fqq0' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_fqq0' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
-                               'MU_fqq1' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_fqq1' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
-                            }
+                  'MDFTree' : { 'TargetBase' : 'fJP' , 'POISetKeys'  : [ 'x_fqq0' , 'x_fqq1' ] , 
+                                'x_fqq0' : { 'NDim' : 1 , 'Keys' : ['x'] , 'Ext' : '_fqq0' , 'AxisTitle' : ['f(J^{P})'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,12.]  } ,
+                                'x_fqq1' : { 'NDim' : 1 , 'Keys' : ['x'] , 'Ext' : '_fqq1' , 'AxisTitle' : ['f(J^{P})'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,12.]  } ,
+                             }
+#                'MDFTree' : { 'TargetBase' : 'JPMU' , 'POISetKeys'  : [ 'MU_SM' , 'MU_fqq0' ,  'MU_fqq1' ] ,
+#                              'MU_SM' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_SM' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
+#                              'MU_fqq0' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_fqq0' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
+#                              'MU_fqq1' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_fqq1' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
+#                           }
                } ,
 
   'JCPFQQMH' : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs --PO=fqqFloating --PO higgsMassRange=120,130' , 'cardtype' : 'jcp' ,
@@ -142,9 +143,12 @@ physmodels = {
 #
 
   'HWidth2l2nu' : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsWidth:higgswidth --PO=is2l2nu' , 'cardtype' : 'hwidth' ,
-                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width'] ,
+                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width'] , # ,'WidthFloatMu'] ,
                                  'Width'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] , 
-                                                 'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [60., 10.]  } ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [60., 10.]  } ,
+                                 'WidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] , 
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [60., 10.]  } ,
+
                               } 
                   } , 
 

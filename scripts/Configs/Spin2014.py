@@ -1219,7 +1219,7 @@ combinations = {
  'hww01jet_jcp_2ph2'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph2' ,  'hww1jof_jcp_2ph2'  ] , 'purposes' : [ 'jcp' ] ,
                          'legend' : '2^{+}_{h2}'
                        } ,
- 'hww01jet_jcp_2ph3'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph2' ,  'hww1jof_jcp_2ph2'  ] , 'purposes' : [ 'jcp' ] ,
+ 'hww01jet_jcp_2ph3'   : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph3' ,  'hww1jof_jcp_2ph3'  ] , 'purposes' : [ 'jcp' ] ,
                          'legend' : '2^{+}_{h3}'
                        } ,
 
