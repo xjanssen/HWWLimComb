@@ -24,6 +24,7 @@ parser.add_option("-S", "--batchSplit", dest="batchSplit",  help="Splitting mode
 parser.add_option("-v", "--version",    dest="Version",     help="Datacards version" , default=DefaultVersion ,  type='string' )
 parser.add_option("-a", "--AltModel" ,  dest="AltModel",    help="Alternative models", default=['NONE'], type='string' , action='callback' , callback=combTools.list_maker('AltModel',','))
 parser.add_option("-d", "--dictionary", dest="Dictionary",  help="Datacards Dictionary", default='Configs.HWW2012' , type='string' )
+parser.add_option("-q", "--quiet",    dest="quiet",     help="Quiet logs",                default=False, action="store_true")
 
 (options, args) = parser.parse_args()
 
@@ -129,11 +130,22 @@ for iComb in combList:
                     if NJobs == 1 : logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'.log' 
                     else          : 
                       logfile  = logbase+'_'+iTarget+TPF+'.mH'+str(iMass)+'_'+str(iJob)+'.log' 
+                      if iAltModel != 'NONE' and 'AltModel' in targets[iTarget] and targets[iTarget]['AltModel'] == 'Use' :
+                        logfile = logfile.replace(iTarget,iTarget+'_Use-'+iAltModel)
                       subdir = 'jobs'+str((iJob/250)*250)
                       os.system('mkdir -p '+TargetDir+'/'+str(iMass)+'/'+subdir) 
                     command =''
                     if not options.runGrid : command  += 'cd '+TargetDir+'/'+str(iMass)+'/'+subdir+' && '
-                    command += 'combine '+TargetDir+'/'+str(iMass)+'/'+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)+' '+targets[iTarget]['options']
+                    command += 'combine '+TargetDir+'/'+str(iMass)+'/'+wspace+' -M '+targets[iTarget]['method']+' -m '+str(iMass)  #+' '+targets[iTarget]['options']
+                    # Options
+                    OPTS=targets[iTarget]['options']
+                    if '$FitOptions' in OPTS:
+                      print 'Using FitOptions: ' , FitOptions[FitOptDef]
+                      FitOPTS=''
+                      for iFitOpt in FitOptions[FitOptDef] : 
+                        FitOPTS += ' '+iFitOpt
+                      OPTS = OPTS.replace('$FitOptions',FitOPTS)
+                    command += ' '+OPTS
                     # toys
                     if len(ToysList) > 0:
                       command += ' -t '+str(targets[iTarget]['Toys']['NToysJob'])+' --toysFile='+ToysList[iJob-1]+' -s '+os.path.splitext(os.path.splitext(ToysList[iJob-1])[0])[1].replace('.','')
@@ -178,7 +190,9 @@ for iComb in combList:
                         for iSystType in  dc.content['systs']: 
                           if targets[iTarget]['FreezeNuis'][iTF][0] ==  iSystType or  targets[iTarget]['FreezeNuis'][iTF][0] == '*' :
                             for iSyst in dc.content['systs'][iSystType]:
-                              if targets[iTarget]['FreezeNuis'][iTF][1] == iSyst or  targets[iTarget]['FreezeNuis'][iTF][1]  == '*' :
+                              print iSystType , iSyst  
+                              if targets[iTarget]['FreezeNuis'][iTF][1] in iSyst or  targets[iTarget]['FreezeNuis'][iTF][1]  == '*' :
+                                print '-->Freeze'
                                 toFreeze.append(iSyst)
                       if len(toFreeze) > 0 : command += ' --freezeNuisances '+toFreeze[0]
                       if len(toFreeze) > 1 : 
@@ -190,8 +204,10 @@ for iComb in combList:
                     if (NJobs) > 1 : JobN += '.job'+str(iJob)
                     command +=' -n '+outname+'_'+iTarget+PF+TPF+JobN
                     # logfile 
-                    command += ' 2>&1 > /dev/null' 
-                    #command += ' 2>&1 | tee '+logfile
+                    if options.quiet :
+                      command += ' 2>&1 > /dev/null' 
+                    else:
+                      command += ' 2>&1 | tee '+logfile
                     jJob+=1
                     if options.pretend : print command
                     else :

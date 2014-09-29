@@ -1698,7 +1698,7 @@ class combPlot :
        self.Save('LimitCC_'+self.EnergyName(iEnergy)+'_'+iModel+'_'+str(massFilter[0]).replace('.','d'))
        self.Wait()
 
-   def MLToysBB(self,CombList=['vbfbbsplit'],iEnergy=8,iModel='SMHiggs',massFilter=[125],AltModels=['NONE']):
+   def MLToysBB(self,CombList=['vbfbbsplit'],iEnergy=0,iModel='SMHiggs',massFilter=[125],AltModels=['NONE']):
        self.squareCanvas(False,False)
        self.c1.cd()
        self.resetPlot()
@@ -1723,6 +1723,7 @@ class combPlot :
          hBiasSumErr[iComb] = {}
          cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get() 
          energyList= combTools.EnergyList_Filter(iEnergy).get()
+         energyList=['ALL']
          if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
            TargetDir=workspace+'/'+self.Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb
          else:
@@ -1760,22 +1761,30 @@ class combPlot :
                biasName = 'Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
                hPull[iComb][iEnergy][iMass][iAltModel] = TH1F(pullName,pullName,100,-10,10)
                hBias[iComb][iEnergy][iMass][iAltModel] = TH1F(biasName,biasName,100,-20,20)
-               fileCmd = 'ls '+TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb+'_'+iEnergy+'_'+iModel+AMFix+'_MLToysBB.job*.MaxLikelihoodFit.mH'+str(iMass)+'.*.root'
+               print AMFix
+               if iEnergy == 'ALL' : 
+                 fileCmd = 'ls '+TargetDir+'/'+str(iMass)+'/jobs*/higgsCombine_'+iComb+'_'+iModel+AMFix+'_MLToysBB1EXP.job*.MaxLikelihoodFit.mH'+str(iMass)+'.*.root'
+               else:
+                 fileCmd = 'ls '+TargetDir+'/'+str(iMass)+'/jobs*/higgsCombine_'+iComb+'_'+iEnergy+'_'+iModel+AMFix+'_MLToysBB1EXP.job*.MaxLikelihoodFit.mH'+str(iMass)+'.*.root'
                
+               print fileCmd               
                proc=subprocess.Popen(fileCmd, stderr = subprocess.PIPE,stdout = subprocess.PIPE, shell = True)
                out, err = proc.communicate()
                FileList=string.split(out)
                print FileList
                for iFile in FileList:
-                 #try:
+                 try:
+                   print iFile
                    fTree = TFile(iFile,'READ')
                    tTree = fTree.Get("limit")
                    for iEv in tTree:
-                     hBias[iComb][iEnergy][iMass][iAltModel].Fill(iEv.limit-1.) 
+                     print iEv.limit,iEv.limitErr
+                     if (iEv.limitErr>0) :
+                          hBias[iComb][iEnergy][iMass][iAltModel].Fill(iEv.limit-1.) 
                      if (iEv.limitErr>0) : hPull[iComb][iEnergy][iMass][iAltModel].Fill((iEv.limit-1.)/iEv.limitErr)
                    fTree.Close()
-                 #except:
-                 # print 'Could not read ', iFile
+                 except:
+                  print 'Could not read ', iFile
 
                hBias[iComb][iEnergy][iMass][iAltModel].Draw()
                self.Save('Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass))
@@ -1807,14 +1816,14 @@ class combPlot :
 
  
            # Bias Summary plot
-           Cols=[kBlack,kRed,kBlue,kMagenta]
+           Cols=[kBlack,kRed,kBlue,kMagenta,kGreen]
            self.c1.SetGridy(1)
            First=True
            iPos=0
            leg = TLegend(0.20,0.65,0.40,0.89);
            leg.SetLineColor(0);
            leg.SetFillColor(0);
-           leg.SetTextSize(0.033)
+           leg.SetTextSize(0.028)
            leg.SetFillStyle(0)
            leg.SetBorderSize(0)
            leg.SetTextFont (42)
@@ -1823,6 +1832,7 @@ class combPlot :
            for iPlot in hPullSum[iComb][iEnergy]:
              if First :
                hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-5,5)
+               #hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-10,10)
                hBiasSumErr[iComb][iEnergy][iPlot].SetLineColor(kYellow)
                hBiasSumErr[iComb][iEnergy][iPlot].SetFillColor(kYellow)
                hBiasSumErr[iComb][iEnergy][iPlot].SetMarkerSize(0)
@@ -1833,7 +1843,11 @@ class combPlot :
              hBiasSum[iComb][iEnergy][iPlot].SetMarkerColor(Cols[iPos])
              hBiasSum[iComb][iEnergy][iPlot].SetMarkerStyle(20+iPos)
              hBiasSum[iComb][iEnergy][iPlot].Draw("psame")
-             leg.AddEntry(hBiasSum[iComb][iEnergy][iPlot],iPlot,"p")
+             LEG=iPlot
+             if 'altlegend' in self.channels[self.Version][self.combinations[iComb]['channels'][0]][self.combinations[iComb]['energies'][0]] :
+               if iPlot in self.channels[self.Version][self.combinations[iComb]['channels'][0]][self.combinations[iComb]['energies'][0]]['altlegend'] : 
+                 LEG = self.channels[self.Version][self.combinations[iComb]['channels'][0]][self.combinations[iComb]['energies'][0]]['altlegend'][iPlot]
+             leg.AddEntry(hBiasSum[iComb][iEnergy][iPlot],LEG,"p")
              iPos+=1
 
            leg.Draw("same")

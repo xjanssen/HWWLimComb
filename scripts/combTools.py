@@ -282,7 +282,7 @@ def getToys(iComb,iTarget,iEnergy,iMass,workspace,Version,cardtypes,physmodels,t
     iModel=targets[iTarget]['Toys']['Model']
     cardDir   = CardDir_Filter(cardtypes,physmodels[iModel]['cardtype']).get()  
     if 'targetdir' in cardtypes[physmodels[iModel]['cardtype']]:
-      toysDir=workspace+'/'+Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb+'/'+str(iMass)
+      toysDir=workspace+'/'+Version+'/'+cardtypes[physmodels[iModel]['cardtype']]['targetdir']+'/'+iComb+'/'+str(iMass)+'/jobs*'
     else:
       toysDir=workspace+'/'+Version+'/'+cardDir+'/'+iComb+'/'+str(iMass)
     print toysDir
