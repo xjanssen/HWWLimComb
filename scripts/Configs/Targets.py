@@ -243,8 +243,8 @@ targets = {
                      #'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.25,0.5,0.75] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.5] , 'FITNUIS' : [1] } },
-                     'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
-                     #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
+                     'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
 
   'JCPGGfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
                     'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=0 --freezeNuisances fqq -T 10 ' ,

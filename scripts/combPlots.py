@@ -110,9 +110,24 @@ class combPlot :
        self.cmsprel.SetLineWidth(0)
        self.cmsprel.SetTextAlign(11)
        self.cmsprel.SetTextFont(61);
-       self.cmsprel.AddText(CMSText[iCMS]);
+       #self.cmsprel.AddText(CMSText[iCMS]);
+       self.cmsprel.AddText("CMS");
        self.cmsprel.SetBorderSize(0);
        self.cmsprel.Draw("same");
+
+       self.status = TPaveText(x1*2.1,y1*1.01,x2,y2,"brtlNDC");
+       self.status.SetTextSize(fontSize);
+       self.status.SetFillColor(0)
+       self.status.SetFillStyle(0)
+       self.status.SetLineStyle(0)
+       self.status.SetLineWidth(0)
+       self.status.SetTextAlign(11)
+       self.status.SetTextFont(52);
+       #self.status.AddText(CMSText[iCMS]);
+       self.status.AddText("Unpublished");
+       self.status.SetBorderSize(0);
+       self.status.Draw("same");
+
 
        self.lumi = TPaveText(x1,y1*1.01,x2,y2,"brtlNDC");  
        self.lumi.SetTextSize(fontSize);
@@ -2785,24 +2800,28 @@ class combPlot :
    
      grData.SetMarkerStyle(kFullCircle)
      grData.SetLineWidth(2)
+     grData.SetMarkerSize(1.8)
      
      grSM.SetMarkerStyle(kFullSquare)
      grSM.SetMarkerColor(kRed)
      #grSM.SetLineStyle(kDashed)
      grSM.SetLineWidth(2)
      grSM.SetLineColor(kRed)
-   
+     grSM.SetMarkerSize(1.8)  
+ 
      grSM95.SetLineColor(kYellow)
      grSM95.SetFillColor(kYellow)
      grSM68.SetLineColor(kGreen)
      grSM68.SetFillColor(kGreen)
-   
+       
+
      grGRAV.SetMarkerStyle(kFullTriangleUp)
      grGRAV.SetMarkerColor(kBlue)
      #grGRAV.SetLineStyle(kDashed)
      grGRAV.SetLineWidth(2)
      grGRAV.SetLineColor(kBlue)
-   
+     grGRAV.SetMarkerSize(1.8)   
+
      grGR68.SetMarkerColor(kRed)
      grGR68.SetLineWidth(2)
      grGR68.SetLineColor(kRed)
@@ -2815,7 +2834,7 @@ class combPlot :
      grGR95.SetLineColor(kBlue)
      grGR95.SetFillColor(kBlack)
      grGR95.SetLineStyle(kDotted)
-     grGR95.SetFillStyle(3356)
+     grGR95.SetFillStyle(3365)
    
      ymin=-20.
      ymax=50.
@@ -2854,7 +2873,7 @@ class combPlot :
      #elif 'hgg'       in limFile : leg.SetHeader("#gamma#gamma ")
 
 
-     pt4 = TPaveText(0.28,0.83,0.88,0.93,"brNDC");
+     pt4 = TPaveText(0.53,0.83,0.88,0.93,"brNDC");
      if 'hww01' in limFile : pt4 = TPaveText(0.62,0.83,0.88,0.93,"brNDC");
      if 'hwwhzz_' in limFile : pt4 = TPaveText(0.62,0.83,0.88,0.93,"brNDC");
      pt4.SetBorderSize(0);
@@ -2864,18 +2883,18 @@ class combPlot :
      pt4.SetTextSize(0.04);
      pt4.AddText(0,0.5,title);
 
-     leg1 = TLegend(0.3,0.7,0.6,0.82)#,NULL,"brNDC");
+     leg1 = TLegend(0.20,0.68,0.50,0.80)
      leg1.SetLineColor(0);
      leg1.SetFillColor(0);
-     leg1.SetTextSize(0.033)
+     leg1.SetTextSize(0.035)
      leg1.SetFillStyle(0)
      leg1.SetBorderSize(0)
      leg1.SetTextFont (42)
 
-     leg2 = TLegend(0.62,0.7,0.92,0.86)#,NULL,"brNDC"); 
+     leg2 = TLegend(0.56,0.68,0.86,0.84)
      leg2.SetLineColor(0);
      leg2.SetFillColor(0);
-     leg2.SetTextSize(0.033)
+     leg2.SetTextSize(0.035)
      leg2.SetFillStyle(0)
      leg2.SetBorderSize(0)
      leg2.SetTextFont (42)
@@ -2883,14 +2902,14 @@ class combPlot :
 
       
      leg1.AddEntry(grSM,"0^{+}","lp");
-     leg1.AddEntry(grSM68,"#pm 1#sigma expected","f");
-     leg1.AddEntry(grSM95,"#pm 2#sigma expected","f");
+     leg1.AddEntry(grSM95,"Expected at 95% CL","f");
+     leg1.AddEntry(grSM68,"Expected at 68% CL","f");
      
      
      if unblind: leg2.AddEntry(grData,"Observed","lp")
      leg2.AddEntry(grGRAV,"J^{P}","lp");
-     leg2.AddEntry(grGR68,"#pm 1#sigma expected","f");
-     leg2.AddEntry(grGR95,"#pm 2#sigma expected","f");
+     leg2.AddEntry(grGR95,"Expected at 95% CL","f");
+     leg2.AddEntry(grGR68,"Expected at 68% CL","f");
 
 
      #TlMH=TLatex()
@@ -2901,10 +2920,10 @@ class combPlot :
    
      grSM95.Draw("E3same")
      grSM68.Draw("E3same")
-     grGRAV.Draw("LPsame")
-     grSM.Draw("LPsame")
      grGR95.Draw("E3same")
      grGR68.Draw("E3same")
+     grSM.Draw("LPsame")
+     grGRAV.Draw("LPsame")
      if unblind: grData.Draw("LPsame")
      leg1.Draw("SAME")
      leg2.Draw("SAME")
@@ -3075,7 +3094,8 @@ class combPlot :
          iStatus2=1
          if 'float' in iTarget :
            if    'hgghzzhww' in iComb :
-             if '_gg' in iComb : iStatus2=2
+             iStatus2=0
+             if '_gg' in iComb : iStatus2=0
            elif  'hwwhzz'    in iComb :
              if  '2pm'  in iComb :
                if '_dec' in iComb : iStatus2=0
@@ -3089,7 +3109,7 @@ class combPlot :
  
 
          self.plotFqqLim(tableName,unblind,iLumiLocal,massFilter[0],jcp,mText,chText2,iStatus2,iRange) 
-
+         #print tableName,unblind,iLumiLocal,massFilter[0],jcp,mText,chText2,iStatus2,iRange
 
 
 

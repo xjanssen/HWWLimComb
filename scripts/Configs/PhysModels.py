@@ -97,13 +97,13 @@ physmodels = {
 #
 #  'JCP'      : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs ' , 'cardtype' : 'jcp' } ,
   'JCP'      : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs --PO=muFloating'  , 'cardtype' : 'jcp' ,
-#                'MDFTree' : { 'TargetBase' : 'fJP' , 'POISetKeys'  : [ 'x' ] ,
-#                              'x' : { 'NDim' : 1 , 'Keys' : ['x'] , 'AxisTitle' : ['f(J^{P})'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,12.]  } ,
-#                            }
-                  'MDFTree' : { 'TargetBase' : 'JPMU' , 'POISetKeys'  : [ 'MU_SM' , 'MU_ALT'  ] ,
-                                'MU_SM' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_SM' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
-                                'MU_ALT' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_ALT' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
-                             }
+                'MDFTree' : { 'TargetBase' : 'fJP' , 'POISetKeys'  : [ 'x' ] ,
+                              'x' : { 'NDim' : 1 , 'Keys' : ['x'] , 'AxisTitle' : ['f(J^{P})'] , 'Min' : [0.] , 'Max' : [1.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.,12.]  } ,
+                            }
+#                  'MDFTree' : { 'TargetBase' : 'JPMU' , 'POISetKeys'  : [ 'MU_SM' , 'MU_ALT'  ] ,
+#                                'MU_SM' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_SM' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
+#                                'MU_ALT' : { 'NDim' : 1 , 'Keys' : ['r'] , 'Ext' : '_ALT' , 'AxisTitle' : ['#mu'] , 'Min' : [0.] , 'Max' : [4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [3.,10.]  } ,
+#                             }
                } ,
 
   'JCPFQQ'   : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs --PO=fqqFloating' , 'cardtype' : 'jcp' ,
