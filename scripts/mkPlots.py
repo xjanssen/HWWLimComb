@@ -132,7 +132,7 @@ for iPlot in options.plots:
    #
    # Plot with single iModel and several Comb
    #
-   elif iPlot in ['ExpLim','ExpSign']:
+   elif iPlot in ['ExpLim','ExpSign','ExpPval']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
        massList=dc(getAllMass(iModel,combList,options.Version))
@@ -143,6 +143,7 @@ for iPlot in options.plots:
        plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix,options.logx,options.logy)
        if iPlot == 'ExpLim'  : plot.plotExpLimits(combList,options.energy,iModel,mLF)
        if iPlot == 'ExpSign' : plot.plotExpSignVsMh(combList,options.energy,iModel,mLF)
+       if iPlot == 'ExpPval' : plot.plotExpPvalVsMh(combList,options.energy,iModel,mLF)
 
    #
    # Channel compatibility
