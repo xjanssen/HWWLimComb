@@ -16,9 +16,16 @@ from collections import OrderedDict
 from Config import *
 import combTools
 
+#homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/'
+#workspace   = homedir+'workspace/'
+#jobdir      = homedir+'jobs/'
+#plotsdir    = homedir+'plots/'
+#cardbase    = homedir+'cmshcg/trunk/'
+
 gROOT.SetBatch()
 #gROOT.ProcessLine(".x tdrstyle.cc")
-gROOT.ProcessLine('.L '+combscripts+'contours.cxx')
+#gROOT.ProcessLine('.L '+combscripts+'contours.cxx')
+gROOT.ProcessLine('.L /afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/summer2013/scripts/contours.cxx')
 gStyle.SetOptTitle(0)
 gStyle.SetOptStat(0)
 
@@ -28,7 +35,9 @@ LumText=["19.4 fb^{-1} (8 TeV) + 4.9 fb^{-1} (7 TeV)","4.9 fb^{-1} (7 TeV)","19.
 #LumText=["#sqrt{s} = 7 TeV, L = 4.9 fb^{-1} ; #sqrt{s} = 8 TeV, L = 19.5 fb^{-1}","#sqrt{s} = 7 TeV, L = 4.9 fb^{-1}","#sqrt{s} = 8 TeV, L = 19.5 fb^{-1}"]
 
 class combPlot :
-   def __init__(self,channels,combinations,Version,blind=True,postFix='',logX=False,logY=False,iTitle=0,iLumi=0):
+   def __init__(self,channels,combinations,Version,ConfDic,blind=True,postFix='',logX=False,logY=False,iTitle=0,iLumi=0):
+       exec('from %s import *'%(ConfDic))
+
        self.channels = channels
        self.combinations = combinations
        self.Version = Version
@@ -336,7 +345,7 @@ class combPlot :
              fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb+extSet
              if iEnergy != 0: fileName += '_' + str(iEnergy) + 'TeV'           
              fileName += '_'+iModel+'_'+iTarget+'.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
-             print fileName
+             #print fileName
              if not os.path.exists(fileName):
                print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO :',fileName
                for iKey in targets[iTarget]['treeKeys']:
@@ -497,7 +506,7 @@ class combPlot :
          print  fileName   
          
          if   physmodels[iModel]['MDFTree']['NDim'] == 2 :
-           try:
+           #try:
              gROOT.ProcessLine('TFile* fTree = TFile::Open("'+fileName+'")')
              gROOT.ProcessLine('TTree*  tree = (TTree*)  fTree->Get("limit")')
              keyX=physmodels[iModel]['MDFTree']['Keys'][0]
@@ -524,7 +533,7 @@ class combPlot :
              gROOT.ProcessLine('TList* c95')
              print 'h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+maxY+')'
              gROOT.ProcessLine('h2d = treeToHist2D(tree,"'+keyX+'","'+keyY+'","'+objName+'",TCut(""),'+minX+','+maxX+','+minY+','+maxY+')')
-             if iModel == 'cVcF' and iTarget== 'MDFGridObs' : ROOT.h2d.Fill(0.67,1.5399999,2.30)
+             #if iModel == 'cVcF' and iTarget== 'MDFGridObs' : ROOT.h2d.Fill(0.67,1.5399999,2.30)
              gROOT.ProcessLine('c68 = contourFromTH2(h2d,2.30)')
              gROOT.ProcessLine('c95 = contourFromTH2(h2d,5.99)')
              gROOT.ProcessLine('gr0 = bestFit(tree,"'+keyX+'","'+keyY+'",TCut(""))')
@@ -541,9 +550,9 @@ class combPlot :
              gROOT.ProcessLine('delete gr0')
              # Set some Default Style and Legend
              self.Obj2Plot['h2d__'+objName]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
-             self.Obj2Plot['h2d__'+objName]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
+             self.Obj2Plot['h2d__'+objName]['Obj'].GetXaxis().SetRangeUser(float(minXP),float(maxXP))
              self.Obj2Plot['h2d__'+objName]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
-             self.Obj2Plot['h2d__'+objName]['Obj'].GetYaxis().SetRangeUser(minYP,maxYP)
+             self.Obj2Plot['h2d__'+objName]['Obj'].GetYaxis().SetRangeUser(float(minYP),float(maxYP))
              self.Obj2Plot['h2d__'+objName]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
              self.Obj2Plot['h2d__'+objName]['Obj'].GetZaxis().SetRangeUser(0.00001,20.)
              #for X in TIter(self.Obj2Plot['c68__'+objName]['Obj']) : X.SetLineColor(kRed) 
@@ -553,7 +562,7 @@ class combPlot :
              for X in TIter(self.Obj2Plot['c95__'+objName]['Obj']) : X.SetLineStyle(2) 
              #self.Obj2Plot['gr0__'+objName]['Obj'].SetMarkerColor(kRed) 
              gROOT.ProcessLine('fTree->Close()') 
-           except:
+           #except:
              print 'WARNING: Specified root file doesn\'t exist --> Putting ZERO'
 
        return
@@ -1016,7 +1025,7 @@ class combPlot :
          lMass=[]
          lMass.append(100.)
          lMass.append(aMass[-1]+1)
-         self.plotHorizLine('Line', lMass , 1. , kBlack , 1    , 'CL=1')
+         self.plotHorizLine('Line', lMass , 1. , kBlack , 1  , 2  , 'CL=1')
   
          self.Obj2Plot['Exp']['Obj'].SetMarkerStyle(20)
          self.Obj2Plot['Exp']['Obj'].SetMarkerSize(.8)
@@ -1170,7 +1179,7 @@ class combPlot :
       
        CombListAll = dc(toPlot)
        aMass = [110,1000] 
-       self.plotHorizLine('Line', aMass , 1. , kRed , 1    , 'CL=1')
+       self.plotHorizLine('Line', aMass , 1. , kRed , 1  , 2  , 'CL=1')
   
        #self.c1.SetLogy()
        #self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.05,200.)
@@ -1279,10 +1288,10 @@ class combPlot :
        self.c1.SetLeftMargin(0.4) 
        self.c1.SetGridx(1)
 
-       if False:
-         BestFit='BestFit'
-       else:
-         BestFit='BestFitExp'
+       #if False:
+       BestFit='BestFit'
+       #else:
+       #  BestFit='BestFitExp'
 
        if len(massFilter) != 1 : return
        nChann=len(CombList)-1
@@ -1775,7 +1784,7 @@ class combPlot :
                pullName = 'Pull_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
                biasName = 'Bias_'+iComb+'_'+iEnergy+AMFix+'_'+iModel+'_'+str(iMass)
                hPull[iComb][iEnergy][iMass][iAltModel] = TH1F(pullName,pullName,100,-10,10)
-               hBias[iComb][iEnergy][iMass][iAltModel] = TH1F(biasName,biasName,100,-20,20)
+               hBias[iComb][iEnergy][iMass][iAltModel] = TH1F(biasName,biasName,100,-40,40)
                print AMFix
                if iEnergy == 'ALL' : 
                  fileCmd = 'ls '+TargetDir+'/'+str(iMass)+'/jobs*/higgsCombine_'+iComb+'_'+iModel+AMFix+'_MLToysBB1EXP.job*.MaxLikelihoodFit.mH'+str(iMass)+'.*.root'
@@ -1847,7 +1856,9 @@ class combPlot :
            for iPlot in hPullSum[iComb][iEnergy]:
              if First :
                hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-5,5)
-               #hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-10,10)
+               hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-10,10)
+               hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-15,15)
+               hBiasSumErr[iComb][iEnergy][iPlot].GetYaxis().SetRangeUser(-20,20)
                hBiasSumErr[iComb][iEnergy][iPlot].SetLineColor(kYellow)
                hBiasSumErr[iComb][iEnergy][iPlot].SetFillColor(kYellow)
                hBiasSumErr[iComb][iEnergy][iPlot].SetMarkerSize(0)
@@ -1897,7 +1908,8 @@ class combPlot :
 
        for iTarget in TargetList:
          for iMass in massList:
-           fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
+           fileName  = TargetDir+'/'+str(iMass)+'/jobs*/higgsCombine_'+iComb
+           #fileName  = TargetDir+'/'+str(iMass)+'/higgsCombine_'+iComb
            if iEnergy != 0: fileName += '_' + str(iEnergy) + 'TeV'
            fileName += '_'+iModel+'_'+iTarget+'_Points*.'+targets[iTarget]['method']+'.mH'+str(iMass)+'.root'
            fileCmd = 'ls '+fileName 
@@ -2063,13 +2075,15 @@ class combPlot :
          #self.Obj2Plot['gr0__'+objNameObs]['Obj'].Draw("samep")
          #self.Obj2Plot['gr0__'+objNameObs]['Obj'].Print()
 
+         PF=''
+         if 'PlotPF' in PlotDic[iPlot] : PF= PlotDic[iPlot]['PlotPF']
          self.c1.Update() 
-         self.Save(iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext)
+         self.Save(iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext+PF)
 
          # Save values
          cardDir   = combTools.CardDir_Filter(cardtypes,physmodels[iModel]['cardtype'],'target').get()
          TargetDir=workspace+'/'+self.Version+'/'+cardDir+'/'+iComb+'/'+str(massFilter[0])+'/'
-         limFile= TargetDir+iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext+'.txt' 
+         limFile= TargetDir+iComb+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext+PF+'.txt' 
          print limFile
          subfile = open(limFile,'w')
          subfile.write ('Exp  '+ str(lo95Exp) + ' ' + str(lo68Exp) + ' ' + str(hi68Exp) + ' ' + str(hi95Exp)+'\n')
@@ -2168,9 +2182,10 @@ class combPlot :
          text = pt2.AddText("95% CL");
          pt2.Draw();
 
-
+         PF=''
+         if 'PlotPF' in PlotDic[iPlot] : PF= PlotDic[iPlot]['PlotPF']
          self.c1.Update()
-         self.Save(List+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext) 
+         self.Save(List+'_'+str(iEnergy)+'_'+iModel+'_'+TargetBase+Fast+Ext+PF) 
 
 
 
@@ -2206,8 +2221,8 @@ class combPlot :
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
-       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
-       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetYaxis().SetRangeUser(minYP,maxYP)
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetXaxis().SetRangeUser(float(minXP),float(maxXP))
+       self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetYaxis().SetRangeUser(float(minYP),float(maxYP))
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].GetZaxis().SetRangeUser(0.00001,10.)
        self.Obj2Plot['h2d__'+objNameExp]['Obj'].Draw("colz")  
        self.Obj2Plot['c68__'+objNameExp]['Obj'].Draw("same")  
@@ -2233,8 +2248,8 @@ class combPlot :
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetTitle(self.xAxisTitle) 
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetYaxis().SetTitle(self.yAxisTitle) 
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetZaxis().SetTitle("-2 #Delta ln L")
-         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetRangeUser(minXP,maxXP)
-         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetYaxis().SetRangeUser(minYP,maxYP)
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetXaxis().SetRangeUser(float(minXP),float(maxXP))
+         self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetYaxis().SetRangeUser(float(minYP),float(maxYP))
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].GetZaxis().SetRangeUser(0.00001,10.)
          self.Obj2Plot['h2d__'+objNameObs]['Obj'].Draw("colz")  
          self.Obj2Plot['c68__'+objNameObs]['Obj'].Draw("same")  
@@ -3457,7 +3472,7 @@ class combPlot :
        for iMass in massList:
 
          plotContent = OrderedDict()
-         #plotContent['q#bar{q}'] = OrderedDict()
+         plotContent['q#bar{q}'] = OrderedDict()
          plotContent['gg production']  = OrderedDict()
          plotContent['q#bar{q} production'] = OrderedDict()
 
@@ -5004,18 +5019,25 @@ class combPlot :
       if 'ACLsBkgOnly' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsBkgOnly')
       if 'SExpPre'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SExpPre') 
       if 'PVExpPre' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'PVExpPre') 
+      if 'SExpPost'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SExpPost')
+      if 'PVExpPost' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'PVExpPost')
       if 'BestFitExp' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitExp')
 
       if (not self.blind ) :
+        if 'ACLs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLs'   ) 
         if 'ACLsObs' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'ACLsObs') 
         if 'SObs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'SObs') 
         if 'PVObs'    in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'PVObs') 
         if 'BestFit'  in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFit')
         if 'BestFitG' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitG')
         if 'BestFitT' in printList : self.readResults(iComb,iEnergy,iModel,massFilter,'BestFitT')
+ 
+      #print self.Results
 
       # build Mass List
       allList = []
+      #print iComb , self.Results
+      #print self.Results[iComb][iEnergy][iModel]
       for iTarget in self.Results[iComb][iEnergy][iModel]: allList.extend(self.Results[iComb][iEnergy][iModel][iTarget]['mass'])
       AllMass = sorted(list(set(allList)))
      
@@ -5027,6 +5049,8 @@ class combPlot :
       texPrint=''
       if 'ACLsObs' in printList : 
          txtPrint+='| CLsObs '
+      if 'ACLs'    in printList :
+         txtPrint+='|CLsObsVH'
       if 'ACLsInjPre'  in printList :
          txtPrint+='| CLsInj '
       if 'ACLsBkgOnly'  in printList :
@@ -5044,11 +5068,15 @@ class combPlot :
       if 'SObs'    in printList : 
          txtPrint+='| SObs '
       if 'SExpPre' in printList : 
-         txtPrint+='| SExp '
+         txtPrint+='| SExpPre '
+      if 'SExpPost' in printList :
+         txtPrint+='| SExpPost '
       if 'PVObs'    in printList : 
          txtPrint+='| pVal Obs '
       if 'PVExpPre' in printList : 
-         txtPrint+='| pVal Exp '
+         txtPrint+='| pVal ExpPre '
+      if 'PVExpPost' in printList :
+         txtPrint+='| pVal ExpPost '
       if 'BestFit' in printList : 
          txtPrint+='| BestFit '
       if 'BestFitG' in printList : 
@@ -5070,6 +5098,12 @@ class combPlot :
             txtPrint+='| '+str(round(Val,2))+' '  
           else:
             txtPrint+='|  X  ' 
+        if 'ACLs'    in printList :
+          if (not self.blind ) :
+            Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLs'   ,'Val')
+            txtPrint+='| '+str(round(Val,2))+' '
+          else:
+            txtPrint+='|  X  '
         if 'ACLsInjPre' in printList :
           Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'ACLsInjPre','Val')
           txtPrint+='| '+str(round(Val,2))+' '  
@@ -5118,17 +5152,23 @@ class combPlot :
           else:
             txtPrint+='|  X  ' 
         if 'SExpPre' in printList :
-          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVExpPre','Val')
+          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'SExpPre','Val')
           txtPrint+='| '+str(round(Val,2))+' '  
+        if 'SExpPost' in printList :
+          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'SExpPost','Val')
+          txtPrint+='| '+str(round(Val,2))+' '
         if 'PVObs'     in printList :
           if (not self.blind ) : 
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVObs','Val')
-            txtPrint+='| '+str(round(Val,2))+' '  
+            txtPrint+='| '+str(round(Val,5))+' '  
           else:
             txtPrint+='|  X  ' 
         if 'PVExpPre' in printList :
           Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVExpPre','Val')
-          txtPrint+='| '+str(round(Val,2))+' ' 
+          txtPrint+='| '+str(round(Val,5))+' ' 
+        if 'PVExpPost' in printList :
+          Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'PVExpPost','Val')
+          txtPrint+='| '+str(round(Val,5))+' '
         if 'BestFit' in printList : 
           if (not self.blind ) : 
             Val=self.findResValbyM(iComb,iEnergy,iModel,iMass,'BestFit','Val')

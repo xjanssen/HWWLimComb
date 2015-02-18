@@ -123,7 +123,7 @@ for iPlot in options.plots:
             mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
             postFix += '_mH'+str(options.mrange[0]).replace('.','d')+'-'+str(options.mrange[1]).replace('.','d')
           else                           : mLF = massList
-          plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,options.logx,options.logy,iTitle,iLumi)
+          plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix,options.logx,options.logy,iTitle,iLumi)
           if iPlot == 'Limit'   : plot.plotOneLimit(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'Sign'    : plot.plotSignVsMh(iComb,options.energy,iModel,mLF,options.inject)
           if iPlot == 'BestFit' : plot.plotMuVsMh(iComb,options.energy,iModel,mLF)
@@ -140,7 +140,7 @@ for iPlot in options.plots:
          mLF = [X for X in massList  if (X >= options.mrange[0] and X <= options.mrange[1])]
          postFix += '_mH'+str(options.mrange[0])+'-'+str(options.mrange[1])
        else                           : mLF = massList
-       plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,options.logx,options.logy)
+       plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix,options.logx,options.logy)
        if iPlot == 'ExpLim'  : plot.plotExpLimits(combList,options.energy,iModel,mLF)
        if iPlot == 'ExpSign' : plot.plotExpSignVsMh(combList,options.energy,iModel,mLF)
 
@@ -150,7 +150,7 @@ for iPlot in options.plots:
    elif iPlot in ['MuCC','SCC','LimCC']:
      for iModel in PhysModelList:
        print '---------------------------> Model = '+iModel 
-       plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,options.logx,False,iTitle,iLumi)
+       plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix,options.logx,False,iTitle,iLumi)
        #CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
        #CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape']
        CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','vh3l_shape','hwwvh2j_cut','hww2j_shape','hww01jet_shape','zh3l2j_shape']
@@ -173,8 +173,8 @@ for iPlot in options.plots:
          print '------------------------------> Comb = '+iComb
          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get() 
          for iMass in massList:
-           bSimple=True
-           plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,False,False,iTitle,iLumi)
+           bSimple=False
+           plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix,False,False,iTitle,iLumi)
            if iPlot == 'MDFSum'    : plot.MDF2DSum(iComb,options.energy,iModel,[iMass],False) 
            if iPlot == 'MDFSumFast': plot.MDF2DSum(iComb,options.energy,iModel,[iMass],True) 
            if iPlot == 'MDF1D'     : plot.MDF1D(iComb,options.energy,iModel,[iMass],False) 
@@ -186,7 +186,7 @@ for iPlot in options.plots:
        print '---------------------------> Model = '+iModel
        massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,combList[0],energyList).get()
        for iMass in massList:
-         plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix,False,False,iTitle,iLumi)
+         plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix,False,False,iTitle,iLumi)
          if iPlot == 'MDF1DExp' : plot.MDF1DExp(combList,options.energy,iModel,[iMass],False)
 
    #
@@ -200,7 +200,7 @@ for iPlot in options.plots:
          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get() 
          for iMass in massList:
            for iTarget in options.printList : 
-             plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
+             plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix)
              if iPlot == 'JCPSum'    : plot.JCPSum(iComb,options.energy,iModel,iTarget,[iMass]) 
              if iPlot == 'JCPClean'  : plot.JCPClean(iComb,options.energy,iModel,iTarget,[iMass]) 
              if iPlot == 'JCPFit'    : plot.JCPFit(iComb,options.energy,iModel,iTarget,[iMass]) 
@@ -213,7 +213,7 @@ for iPlot in options.plots:
        massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,combList[0],energyList).get()
        for iMass in massList:
          for iTarget in options.printList :
-           plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
+           plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix)
            if iPlot == 'JCPView'   : plot.JCPView(combList,options.energy,iModel,iTarget,[iMass]) 
            if iPlot == 'JCPTable'  : plot.JCPTable(combList,options.energy,iModel,iTarget,[iMass]) 
            if iPlot == 'JCPFB2'    : plot.JCPFB2(combList,options.energy,iModel,iTarget,[iMass]) 
@@ -229,7 +229,7 @@ for iPlot in options.plots:
        for iComb in combList:
          print '------------------------------> Comb = '+iComb
          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get()     
-         plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
+         plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix)
          if iPlot == 'MUMHSum'   : plot.MUMHSum(iComb,options.energy,iModel,massList)
          muVal = 1.0 
          if iPlot == 'MHFit'     : plot.MHFit(iComb,options.energy,iModel,muVal)  
@@ -243,7 +243,7 @@ for iPlot in options.plots:
        for iComb in combList:
          print '------------------------------> Comb = '+iComb
          massList  = combTools.MassList_Filter(cardtypes,channels[options.Version],combinations,physmodels[iModel]['cardtype'],options.mrange,iComb,energyList).get()        
-         plot=combPlots.combPlot(channels,combinations,options.Version,options.unblind,postFix)
+         plot=combPlots.combPlot(channels,combinations,options.Version,options.Dictionary,options.unblind,postFix)
          plot.MLToysBB(combList,options.energy,iModel,massList,options.AltModel)
 
    else:

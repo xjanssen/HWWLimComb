@@ -50,7 +50,7 @@ physmodels = {
   'cVcF'     : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF'      , 
                  'cardtype' : 'couplings' , 
                  'MDFTree' : { 'NDim' : 2 , 'Keys' : ['CV','CF'] , 'AxisTitle' : ['#kappa_{V}','#kappa_{f}'] , 
-                               'Min' : [0.,-2.] , 'Max' : [2.,2.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,2.]  }  
+                               'Min' : [0.,0.] , 'Max' : [4.,4.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [1.5,4.]  }  
                } ,
 #
 # ... 3 mu (ggH+ttH,VBF,VH)
@@ -143,13 +143,85 @@ physmodels = {
 #
 
   'HWidth2l2nu' : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsWidth:higgswidth --PO=is2l2nu' , 'cardtype' : 'hwidth' ,
-                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width'] , # ,'WidthFloatMu'] ,
-                                 'Width'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] , 
-                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [60., 10.]  } ,
-                                 'WidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] , 
-                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [60., 10.]  } ,
-
+                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width' , 'RWidth' ,'WidthFloatMu','RWidthFloatMu'] ,
+                                 'RWidth'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] , 
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [45., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'Width'       : { 'NDim' : 1 , 'Keys' : ['4.07*CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [80., 10.]  } , 
+                                 'RWidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] , 
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [45., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'WidthFloatMu'       : { 'NDim' : 1 , 'Keys' : ['4.07*CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [80., 10.]  } ,
                               } 
                   } , 
+
+
+  'HWidthKappa2l2nu' : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsWidthKappa:higgswidth --PO=is2l2nu' , 'cardtype' : 'hwidth' ,
+                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width' , 'RWidth' ,'WidthFloatMu','RWidthFloatMu'] ,
+                                 'RWidth'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [45., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'Width'       : { 'NDim' : 1 , 'Keys' : ['4.07*CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [80., 10.]  } ,
+                                 'RWidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [45., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'WidthFloatMu'       : { 'NDim' : 1 , 'Keys' : ['4.07*CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [80., 10.]  } ,
+                              }
+                  } ,
+
+  'HWidth' : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsWidthKappa:higgswidth ' , 'cardtype' : 'hwidth' ,
+                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width' ,'WidthFloatMu' , 'RWidth' , 'RWidthFloatMu' ] ,
+                                # 'Width'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                #                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.]  } ,
+                                # 'WidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                #                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.]  } ,
+                                 'RWidth'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'Width'       : { 'NDim' : 1 , 'Keys' : ['4.15*CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [65., 10.]  } ,
+                                 'RWidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'WidthFloatMu'       : { 'NDim' : 1 , 'Keys' : ['4.15*CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [65., 10.]  } ,
+
+                              }
+                  } ,
+
+ 'HWidthNotCustodial' : { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsWidthKappaCustodial:higgswidth --PO=notCustodial ' , 'cardtype' : 'hwidth' ,
+                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['WidthFloatMu' , 'RWidthFloatMu' ] ,
+                                # 'Width'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                #                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.]  } ,
+                                # 'WidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                #                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.]  } ,
+                                 'RWidth'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'Width'       : { 'NDim' : 1 , 'Keys' : ['4.15*CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [65., 10.]  } ,
+                                 'RWidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'WidthFloatMu'       : { 'NDim' : 1 , 'Keys' : ['4.15*CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [65., 10.]  } ,
+
+                              }
+                  } ,
+
+ 'HiggsWidthKappaRescaleZZ' :
+              { 'model' : 'HiggsAnalysis.CombinedLimit.HiggsWidthKappaRescaleZZ:higgswidth ' , 'cardtype' : 'hwidth' ,
+                    'MDFTree': { 'TargetBase' : 'HWidth' , 'POISetKeys'  : ['Width' ,'WidthFloatMu' , 'RWidth' , 'RWidthFloatMu' ] ,
+                                # 'Width'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                #                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.]  } ,
+                                # 'WidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                #                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.]  } ,
+                                 'RWidth'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'Width'       : { 'NDim' : 1 , 'Keys' : ['4.15*CMS_zz4l_GGsm'] , 'Ext' : '_Width' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [65., 10.]  } ,
+                                 'RWidthFloatMu'      : { 'NDim' : 1 , 'Keys' : ['CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma/#Gamma_{SM}'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [30., 10.] , 'PlotPF' : '_Ratio' } ,
+                                 'WidthFloatMu'       : { 'NDim' : 1 , 'Keys' : ['4.15*CMS_zz4l_GGsm'] , 'Ext' : '_WidthFloatMu' , 'AxisTitle' : ['#Gamma_{H} (MeV)'] ,
+                                                  'Min' : [0.] , 'Max' : [60.] , 'MinPlt' : [0.,0.] , 'MaxPlt' : [65., 10.]  } ,
+                             }
+                  } ,
+
 
 }

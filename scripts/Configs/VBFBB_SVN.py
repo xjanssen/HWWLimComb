@@ -4,7 +4,7 @@
 cardbase    = '/afs/cern.ch/work/x/xjanssen/cms/vbfHbbCards/'
 combscripts = '/afs/cern.ch/work/x/xjanssen/cms/HWW2012/HWWLimComb/cmshcg/trunk/highmass2014/scripts/'
 
-DefaultVersion = 'VBFBB'
+DefaultVersion = 'VBFBB_V1'
 channels = {
 
 'VBFBB' : {

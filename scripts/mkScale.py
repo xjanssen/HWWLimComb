@@ -289,9 +289,14 @@ def ExtrapolateMassEff(iChannel,iEnergy,card,cardLow,cardHigh,TargetCard,vMass,i
         print jBin,iProc,dcIn.getRate(bin=jBin,process=iProc) , '-->' , YieldOut , '(Low: ' , YieldLow , ' , High: ' , YieldHigh , ')' 
         dcOut.setRate(bin=jBin,process=iProc,value=YieldOut) 
         ScaleFactors[dcIn.content['block2']['process'][iBin]] = {} 
-        ScaleFactors[dcIn.content['block2']['process'][iBin]]['Avg']  = YieldOut/YieldIn
-        ScaleFactors[dcIn.content['block2']['process'][iBin]]['Low']  = wLow *(YieldLow /YieldIn)
-        ScaleFactors[dcIn.content['block2']['process'][iBin]]['High'] = wHigh*(YieldHigh/YieldIn)
+        if YieldOut>0 and YieldIn>0: 
+          ScaleFactors[dcIn.content['block2']['process'][iBin]]['Avg']  = YieldOut/YieldIn
+          ScaleFactors[dcIn.content['block2']['process'][iBin]]['Low']  = wLow *(YieldLow /YieldIn)
+          ScaleFactors[dcIn.content['block2']['process'][iBin]]['High'] = wHigh*(YieldHigh/YieldIn)
+        else: 
+          ScaleFactors[dcIn.content['block2']['process'][iBin]]['Avg']  = 1.
+          ScaleFactors[dcIn.content['block2']['process'][iBin]]['Low']  = 1.
+          ScaleFactors[dcIn.content['block2']['process'][iBin]]['High'] = 1.
 
     # Modify Histograms for HWW2l2v 
     if channels[options.Version][iChannel][iEnergy]['branch'] == 'hww' and any(['shapes' in X for X in dcIn.content['header2'].itervalues()]) :  

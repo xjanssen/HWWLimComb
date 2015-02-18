@@ -79,4 +79,4 @@ for iComb in combList:
           else:
             print 'WARNING: Card does not exist : '+TargetDir+'/'+str(iMass)+'/'+card
 
-#if options.runBatch: jobs.Sub('8nh')
+if options.runBatch: jobs.Sub('8nh')

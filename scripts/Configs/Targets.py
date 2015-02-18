@@ -23,18 +23,43 @@ targets = {
 # p-value 
 ###########
 
-  'PVObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --pvalue' , 'treeKeys' : ['Val'] } , 
-  'PVExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --pvalue --expectSignal=1 -t -1 --X-rtd TMCSO_AdaptivePseudoAsimov' , 'treeKeys' : ['Val'] } ,  
-  'PVExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --pvalue --expectSignal=1 -t -1 --X-rtd TMCSO_AdaptivePseudoAsimov --toysFreq'  , 'treeKeys' : ['Val'] } ,  
+  'PVObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --uncapped 1 --scanPoints=100 --minimizerTolerance=0.01 --preFit' , 'treeKeys' : ['Val'] } , 
+  'PVExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --expectSignal=1 -t -1 ' , 'treeKeys' : ['Val'] } ,  
+  'PVExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --expectSignal=1 -t -1 --toysFreq'  , 'treeKeys' : ['Val'] } ,  
+
+# 'PVExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --pvalue --expectSignal=1 -t -1 --X-rtd TMCSO_AdaptivePseudoAsimov' , 'treeKeys' : ['Val'] } ,  
+# 'PVExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --pvalue --expectSignal=1 -t -1 --X-rtd TMCSO_AdaptivePseudoAsimov --toysFreq'  , 'treeKeys' : ['Val'] } ,  
 
 ###############
 # significance
 ###############
 
-  'SObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 'treeKeys' : ['Val'] } , 
-  'SExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --minimizerAlgo=Minuit' , 'treeKeys' : ['Val'] } ,  
-  'SExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --minimizerAlgo=Minuit  --toysFreq'  , 'treeKeys' : ['Val'] } ,  
+  'SObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --uncapped 1 --scanPoints=100 --minimizerTolerance=0.01 --preFit --bruteForce' , 'treeKeys' : ['Val'] } , 
+  'SExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1' , 'treeKeys' : ['Val'] } ,  
+  'SExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --toysFreq'  , 'treeKeys' : ['Val'] } ,  
 
+# 'SExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --minimizerAlgo=Minuit' , 'treeKeys' : ['Val'] } ,  
+# 'SExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --minimizerAlgo=Minuit  --toysFreq'  , 'treeKeys' : ['Val'] } ,  
+
+  #
+  # significance SM Higgs Injection
+  #
+  #'SObsSMToysNoSyst'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 500 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  #'SObsSMToysNoSyst50' : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysNoSyst' , 'NToysJob' : 50 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} },
+  #'SObsSMToysSyst'     : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysSyst' , 'NToysJob' : 500 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} }
+  #'SObsSMToysSyst50'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysSyst' , 'NToysJob' : 50 } ,
+  #                                            'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} }
+  #'SObsSMToysAsimov'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --minimizerAlgo=Minuit' , 
+  #                                            'Toys' : { 'Model' : 'SMToys' , 'Target' : 'ToysAsimov' , 'NToysJob' : -1 } ,
+
+###################
   #
   # significance SM Higgs Injection
   #
@@ -57,7 +82,8 @@ targets = {
 # Limits: Standard
 ###################
 
-  'ACLsObs'      : { 'notblind' : False , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'treeKeys' : ['Val'] } ,
+  'ACLsObs'      : { 'notblind' : False , 'method' : 'Asymptotic' , 'options' : '-v 2 ' , 'treeKeys' : ['95D','68D','Median','68U','95U','Val'] } ,
+  'ACLsObsBug'   : { 'notblind' : False , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed' , 'treeKeys' : ['Val'] } ,
   'ACLsExp'      : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run expected' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
   'ACLsBlind'    : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run blind   ' , 'treeKeys' : ['95D','68D','Val','68U','95U'] } ,
   'ACLsInjPre'   : { 'notblind' : True  , 'method' : 'Asymptotic' , 'options' : '-v 2 --run observed -t -1 --expectSignal=1' , 'treeKeys' : ['Val'] },
@@ -87,7 +113,7 @@ targets = {
   'BestFit'      : { 'notblind' : False , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-5 --rMax=10 $FitOptions' , 
                      'treeKeys' : ['Val','68D','68U']
                    },
-  'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-2 --rMax=4 -t -1 --expectSignal=1 $FitOptions' , 
+  'BestFitExp'   : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '-v 2 --rMin=-20 --rMax=20 -t -1 --expectSignal=1 $FitOptions' , 
                      'treeKeys' : ['Val','68D','68U']   , 'AltModel' : 'Gen'
                    },
 
@@ -128,15 +154,15 @@ targets = {
   'ToysSyst'      : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t 500 --saveToys --expectSignal=1 -s -1' , 'NJobs' : 10 },
   'ToysAsimov'    : { 'notblind' : True  , 'method' : 'GenerateOnly' , 'options' : '-t -1 --saveToys --expectSignal=1' },
 
-  'ToysBB1EXP'   : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t 250  --saveToys -s -1 --expectSignal=1' ,
-                     'NJobs' : 4  ,
+  'ToysBB1EXP'   : { 'notblind' : True  , 'method' : 'GenerateOnly'     , 'options' : '-t 125  --saveToys -s -1 --expectSignal=1 -S 0' ,
+                     'NJobs' : 8  ,
                      'AltModel' : 'Gen' , 
                      #'FreezeNuis' : {1:['lnU','*'],2:['lnN','*'],3:['param','*'],4:['param','CMS_scale_j'],5:['param','CMS_res_j']}
                      'FreezeNuis' : {1:['lnU','*'],2:['lnN','*'],3:['param','CMS'],4:['param','mean'],5:['param','sigma'] }
                    },                 
 # 'MLToysBB1EXP'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --noErrors --minos none --rMin=-40 --rMax=40' , 
-  'MLToysBB1EXP'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --rMin=-40 --rMax=40 $FitOptions', 
-                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBB1EXP' , 'NToysJob' : 250   } ,
+  'MLToysBB1EXP'     : { 'notblind' : True  , 'method' : 'MaxLikelihoodFit' , 'options' : '--expectSignal=1 --rMin=-80 --rMax=80 $FitOptions', 
+                     'Toys' : { 'Model' : 'SMHiggs' , 'Target' : 'ToysBB1EXP' , 'NToysJob' : 125   } ,
                      'quantile' :  {'95D':0.025,'68D':0.16,'Val':0.5,'68U':0.84,'95U':0.975} ,
                      'AltModel' : 'Use' 
                    },
@@ -210,7 +236,7 @@ targets = {
   #'MDFCrossExp95'  : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=cross -v 2 --minimizerAlgo=Minuit --cl=0.95 -t -1 --expectSignal=1' },
   # Full Grid Scan
   'MDFGridObs'     : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1' , 'NJobs' : 50 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
-  'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 50 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
+#  'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1' , 'NJobs' : 50 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
   'MDFGridFastObs' : {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
   'MDFGridFastExp' : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid --fastScan -v -1 -t -1 --expectSignal=1' , 'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 100000 }},
   'MDFGridObsMZOptNoFloat': {'notblind' : False , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 --robustFit=1 --minimizerToleranceForMinos=0.0001 --X-rtd FITTER_DYN_STEP' , 'NJobs' : 100 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
@@ -219,6 +245,7 @@ targets = {
   'MDFGridExpMZOptFloat'  : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v 2 -t -1 --expectSignal=1 --robustFit=1 --minimizerToleranceForMinos=0.0001 --X-rtd FITTER_DYN_STEP --floatOtherPOIs=1 ' , 'NJobs' : 100 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
 
 
+  'MDFGridExp'     : {'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -v -1 -t -1 --expectSignal=1 --setPhysicsModelParameters CV=1.04,CF=0.92 ' , 'NJobs' : 50 , 'MDFGridParam' :{ 'NPOINTS' : 10000 }},
 ######
 # JCP
 ######
@@ -237,14 +264,14 @@ targets = {
 
 
   'JCPFQQfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   , 
-                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 1000 --redefineSignalPOI x' , 
+                    'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=$FQQ --freezeNuisances fqq -T 2000 --redefineSignalPOI x' , 
                     'NJobs' : 500 , 
                      #'JobsParam' : { 'FQQ' : [0.25] , 'FITNUIS' : [1] } },
-                     #'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
+                     'JobsParam' : { 'FQQ' : [0.,1.] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.25,0.5,0.75] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.5] , 'FITNUIS' : [1] } },
                      #'JobsParam' : { 'FQQ' : [0.,0.25,0.5,0.75,1.] , 'FITNUIS' : [1] } },
-                     'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
+                     #'JobsParam' : { 'FQQ' : [0.0] , 'FITNUIS' : [1] } },
 
   'JCPGGfloatmu'      : {'notblind' : True  , 'method' : 'HybridNew'   ,
                     'options' : '--testStat=TEV --generateExt=1 --generateNuis=0 --fitNuis=$FITNUIS --singlePoint 1 --saveHybridResult -i 1 --clsAcc 0 --fullBToys -s -1 --cminDefaultMinimizerType=Minuit2 --setPhysicsModelParameters fqq=0 --freezeNuisances fqq -T 10 ' ,
@@ -445,12 +472,19 @@ targets = {
 # HWidth
 #
 
-  'HWidthExp_Width'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances RV,RF,CMS_widthH_kbkg --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,120  -t -1 --expectSignal=1 ' ,
-                          'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
+#  'HWidthExp_Width'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances RV,RF,CMS_widthH_kbkg --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
+#                          'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
 
-  'HWidthExp_WidthFloatMu'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances CMS_widthH_kbkg --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,120  -t -1 --expectSignal=1 ' ,
-                          'NJobs' : 1 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
+#  'HWidthExp_WidthFloatMu'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1,CMS_widthH_kbkg=1 --freezeNuisances CMS_widthH_kbkg --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
+#                          'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
   
 
+  'HWidthExp_Width'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 'options' : '--algo=grid -S 1 --setPhysicsModelParameters RV=1,RF=1 --freezeNuisances RV,RF --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
+                          'NJobs' : 40 , 'MDFGridParam' :{ 'NPOINTS' : 400} }, 
+
+  'HWidthExp_WidthFloatMu'      :   { 'notblind' : True  , 'method' : 'MultiDimFit' , 
+                                      'options' : '--algo=grid -S 1 -P CMS_zz4l_GGsm --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
+                                      #'options' : '--algo=grid -S 1 --redefineSignalPOI CMS_zz4l_GGsm --floatOtherPOI=1 --setPhysicsModelParameterRanges CMS_zz4l_GGsm=0.000001,60  -t -1 --expectSignal=1 ' ,
+                                      'NJobs' :  40 , 'MDFGridParam' :{ 'NPOINTS' : 400 } }, 
                             
 }

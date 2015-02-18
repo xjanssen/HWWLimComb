@@ -759,30 +759,32 @@ combinations = {
                          'legend' : '1(qqb)'
                   } ,
 
- 'hzz_jcp_1qqb_canyou' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_1qqb' , 'hzz_4e_jcp_1qqb' , 'hzz_2mu2e_jcp_1qqb' ] , 'purposes' : [ 'jcp' ] ,
-                         'legend' : '1(qqb)'
-                  } ,
-
- 'hzz_jcp_1qqb_canyou_v2' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_1qqb' , 'hzz_4e_jcp_1qqb' , 'hzz_2mu2e_jcp_1qqb' ] , 'purposes' : [ 'jcp' ] ,
-                         'legend' : '1(qqb)'
-                  } ,
-
-
-
-
- 'hzz_jcp_1qqb_v2' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_1qqb_v2' , 'hzz_4e_jcp_1qqb_v2' , 'hzz_2mu2e_jcp_1qqb_v2' ] , 'purposes' : [ 'jcp' ] ,
-                         'legend' : '1(qqb)'
-                  } ,
-
- 'hzz_jcp_all_1qqb_v2' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_all_jcp_1qqb_v2' ] , 'purposes' : [ 'jcp' ] ,
-                         'legend' : '1(qqb)'
-                  } ,
+# 'hzz_jcp_1qqb_canyou' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_1qqb' , 'hzz_4e_jcp_1qqb' , 'hzz_2mu2e_jcp_1qqb' ] , 'purposes' : [ 'jcp' ] ,
+#                         'legend' : '1(qqb)'
+#                  } ,
+#
+# 'hzz_jcp_1qqb_canyou_v2' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_1qqb' , 'hzz_4e_jcp_1qqb' , 'hzz_2mu2e_jcp_1qqb' ] , 'purposes' : [ 'jcp' ] ,
+#                         'legend' : '1(qqb)'
+#                  } ,
 
 
 
- 'hzz_jcp_2bp_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_2bp_qqb' , 'hzz_4e_jcp_2bp_qqb' , 'hzz_2mu2e_jcp_2bp_qqb' ] , 'purposes' : [ 'jcp' ] ,
-                         'legend' : '1(qqb)'
-                  } ,
+
+# 'hzz_jcp_1qqb_v2' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_1qqb_v2' , 'hzz_4e_jcp_1qqb_v2' , 'hzz_2mu2e_jcp_1qqb_v2' ] , 'purposes' : [ 'jcp' ] ,
+#                         'legend' : '1(qqb)'
+#                  } ,
+
+# 'hzz_jcp_all_1qqb_v2' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_all_jcp_1qqb_v2' ] , 'purposes' : [ 'jcp' ] ,
+#                         'legend' : '1(qqb)'
+#                  } ,
+
+
+
+# 'hzz_jcp_2bp_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_2bp_qqb' , 'hzz_4e_jcp_2bp_qqb' , 'hzz_2mu2e_jcp_2bp_qqb' ] , 'purposes' : [ 'jcp' ] ,
+#                         'legend' : '1(qqb)'
+#                 } ,
+
+  ####
 
  'hzz_jcp_2pm_dec' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hzz_4mu_jcp_2pm_dec' , 'hzz_4e_jcp_2pm_dec' , 'hzz_2mu2e_jcp_2pm_dec' ] , 'purposes' : [ 'jcp' ] ,
                          'legend' : '2^{+}_{m}'
@@ -847,11 +849,13 @@ combinations = {
 
 
 
- 'hwwhzz_jcp_2bp_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2bp' ,  'hww1jof_jcp_2bp' ,
-                                                                            'hzz_4mu_jcp_2bp_qqb' , 'hzz_4e_jcp_2bp_qqb' , 'hzz_2mu2e_jcp_2bp_qqb' ] , 'purposes' : [ 'jcp' ] ,
-                         'legend' : '1(qqb)'
-                  } ,
+# 'hwwhzz_jcp_2bp_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2bp' ,  'hww1jof_jcp_2bp' ,
+#                                                                            'hzz_4mu_jcp_2bp_qqb' , 'hzz_4e_jcp_2bp_qqb' , 'hzz_2mu2e_jcp_2bp_qqb' ] , 'purposes' : [ 'jcp' ] ,
+#                         'legend' : '1(qqb)'
+#                  } ,
 
+
+ ### DECAY ONLY 
 
  'hwwhzz_jcp_2bp_dec' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2bp' ,  'hww1jof_jcp_2bp' ,
                                                                             'hzz_4mu_jcp_2bp_dec' , 'hzz_4e_jcp_2bp_dec' , 'hzz_2mu2e_jcp_2bp_dec' ] , 'purposes' : [ 'jcp' ] ,
@@ -869,8 +873,6 @@ combinations = {
                          'legend' : '2^{+}_{m}'
                   } ,
 
-
-#
 
  'hwwhzz_jcp_2hm_dec' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2hm' ,  'hww1jof_jcp_2hm' ,
                                                                             'hzz_4mu_jcp_2hm_dec' , 'hzz_4e_jcp_2hm_dec' , 'hzz_2mu2e_jcp_2hm_dec' ] , 'purposes' : [ 'jcp' ] ,
@@ -911,6 +913,126 @@ combinations = {
                                                                             'hzz_4mu_jcp_2mh10_dec' , 'hzz_4e_jcp_2mh10_dec' , 'hzz_2mu2e_jcp_2mh10_dec' ] , 'purposes' : [ 'jcp' ] ,
                          'legend' : '2^{-}_{h10}'
                   } ,
+
+
+  ### GG ONLY 
+
+ 'hwwhzz_jcp_2bp_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2bp' ,  'hww1jof_jcp_2bp' ,
+                                                                            'hzz_4mu_jcp_2bp_dec' , 'hzz_4e_jcp_2bp_dec' , 'hzz_2mu2e_jcp_2bp_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{b}'
+                  } ,
+
+ 'hwwhzz_jcp_2pm_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2pm' ,  'hww1jof_jcp_2pm' ,
+                                                                            'hzz_4mu_jcp_2pm_dec' , 'hzz_4e_jcp_2pm_dec' , 'hzz_2mu2e_jcp_2pm_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{m}'
+                  } ,
+
+
+ 'hwwhzz_jcp_2pm_gg_legacy' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2pm_legacy' ,  'hww1jof_jcp_2pm_legacy' ,
+                                                                            'hzz_4mu_jcp_2pm_dec' , 'hzz_4e_jcp_2pm_dec' , 'hzz_2mu2e_jcp_2pm_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{m}'
+                  } ,
+
+
+ 'hwwhzz_jcp_2hm_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2hm' ,  'hww1jof_jcp_2hm' ,
+                                                                            'hzz_4mu_jcp_2hm_dec' , 'hzz_4e_jcp_2hm_dec' , 'hzz_2mu2e_jcp_2hm_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{-}_{h}'
+                  } ,
+
+ 'hwwhzz_jcp_2hp_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2hp' ,  'hww1jof_jcp_2hp' ,
+                                                                            'hzz_4mu_jcp_2hp_dec' , 'hzz_4e_jcp_2hp_dec' , 'hzz_2mu2e_jcp_2hp_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph2_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph2' ,  'hww1jof_jcp_2ph2' ,
+                                                                            'hzz_4mu_jcp_2ph2_dec' , 'hzz_4e_jcp_2ph2_dec' , 'hzz_2mu2e_jcp_2ph2_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h2}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph3_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph3' ,  'hww1jof_jcp_2ph3' ,
+                                                                            'hzz_4mu_jcp_2ph3_dec' , 'hzz_4e_jcp_2ph3_dec' , 'hzz_2mu2e_jcp_2ph3_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h3}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph6_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph6' ,  'hww1jof_jcp_2ph6' ,
+                                                                            'hzz_4mu_jcp_2ph6_dec' , 'hzz_4e_jcp_2ph6_dec' , 'hzz_2mu2e_jcp_2ph6_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h6}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph7_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph7' ,  'hww1jof_jcp_2ph7' ,
+                                                                            'hzz_4mu_jcp_2ph7_dec' , 'hzz_4e_jcp_2ph7_dec' , 'hzz_2mu2e_jcp_2ph7_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h7}'
+                  } ,
+
+ 'hwwhzz_jcp_2mh9_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2mh9' ,  'hww1jof_jcp_2mh9' ,
+                                                                            'hzz_4mu_jcp_2mh9_dec' , 'hzz_4e_jcp_2mh9_dec' , 'hzz_2mu2e_jcp_2mh9_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{-}_{h9}'
+                  } ,
+
+ 'hwwhzz_jcp_2mh10_gg' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2mh10' ,  'hww1jof_jcp_2mh10' ,
+                                                                            'hzz_4mu_jcp_2mh10_dec' , 'hzz_4e_jcp_2mh10_dec' , 'hzz_2mu2e_jcp_2mh10_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{-}_{h10}'
+                  } ,
+
+  ### GG ONLY 
+
+ 'hwwhzz_jcp_2bp_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2bp' ,  'hww1jof_jcp_2bp' ,
+                                                                            'hzz_4mu_jcp_2bp_dec' , 'hzz_4e_jcp_2bp_dec' , 'hzz_2mu2e_jcp_2bp_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{b}'
+                  } ,
+
+ 'hwwhzz_jcp_2pm_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2pm' ,  'hww1jof_jcp_2pm' ,
+                                                                            'hzz_4mu_jcp_2pm_dec' , 'hzz_4e_jcp_2pm_dec' , 'hzz_2mu2e_jcp_2pm_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{m}'
+                  } ,
+
+
+ 'hwwhzz_jcp_2pm_qqb_legacy' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2pm_legacy' ,  'hww1jof_jcp_2pm_legacy' ,
+                                                                            'hzz_4mu_jcp_2pm_dec' , 'hzz_4e_jcp_2pm_dec' , 'hzz_2mu2e_jcp_2pm_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{m}'
+                  } ,
+
+
+ 'hwwhzz_jcp_2hm_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2hm' ,  'hww1jof_jcp_2hm' ,
+                                                                            'hzz_4mu_jcp_2hm_dec' , 'hzz_4e_jcp_2hm_dec' , 'hzz_2mu2e_jcp_2hm_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{-}_{h}'
+                  } ,
+
+ 'hwwhzz_jcp_2hp_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2hp' ,  'hww1jof_jcp_2hp' ,
+                                                                            'hzz_4mu_jcp_2hp_dec' , 'hzz_4e_jcp_2hp_dec' , 'hzz_2mu2e_jcp_2hp_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph2_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph2' ,  'hww1jof_jcp_2ph2' ,
+                                                                            'hzz_4mu_jcp_2ph2_dec' , 'hzz_4e_jcp_2ph2_dec' , 'hzz_2mu2e_jcp_2ph2_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h2}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph3_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph3' ,  'hww1jof_jcp_2ph3' ,
+                                                                            'hzz_4mu_jcp_2ph3_dec' , 'hzz_4e_jcp_2ph3_dec' , 'hzz_2mu2e_jcp_2ph3_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h3}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph6_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph6' ,  'hww1jof_jcp_2ph6' ,
+                                                                            'hzz_4mu_jcp_2ph6_dec' , 'hzz_4e_jcp_2ph6_dec' , 'hzz_2mu2e_jcp_2ph6_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h6}'
+                  } ,
+
+ 'hwwhzz_jcp_2ph7_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2ph7' ,  'hww1jof_jcp_2ph7' ,
+                                                                            'hzz_4mu_jcp_2ph7_dec' , 'hzz_4e_jcp_2ph7_dec' , 'hzz_2mu2e_jcp_2ph7_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{+}_{h7}'
+                  } ,
+
+ 'hwwhzz_jcp_2mh9_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2mh9' ,  'hww1jof_jcp_2mh9' ,
+                                                                            'hzz_4mu_jcp_2mh9_dec' , 'hzz_4e_jcp_2mh9_dec' , 'hzz_2mu2e_jcp_2mh9_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{-}_{h9}'
+                  } ,
+
+ 'hwwhzz_jcp_2mh10_qqb' : { 'energies' : [ '7TeV' , '8TeV' ] , 'channels' : [ 'hww0jof_jcp_2mh10' ,  'hww1jof_jcp_2mh10' ,
+                                                                            'hzz_4mu_jcp_2mh10_dec' , 'hzz_4e_jcp_2mh10_dec' , 'hzz_2mu2e_jcp_2mh10_dec' ] , 'purposes' : [ 'jcp' ] ,
+                         'legend' : '2^{-}_{h10}'
+                  } ,
+
 
 
 ##########################
