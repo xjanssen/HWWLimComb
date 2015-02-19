@@ -23,7 +23,8 @@ targets = {
 # p-value 
 ###########
 
-  'PVObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --uncapped 1 --scanPoints=100 --minimizerTolerance=0.01 --preFit' , 'treeKeys' : ['Val'] } , 
+#  'PVObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --uncapped 1 --scanPoints=100 --minimizerTolerance=0.01 --preFit ' , 'treeKeys' : ['Val'] } , 
+  'PVObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --uncapped 1 --scanPoints=100 --minimizerTolerance=0.015 --preFit --bruteForce' , 'treeKeys' : ['Val'] } , 
   'PVExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --expectSignal=1 -t -1 ' , 'treeKeys' : ['Val'] } ,  
   'PVExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --pvalue --expectSignal=1 -t -1 --toysFreq'  , 'treeKeys' : ['Val'] } ,  
 
@@ -34,7 +35,8 @@ targets = {
 # significance
 ###############
 
-  'SObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --uncapped 1 --scanPoints=100 --minimizerTolerance=0.01 --preFit --bruteForce' , 'treeKeys' : ['Val'] } , 
+# 'SObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --uncapped 1 --scanPoints=100 --minimizerTolerance=0.01 --preFit ' , 'treeKeys' : ['Val'] } , 
+  'SObs'       : { 'notblind' : False , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --uncapped 1 --scanPoints=100 --minimizerTolerance=0.015 --preFit --bruteForce' , 'treeKeys' : ['Val'] } , 
   'SExpPre'    : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1' , 'treeKeys' : ['Val'] } ,  
   'SExpPost'   : { 'notblind' : True  , 'method' : 'ProfileLikelihood' , 'options' : '-v 2 --signif --expectSignal=1 -t -1 --toysFreq'  , 'treeKeys' : ['Val'] } ,  
 
