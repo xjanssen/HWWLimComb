@@ -78,8 +78,9 @@ plotStyle = {
   'Pval'  :
      {
        'Default'        : { 'linY' : [0.0 , 1.] , 'logY' : [0.1, 1.] } ,
+       'hbb'            : { 'linY' : [0.0 , 1.] , 'logY' : [0.0001,1.]  } ,
        'vbfbb'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
-       'vbfbbsplit'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
+       'vbfbbsplit'     : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
      }
 
 }
