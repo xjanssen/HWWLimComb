@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWWLimComb/'
+homedir     = homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWWLimComb/'
+#homedir     = '/afs/cern.ch/work/s/salderwe/private/2015/combination/'
 workspace   = homedir+'workspace/'
 jobdir      = homedir+'jobs/'
 crabdir     = homedir+'crab/'
@@ -72,6 +73,12 @@ plotStyle = {
        'Default'        : { 'linY' : [0.0 ,25.] , 'logY' : [0.1,200.] } ,
        'vbfbb'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
        'hbb'          : { 'linY' : [0.0 , 5.] , 'logY' : [0.01,5.]  } ,
+       'vbfbbsplit'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
+     },
+  'Pval'  :
+     {
+       'Default'        : { 'linY' : [0.0 , 1.] , 'logY' : [0.1, 1.] } ,
+       'vbfbb'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
        'vbfbbsplit'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
      }
 

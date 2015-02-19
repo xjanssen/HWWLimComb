@@ -1281,6 +1281,50 @@ class combPlot :
        self.c1.Update() 
        self.Save('ExpSign_'+fitType+'Fit_'+self.EnergyName(iEnergy)+'_'+iModel)
 
+   def plotExpPvalVsMh(self,CombList=['hww01jet_shape'],iEnergy=0,iModel='OneHiggs',massFilter=[],fitType='Pre'):
+       self.squareCanvas(False,False)
+       self.c1.cd()
+       self.resetPlot()
+
+       if CombList[0] == 'HWW' : CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape']
+
+       self.xAxisTitle = "Higgs boson mass [GeV]"
+       self.yAxisTitle = "Expected p-value"
+
+       if (self.logX) : gPad.SetLogx()
+       if (self.logY) : gPad.SetLogy()
+       if (self.logX) : self.postFix += '_logX'
+       if (self.logY) : self.postFix += '_logY'
+
+       LCol = [ kBlack , kBlack , kBlack , kBlue , kBlue , kBlue , kRed , kRed ]
+       LTyp = [    1   ,    2   ,   3    ,   1   ,   2   ,   3   ,   2  ,   3  ]      
+
+       iLC=0 
+       for iComb in CombList:
+          self.readResults(iComb,iEnergy,iModel,massFilter,'PVExp'+fitType)
+          aMass         = self.Results[iComb][iEnergy][iModel]['PVExp'+fitType]['mass']
+          aMedExpLimit  = self.Results[iComb][iEnergy][iModel]['PVExp'+fitType]['Val']
+          self.plotHorizCurve(iComb, aMass , aMedExpLimit , LCol[iLC] , LTyp[iLC] , 2 , self.combinations[iComb]['legend'] )
+          iLC+=1
+      
+       aMass = [110,600] 
+       #self.plotHorizLine('Line', aMass , 1. , kRed , 1    , 'CL=1')
+  
+       #self.c1.SetLogy()
+       #self.Obj2Plot[CombList[0]]['Obj'].GetYaxis().SetRangeUser(0.0,25.)
+
+       self.SetRange('Pval',CombList[0])
+       toPlot = dc(CombList)
+       #toPlot.append('Line')
+       self.plotAllObj(toPlot)
+       self.plotObjLeg(CombList)
+       if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Pval',CombList[0])
+
+
+       self.addTitle() 
+       self.c1.Update() 
+       self.Save('ExpPval_'+fitType+'Fit_'+self.EnergyName(iEnergy)+'_'+iModel)
+
    def plotMuChannel(self,CombList=['hww012j_vh3l_vh2j_zh3l2j_shape','hww01jet_shape','hww2j_shape','hwwvh2j_cut','vh3l_shape','zh3l2j_shape'],iEnergy=0,iModel='SMHiggs',massFilter=[125]):
        self.squareCanvas(False,False)
        self.c1.cd()
