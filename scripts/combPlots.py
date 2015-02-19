@@ -1320,6 +1320,27 @@ class combPlot :
        self.plotObjLeg(CombList)
        if (self.logX) : self.plotLogXAxis(aMass[0],aMass[-1],'Pval',CombList[0])
 
+		 # sigma lines
+		 self.c1.Update()
+		 sinfo = []
+		 for nsigma in range(8.): 
+			val = (1.-TMath::Erf(nsigma/sqrt(2.)))/2.
+			if val < self.yMin: break
+			sline = TF1("%dsigma"%nsigma,"%.8f"%val,self.xMin,self.xMax)
+			sline.SetLineColor(kRed)
+			sline.SetLineWidth(2)
+			sline.Draw("same")
+			sinfo += [sline]
+			sname = TPaveText(1.0-gPad.GetRightMargin()-0.05,val*0.85,1.-gPad.GetRightMargin()-0.01,val*0.85)
+			sname.SetTextFont(42)
+			sname.SetTextSize(gStyle.GetPadTopMargin()*2.5/4.)
+			sname.SetBorderSize(0)
+			sname.SetFillStyle(-1)
+			sname.SetTextAlign(32)
+			sname.SetTextColor(kRed)
+			sname.AddText("%d#sigma"%nsigma)
+			sname.Draw()
+			sinfo += [sline]
 
        self.addTitle() 
        self.c1.Update() 
