@@ -66,11 +66,13 @@ plotStyle = {
        'hww_cp2_1d0'     : { 'linY' : [0.0 ,30.] , 'logY' : [0.2,300.] } ,
        'hww01jof_shape'     : { 'linY' : [0.0 ,70.] , 'logY' : [0.3,10.] } ,
        'of_oldcps'     : { 'linY' : [0.0 ,70.] , 'logY' : [0.3,10.] } ,
+       'hbb'          : { 'linY' : [0.0 ,6.] , 'logY' : [0.05,100.] } ,
      },
   'Sign'  :
      {
        'Default'        : { 'linY' : [0.0 ,25.] , 'logY' : [0.1,200.] } ,
        'vbfbb'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
+       'hbb'          : { 'linY' : [0.0 , 5.] , 'logY' : [0.01,5.]  } ,
        'vbfbbsplit'          : { 'linY' : [0.0 , 1.] , 'logY' : [0.01,5.]  } ,
      },
   'Pval'  :
