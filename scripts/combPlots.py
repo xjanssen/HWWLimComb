@@ -1325,28 +1325,26 @@ class combPlot :
        xMin = gPad.GetUxmin() 
        xMax = gPad.GetUxmax()
        yMin = gPad.GetUymin()
-       print xMin,xMax,yMin
        sinfo = []
-       for nsigma in range(8): 
+       for nsigma in range(1,8): 
            val = (1.-TMath.Erf(nsigma/sqrt(2.)))/2.
-               print val , yMin
            if val < yMin: break
-               print val
            sline = TF1("%dsigma"%nsigma,"%.8f"%val,xMin,xMax)
            sline.SetLineColor(kRed)
-           sline.SetLineWidth(2)
+           sline.SetLineWidth(1)
+           sline.SetLineStyle(kDashed)
            sline.Draw("same")
            sinfo += [sline]
-           sname = TPaveText(1.0-gPad.GetRightMargin()-0.05,val*0.85,1.-gPad.GetRightMargin()-0.01,val*0.85)
+           sname = TPaveText(1.0-gPad.GetRightMargin()-0.06,val*0.85,1.-gPad.GetRightMargin()-0.01,val*0.85)
            sname.SetTextFont(42)
-           sname.SetTextSize(gStyle.GetPadTopMargin()*2.5/4.)
+           sname.SetTextSize(gStyle.GetPadTopMargin()*2.0/4.)
            sname.SetBorderSize(0)
            sname.SetFillStyle(-1)
            sname.SetTextAlign(32)
            sname.SetTextColor(kRed)
            sname.AddText("%d#sigma"%nsigma)
            sname.Draw()
-           sinfo += [sline]
+           sinfo += [sname]
 
        self.addTitle() 
        self.c1.Update() 
