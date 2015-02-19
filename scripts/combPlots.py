@@ -1329,10 +1329,10 @@ class combPlot :
        sinfo = []
        for nsigma in range(8): 
            val = (1.-TMath.Erf(nsigma/sqrt(2.)))/2.
-               print val , self.yMin
-           if val < self.yMin: break
+               print val , yMin
+           if val < yMin: break
                print val
-           sline = TF1("%dsigma"%nsigma,"%.8f"%val,self.xMin,self.xMax)
+           sline = TF1("%dsigma"%nsigma,"%.8f"%val,xMin,xMax)
            sline.SetLineColor(kRed)
            sline.SetLineWidth(2)
            sline.Draw("same")
