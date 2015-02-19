@@ -1322,27 +1322,31 @@ class combPlot :
 
 		 # sigma lines
        self.c1.Update()
+       xMin = gPad.GetUxmin() 
+       xMax = gPad.GetUxmax()
+       yMin = gPad.GetUymin()
+       print xMin,xMax,yMin
        sinfo = []
        for nsigma in range(8): 
-		val = (1.-TMath.Erf(nsigma/sqrt(2.)))/2.
-                print val , self.yMin
-		if val < self.yMin: break
-                print val
-		sline = TF1("%dsigma"%nsigma,"%.8f"%val,self.xMin,self.xMax)
-		sline.SetLineColor(kRed)
-		sline.SetLineWidth(2)
-		sline.Draw("same")
-		sinfo += [sline]
-		sname = TPaveText(1.0-gPad.GetRightMargin()-0.05,val*0.85,1.-gPad.GetRightMargin()-0.01,val*0.85)
-		sname.SetTextFont(42)
-		sname.SetTextSize(gStyle.GetPadTopMargin()*2.5/4.)
-		sname.SetBorderSize(0)
-		sname.SetFillStyle(-1)
-		sname.SetTextAlign(32)
-		sname.SetTextColor(kRed)
-		sname.AddText("%d#sigma"%nsigma)
-		sname.Draw()
-		sinfo += [sline]
+           val = (1.-TMath.Erf(nsigma/sqrt(2.)))/2.
+               print val , self.yMin
+           if val < self.yMin: break
+               print val
+           sline = TF1("%dsigma"%nsigma,"%.8f"%val,self.xMin,self.xMax)
+           sline.SetLineColor(kRed)
+           sline.SetLineWidth(2)
+           sline.Draw("same")
+           sinfo += [sline]
+           sname = TPaveText(1.0-gPad.GetRightMargin()-0.05,val*0.85,1.-gPad.GetRightMargin()-0.01,val*0.85)
+           sname.SetTextFont(42)
+           sname.SetTextSize(gStyle.GetPadTopMargin()*2.5/4.)
+           sname.SetBorderSize(0)
+           sname.SetFillStyle(-1)
+           sname.SetTextAlign(32)
+           sname.SetTextColor(kRed)
+           sname.AddText("%d#sigma"%nsigma)
+           sname.Draw()
+           sinfo += [sline]
 
        self.addTitle() 
        self.c1.Update() 
