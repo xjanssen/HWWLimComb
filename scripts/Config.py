@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-homedir     = homedir     = '/afs/cern.ch/work/x/xjanssen/cms/HWWLimComb/'
+homedir    = '/afs/cern.ch/work/x/xjanssen/cms/HWWLimComb/'
 #homedir     = '/afs/cern.ch/work/s/salderwe/private/2015/combination/'
 workspace   = homedir+'workspace/'
 jobdir      = homedir+'jobs/'
